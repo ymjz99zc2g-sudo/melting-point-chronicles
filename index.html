@@ -1,0 +1,1322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>🔥 MELTING POINT CHRONICLES - LEVEL 10 PRO 🔥</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <style>
+        body, html { 
+            margin: 0; padding: 0; width: 100vw; height: 100vh; 
+            overflow: hidden; background-color: #0c192c; 
+            font-family: 'Courier New', Courier, monospace; 
+            user-select: none; -webkit-user-select: none; touch-action: none;
+        }
+        #game-canvas { display: block; width: 100vw; height: 100vh; position: absolute; z-index: 1; }
+        
+        #ui-overlay { position: absolute; z-index: 10; inset: 0; pointer-events: none; display: flex; flex-direction: column; justify-content: space-between; }
+        
+        .pointer-events-auto { pointer-events: auto; }
+        .text-glow { text-shadow: 0 0 10px rgba(34,211,238,1); }
+        .glass-panel { background: rgba(8, 2, 16, 0.85); backdrop-filter: blur(8px); border: 1px solid rgba(168,85,247,0.5); }
+
+        /* Mobile Controls */
+        #mobile-controls {
+            display: flex; justify-content: space-between; align-items: flex-end;
+            padding: 20px; padding-bottom: 40px; width: 100%; box-sizing: border-box;
+        }
+
+        #joystick-zone {
+            width: 130px; height: 130px; background: rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(34,211,238,0.5); border-radius: 50%;
+            position: relative; box-shadow: inset 0 0 20px rgba(34,211,238,0.2);
+        }
+
+        #joystick-knob {
+            width: 50px; height: 50px; background: #22d3ee;
+            border-radius: 50%; position: absolute; top: 40px; left: 40px;
+            box-shadow: 0 0 15px #22d3ee; transform: translate(0px, 0px);
+        }
+
+        #action-btn {
+            width: 90px; height: 90px; background: rgba(168,85,247,0.85);
+            border: 3px solid #d8b4fe; border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            font-weight: 900; color: white; font-size: 14px;
+            box-shadow: 0 0 20px rgba(168,85,247,0.8); transition: transform 0.1s;
+        }
+        #action-btn:active { transform: scale(0.9); background: #d8b4fe; color: black; }
+
+        .typewriter::after { content: "█"; animation: blink 0.8s infinite; }
+        @keyframes blink { 0%, 100% { opacity: 0; } 50% { opacity: 1; } }
+
+        /* Minimap Canvas Container */
+        #minimap-container {
+            position: absolute;
+            top: 90px;
+            right: 16px;
+            width: 140px;
+            height: 140px;
+            border-radius: 12px;
+            border: 2px solid #a855f7;
+            background: rgba(11, 3, 20, 0.9);
+            box-shadow: 0 0 15px rgba(168, 85, 247, 0.5);
+            overflow: hidden;
+            pointer-events: auto;
+        }
+    </style>
+</head>
+<body class="text-slate-100">
+
+    <div id="game-canvas"></div>
+
+    <div id="minimap-container" class="hidden md:block">
+        <canvas id="minimap" width="140" height="140" class="w-full h-full"></canvas>
+    </div>
+
+    <div id="ui-overlay">
+        <div id="hud-top" class="hidden pointer-events-auto glass-panel p-3 mx-2 mt-4 flex justify-between items-center rounded-xl shadow-lg shadow-purple-900/50">
+            <div class="flex flex-col">
+                <h2 class="text-cyan-400 font-black text-lg leading-none text-glow">MICHAEL</h2>
+                <span id="player-rank" class="text-purple-300 text-[10px] font-bold">New Student</span>
+            </div>
+
+            <div class="flex flex-col items-center flex-1 px-4">
+                <div class="w-full max-w-[150px] h-3 bg-slate-900 rounded-full border border-purple-500/50 overflow-hidden relative">
+                    <div id="aura-bar" class="h-full bg-cyan-400 shadow-[0_0_10px_#22d3ee] transition-all" style="width: 50%;"></div>
+                </div>
+                <span class="text-[9px] font-bold text-slate-300 mt-1">AURA <span id="aura-val" class="text-cyan-300">50/100</span></span>
+            </div>
+
+            <div class="flex gap-2 text-sm bg-black/60 p-1.5 rounded-lg border border-slate-700">
+                <span id="stat-brain" class="font-bold text-pink-400">🧠 5</span>
+                <span id="stat-food" class="font-bold text-orange-400 cursor-pointer" onclick="eatFood()">🍕 2</span>
+            </div>
+        </div>
+
+        <div class="flex justify-center mt-2">
+            <div id="hallway-warning" class="hidden bg-red-600/90 border border-red-400 text-white font-black px-4 py-1.5 rounded-full text-xs tracking-widest animate-pulse shadow-lg shadow-red-500/50">
+                🚨 WARNING: ISI OWU PATROLLING HALLWAYS! 🚨
+            </div>
+        </div>
+
+        <div id="interact-popup" class="hidden mx-auto bg-black/95 border-2 border-cyan-400 p-3 rounded-xl flex items-center gap-3 animate-bounce shadow-[0_0_15px_rgba(34,211,238,0.5)] mb-4 pointer-events-auto max-w-[240px]">
+            <div class="text-2xl" id="interact-icon">🎒</div>
+            <div>
+                <h4 class="text-cyan-300 font-bold text-xs" id="interact-title">Object</h4>
+                <p class="text-[9px] text-slate-400">Tap ACTION button to trigger!</p>
+            </div>
+        </div>
+
+        <div id="mobile-controls" class="hidden pointer-events-auto">
+            <div id="joystick-zone">
+                <div id="joystick-knob"></div>
+            </div>
+            <div id="action-btn">ACTION</div>
+        </div>
+    </div>
+
+    <div id="menu-screen" class="absolute inset-0 z-40 bg-[#06020f] flex flex-col items-center justify-center p-6 text-center">
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjMDYwMjBmIiAvPgo8cmVjdCB3aWR0aD0iMSIgaGVpZ2h0PSIxIiBmaWxsPSJyZ2JhKDE2OCwgODUsIDI0NywgMC4xNSkiIC8+Cjwvc3ZnPg==')] opacity-50"></div>
+        
+        <h1 id="menu-title-primary" class="text-5xl md:text-8xl font-black tracking-tighter mb-2 text-transparent bg-clip-text bg-gradient-to-b from-purple-400 via-cyan-300 to-purple-600 drop-shadow-[0_0_20px_rgba(34,211,238,0.8)] z-10 opacity-0">
+            MELTING POINT
+        </h1>
+        <h2 id="menu-title-sub" class="text-xl md:text-3xl font-extrabold text-cyan-300 mb-8 tracking-[0.25em] z-10 text-glow opacity-0">
+            CHRONICLES - LEVEL 10
+        </h2>
+        
+        <div id="menu-description-box" class="max-w-sm glass-panel p-5 rounded-2xl mb-8 z-10 text-xs text-left leading-relaxed text-slate-300 opacity-0">
+            <p class="mb-3 text-cyan-400 font-bold">⚡ MOBILE PRO EDITION ⚡</p>
+            <p class="mb-3">Play as <b>Michael</b> wearing his black "Rolling Loud" hoodie and red trousers. Explore the fully structured campus grounds with an open canteen courtyard and a massive **Exam Hall** filled with rows of students sat at their desks!</p>
+            <p>Controls: Use the virtual touch thumbstick on the left to move. Tap the glowing purple <b>ACTION</b> button on the right to interact with objects and students.</p>
+        </div>
+
+        <button id="menu-launch-btn" onclick="startGame()" class="z-10 px-10 py-4 bg-gradient-to-r from-purple-600 to-cyan-600 font-black text-xl rounded-full shadow-[0_0_20px_#a855f7] active:scale-95 transition-transform text-white opacity-0 scale-75">
+            ENTER GAME LOOP
+        </button>
+    </div>
+
+    <div id="dialogue-screen" class="hidden absolute inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
+        <div id="dialogue-box" class="glass-panel border-2 border-cyan-400 p-5 rounded-2xl w-full max-w-sm pointer-events-auto">
+            <div class="flex items-center gap-3 border-b border-purple-900/50 pb-3 mb-3">
+                <span id="dialogue-avatar" class="text-3xl">🎒</span>
+                <h3 id="dialogue-name" class="text-lg font-bold text-cyan-300">Name</h3>
+            </div>
+            <div class="bg-black/50 p-3 rounded-lg border border-purple-900/30 min-h-[70px] mb-4">
+                <p id="dialogue-text" class="text-slate-200 text-sm italic typewriter"></p>
+            </div>
+            <div id="dialogue-options" class="flex flex-col gap-2"></div>
+        </div>
+    </div>
+
+    <div id="boss-screen" class="hidden absolute inset-0 z-50 bg-red-950/95 flex flex-col justify-center items-center p-4 pointer-events-auto">
+        <div id="boss-combat-card" class="w-full max-w-sm bg-black border-4 border-red-600 p-5 rounded-3xl text-center shadow-[0_0_30px_red]">
+            <h2 class="text-red-500 font-black text-2xl mb-2 animate-bounce">🚨 BOSS COMBAT 🚨</h2>
+            <div class="text-6xl mb-3">👹</div>
+            <p id="boss-quote" class="text-red-200 italic text-sm mb-4">"WHERE IS YOUR EXAM CARD?!"</p>
+
+            <div class="w-full h-4 bg-slate-900 rounded-full border border-red-800 overflow-hidden mb-5">
+                <div id="boss-hp-bar" class="h-full bg-red-600" style="width: 100%;"></div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+                <button onclick="attackBoss('brain')" class="bg-purple-900 border border-purple-500 py-3 rounded-xl font-bold text-white text-[11px] active:bg-purple-700">
+                    🧠 Logic Strike
+                </button>
+                <button onclick="attackBoss('food')" class="bg-cyan-900 border border-cyan-500 py-3 rounded-xl font-bold text-white text-[11px] active:bg-cyan-700">
+                    🍕 Jollof Toss
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="gameover-screen" class="hidden absolute inset-0 z-50 bg-red-950 flex flex-col items-center justify-center p-6 text-center pointer-events-auto">
+        <h1 class="text-5xl font-black text-red-500 mb-4 drop-shadow-[0_0_15px_#ef4444]">AURA EMPTY</h1>
+        <p class="text-slate-300 text-sm mb-8">The school has turned completely strict. You were caught.<br><br><span class="text-red-400 italic font-bold">"Omo, you no try but you still try 😭"</span></p>
+        <button onclick="window.location.reload()" class="px-8 py-3 bg-red-600 text-white font-bold rounded-full shadow-[0_0_15px_red]">
+            RESTART GAME
+        </button>
+    </div>
+
+<script>
+// ==========================================
+// GAME STATE & AUDIO
+// ==========================================
+const state = {
+    aura: 50, maxAura: 100, brainCells: 5, foodTokens: 2, rank: 'New Student',
+    currentScreen: 'menu', activeInteractable: null, boss: null, dayTime: true,
+    quests: [
+        { id: 'homework', desc: '📚 Submit assignments to Class Rep.', done: false },
+        { id: 'escape', desc: '⚡ Evade Isi Owu detection spotlights.', done: false },
+        { id: 'stabilize', desc: '💠 Feed Shards into the Underground Core.', done: false }
+    ],
+    inventory: [
+        { name: 'Pencil Weapon', icon: '✏️', type: 'gear', power: 15, qty: 1 },
+        { name: 'Aura Core Shard', icon: '💠', type: 'shard', qty: 0 }
+    ]
+};
+
+let audioCtx = null;
+
+function initAudio() {
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+}
+
+function playSound(type) {
+    if (!audioCtx) return;
+    try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        const now = audioCtx.currentTime;
+
+        if (type === 'footstep') {
+            osc.type = 'triangle'; osc.frequency.setValueAtTime(80, now);
+            osc.frequency.exponentialRampToValueAtTime(10, now + 0.1);
+            gain.gain.setValueAtTime(0.1, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+            osc.start(now); osc.stop(now + 0.1);
+        } else if (type === 'eat') {
+            osc.type = 'square'; osc.frequency.setValueAtTime(300, now);
+            osc.frequency.setValueAtTime(150, now + 0.1);
+            gain.gain.setValueAtTime(0.2, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+            osc.start(now); osc.stop(now + 0.2);
+        } else if (type === 'boing') { 
+            osc.type = 'sine'; osc.frequency.setValueAtTime(300, now);
+            osc.frequency.exponentialRampToValueAtTime(900, now + 0.3);
+            gain.gain.setValueAtTime(0.2, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+            osc.start(now); osc.stop(now + 0.3);
+        } else if (type === 'damage') {
+            osc.type = 'sawtooth'; osc.frequency.setValueAtTime(200, now);
+            osc.frequency.exponentialRampToValueAtTime(40, now + 0.3);
+            gain.gain.setValueAtTime(0.3, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+            osc.start(now); osc.stop(now + 0.3);
+        } else if (type === 'typewriter') {
+            osc.type = 'sine'; osc.frequency.setValueAtTime(650, now);
+            gain.gain.setValueAtTime(0.02, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+            osc.start(now); osc.stop(now + 0.05);
+        }
+    } catch(e) {}
+}
+
+// ==========================================
+// THREE.JS ENGINE SETUP
+// ==========================================
+let scene, camera, renderer, clock;
+let player, bossTeacher;
+const npcsList = [];
+const zoneIndicators = [];
+const staticColliders = [];
+const pickupItems = [];
+
+// Input state
+const input = { moveX: 0, moveY: 0, action: false };
+
+// Mobile joystick parameters
+let joystickActive = false;
+let joystickStartPos = { x: 0, y: 0 };
+let joystickVector = { x: 0, y: 0 };
+
+const PALETTE = {
+    flesh: 0xffdbac, darkSkin: 0x8d5524, hairBlack: 0x111111, hairBlonde: 0xffd700, hairBrown: 0x5c4033,
+    redTrousers: 0xb91c1c, milkShirt: 0xfffad2, blackHoodie: 0x0f172a, isiOwuSuit: 0x7f1d1d,
+    wood: 0x78350f, brick: 0x7f1d1d, floor: 0x334155, grassGreen: 0x14532d, cloudWhite: 0xf1f5f9,
+    whiteSock: 0xffffff, tattooInk: 0x1e293b
+};
+
+function initEngine() {
+    const canvas = document.getElementById('game-canvas');
+    clock = new THREE.Clock();
+
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x0c192c);
+    scene.fog = new THREE.FogExp2(0x0c192c, 0.02);
+
+    // Mobile specific camera setup (wider FOV, pulled back slightly)
+    camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 45, 60);
+
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    canvas.appendChild(renderer.domElement);
+
+    // Lighting
+    scene.add(new THREE.AmbientLight(0xffffff, 0.65));
+    const dirL = new THREE.DirectionalLight(0xa855f7, 0.95);
+    dirL.position.set(20, 30, 20);
+    scene.add(dirL);
+
+    // Build World
+    buildCampus();
+    buildExamHall();
+
+    // Build Player (Michael)
+    player = buildVoxelCharacter({ isMichael: true });
+    player.mesh.position.set(0, 0, -10);
+    scene.add(player.mesh);
+
+    // Build NPCs & Zones
+    spawnEntities();
+    spawnPickups();
+
+    // Event Listeners
+    window.addEventListener('resize', onWindowResize);
+    setupTouchControls();
+
+    // GSAP staggered loading animation on entry UI
+    gsap.to("#menu-title-primary", { duration: 1, opacity: 1, y: 0, ease: "bounce.out" });
+    gsap.to("#menu-title-sub", { duration: 1.2, opacity: 1, y: 0, ease: "bounce.out", delay: 0.2 });
+    gsap.to("#menu-description-box", { duration: 0.8, opacity: 1, scale: 1, ease: "power2.out", delay: 0.5 });
+    gsap.to("#menu-launch-btn", { duration: 1, opacity: 1, scale: 1, ease: "elastic.out(1, 0.5)", delay: 0.8 });
+}
+
+function onWindowResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+// Build Floor, Sky Scenery, Walkways & Gate
+function buildCampus() {
+    // Concrete Ground
+    const grassMat = new THREE.MeshStandardMaterial({ color: PALETTE.grassGreen, roughness: 0.9 });
+    const stoneMat = new THREE.MeshStandardMaterial({ color: PALETTE.floor, roughness: 0.8 });
+    
+    const lawnLeft = new THREE.Mesh(new THREE.BoxGeometry(22, 0.2, 58), grassMat);
+    lawnLeft.position.set(-13, -0.05, 0);
+    scene.add(lawnLeft);
+
+    const lawnRight = new THREE.Mesh(new THREE.BoxGeometry(22, 0.2, 58), grassMat);
+    lawnRight.position.set(13, -0.05, 0);
+    scene.add(lawnRight);
+
+    const mainWalkway = new THREE.Mesh(new THREE.BoxGeometry(4, 0.22, 58), stoneMat);
+    mainWalkway.position.set(0, -0.04, 0);
+    scene.add(mainWalkway);
+
+    // Brick Entrance Gate (Archway)
+    const brickMat = new THREE.MeshStandardMaterial({ color: PALETTE.brick, roughness: 0.95 });
+    const gateLeftPillar = new THREE.Mesh(new THREE.BoxGeometry(1.5, 6, 1.5), brickMat);
+    gateLeftPillar.position.set(-4, 3, -29);
+    scene.add(gateLeftPillar);
+    staticColliders.push(new THREE.Box3().setFromObject(gateLeftPillar));
+
+    const gateRightPillar = new THREE.Mesh(new THREE.BoxGeometry(1.5, 6, 1.5), brickMat);
+    gateRightPillar.position.set(4, 3, -29);
+    scene.add(gateRightPillar);
+    staticColliders.push(new THREE.Box3().setFromObject(gateRightPillar));
+
+    const gateArch = new THREE.Mesh(new THREE.BoxGeometry(9.5, 1.2, 1.5), brickMat);
+    gateArch.position.set(0, 6.6, -29);
+    scene.add(gateArch);
+
+    // Courtyard Trees
+    const woodMat = new THREE.MeshStandardMaterial({ color: 0x451a03, roughness: 0.95 });
+    const foliageMat = new THREE.MeshStandardMaterial({ color: 0x166534, roughness: 0.9 });
+    
+    const treeCoords = [
+        { x: -10, z: -18 }, { x: 10, z: -18 },
+        { x: -10, z: 12 }, { x: 10, z: 12 }
+    ];
+    
+    treeCoords.forEach(pos => {
+        const tree = new THREE.Group();
+        const trunk = new THREE.Mesh(new THREE.BoxGeometry(0.6, 3, 0.6), woodMat);
+        trunk.position.y = 1.5;
+        tree.add(trunk);
+        const foliage = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 2), foliageMat);
+        foliage.position.y = 3.5;
+        tree.add(foliage);
+        
+        tree.position.set(pos.x, 0, pos.z);
+        scene.add(tree);
+        staticColliders.push(new THREE.Box3().setFromObject(tree));
+    });
+
+    // Voxel Clouds
+    const cloudMat = new THREE.MeshStandardMaterial({ color: PALETTE.cloudWhite, transparent: true, opacity: 0.8 });
+    for(let i=0; i<5; i++){
+        const c = new THREE.Mesh(new THREE.BoxGeometry(6 + Math.random()*4, 2, 4 + Math.random()*3), cloudMat);
+        c.position.set((Math.random()-0.5)*60, 15 + Math.random()*5, (Math.random()-0.5)*60);
+        scene.add(c);
+    }
+}
+
+// Recreate the Exam Hall from the image link (Rows of desks and sitting students)
+function buildExamHall() {
+    const brickMat = new THREE.MeshStandardMaterial({ color: PALETTE.brick });
+    const woodMat = new THREE.MeshStandardMaterial({ color: PALETTE.wood });
+
+    // Exam Hall Back Wall Structure
+    const wall = new THREE.Mesh(new THREE.BoxGeometry(24, 6, 1), brickMat);
+    wall.position.set(0, 3, 29);
+    scene.add(wall);
+    staticColliders.push(new THREE.Box3().setFromObject(wall));
+
+    // Exam Desks and Sitting Students
+    for(let row = 0; row < 3; row++) {
+        for(let col = -2; col <= 2; col++) {
+            const x = col * 3.5;
+            const z = 22 + (row * 3);
+
+            // Desk
+            const desk = new THREE.Mesh(new THREE.BoxGeometry(1.6, 1.1, 0.8), woodMat);
+            desk.position.set(x, 0.55, z);
+            scene.add(desk);
+            staticColliders.push(new THREE.Box3().setFromObject(desk));
+
+            // Sitting Student
+            const student = buildVoxelCharacter({ isSitting: true, gender: Math.random() > 0.5 ? 'boy' : 'girl' });
+            student.mesh.position.set(x, 0.1, z - 0.5); // Behind desk
+            student.mesh.rotation.y = Math.PI; // Face forward towards main gate
+            scene.add(student.mesh);
+        }
+    }
+}
+
+// Canvas textures generator
+function createRollingLoudTexture() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 128;
+    canvas.height = 128;
+    const ctx = canvas.getContext('2d');
+    
+    ctx.fillStyle = "#0f172a";
+    ctx.fillRect(0, 0, 128, 128);
+    
+    ctx.fillStyle = "#22d3ee";
+    ctx.font = "bold 16px monospace";
+    ctx.textAlign = "center";
+    ctx.fillText("ROLLING", 64, 52);
+    ctx.fillText("LOUD", 64, 82);
+
+    return new THREE.CanvasTexture(canvas);
+}
+
+function buildVoxelCharacter({ isMichael=false, isIsiOwu=false, gender='boy', isThick=false, isSitting=false, hasTattoo=false, tattooType='basic' }) {
+    const grp = new THREE.Group();
+    const fleshColor = isThick ? PALETTE.darkSkin : PALETTE.flesh;
+    
+    const skinMat = new THREE.MeshStandardMaterial({ color: fleshColor });
+    const hairMat = new THREE.MeshStandardMaterial({ color: (isMichael || isThick) ? PALETTE.hairBlack : PALETTE.hairBrown });
+    const shirtMat = new THREE.MeshStandardMaterial({ color: isMichael ? PALETTE.blackHoodie : PALETTE.milkShirt });
+    const pantsMat = new THREE.MeshStandardMaterial({ color: PALETTE.redTrousers });
+
+    // Torso
+    const torso = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.8, 0.6), shirtMat);
+    torso.position.y = 2.1;
+    grp.add(torso);
+
+    if (isMichael) {
+        // Back hoodie graphics
+        const backGeo = new THREE.PlaneGeometry(1.0, 1.55);
+        const backMat = new THREE.MeshBasicMaterial({ map: createRollingLoudTexture(), side: THREE.DoubleSide });
+        const backMesh = new THREE.Mesh(backGeo, backMat);
+        backMesh.position.set(0, 2.1, -0.31);
+        backMesh.rotation.y = Math.PI;
+        grp.add(backMesh);
+    }
+
+    // Head
+    const head = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.8, 0.8), skinMat);
+    head.position.y = 3.4;
+    grp.add(head);
+    
+    // Hair
+    const hair = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.3, 0.85), hairMat);
+    hair.position.y = 3.85;
+    grp.add(hair);
+
+    // Arms
+    const rArmGrp = new THREE.Group(); rArmGrp.position.set(-0.85, 2.8, 0);
+    const rArm = new THREE.Mesh(new THREE.BoxGeometry(0.4, 1.5, 0.4), shirtMat);
+    rArm.position.y = -0.65; rArmGrp.add(rArm); grp.add(rArmGrp);
+
+    const lArmGrp = new THREE.Group(); lArmGrp.position.set(0.85, 2.8, 0);
+    const lArm = new THREE.Mesh(new THREE.BoxGeometry(0.4, 1.5, 0.4), shirtMat);
+    lArm.position.y = -0.65; lArmGrp.add(lArm); grp.add(lArmGrp);
+
+    // Sleeve Tattoo implementation
+    if (hasTattoo) {
+        let tattooMesh;
+        if(tattooType === 'roseSleeve') {
+            tattooMesh = new THREE.Mesh(
+                new THREE.BoxGeometry(0.44, 0.8, 0.44), 
+                new THREE.MeshBasicMaterial({ color: PALETTE.tattooInk, transparent: true, opacity: 0.9 })
+            );
+            tattooMesh.position.set(0, -0.6, 0);
+        } else {
+            tattooMesh = new THREE.Mesh(
+                new THREE.BoxGeometry(0.2, 0.3, 0.42), 
+                new THREE.MeshBasicMaterial({ color: PALETTE.tattooInk })
+            );
+            tattooMesh.position.set(0, -1.0, 0);
+        }
+        lArm.add(tattooMesh);
+    }
+
+    // Legs
+    const rLegGrp = new THREE.Group(); rLegGrp.position.set(-0.35, 1.2, 0);
+    const lLegGrp = new THREE.Group(); lLegGrp.position.set(0.35, 1.2, 0);
+
+    if (gender === 'girl' && !isMichael && !isIsiOwu) {
+        // Red pleated skirt voxel piece
+        const rightSkirt = new THREE.Mesh(new THREE.BoxGeometry(0.46, 0.6, 0.46), pantsMat);
+        rightSkirt.position.y = -0.2; rLegGrp.add(rightSkirt);
+
+        const leftSkirt = new THREE.Mesh(new THREE.BoxGeometry(0.46, 0.6, 0.46), pantsMat);
+        leftSkirt.position.y = -0.2; lLegGrp.add(leftSkirt);
+
+        // Lower Leg - Stocking Check for Female Students (White stockings spec)
+        const legSkinMat = isThick ? 
+            new THREE.MeshStandardMaterial({ color: PALETTE.whiteSock, roughness: 0.9 }) : 
+            skinMat;
+
+        const rightSkin = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.6, 0.4), legSkinMat);
+        rightSkin.position.y = -0.8; rLegGrp.add(rightSkin);
+
+        const leftSkin = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.6, 0.4), legSkinMat);
+        leftSkin.position.y = -0.8; lLegGrp.add(leftSkin);
+    } else {
+        // Boys & Michael wear Red Trousers
+        const rightLeg = new THREE.Mesh(new THREE.BoxGeometry(0.45, 1.2, 0.45), pantsMat);
+        rightLeg.position.y = -0.6; rLegGrp.add(rightLeg);
+
+        const leftLeg = new THREE.Mesh(new THREE.BoxGeometry(0.45, 1.2, 0.45), pantsMat);
+        leftLeg.position.y = -0.6; lLegGrp.add(leftLeg);
+    }
+
+    grp.add(rLegGrp);
+    grp.add(lLegGrp);
+
+    // If Sitting pose (For Exam Hall)
+    if(isSitting) {
+        rLegGrp.rotation.x = -Math.PI / 2.2;
+        lLegGrp.rotation.x = -Math.PI / 2.2;
+        rArmGrp.rotation.x = -Math.PI / 6;
+        lArmGrp.rotation.x = -Math.PI / 6;
+    }
+
+    if(isThick) grp.scale.set(1.15, 0.88, 1.15); // Curvy dark skin model scale
+    else grp.scale.set(0.9, 0.9, 0.9);
+
+    return { mesh: grp, joints: { rArm: rArmGrp, lArm: lArmGrp, rLeg: rLegGrp, lLeg: lLegGrp }, isSitting };
+}
+
+function spawnEntities() {
+    // Isi Owu Boss
+    bossTeacher = buildVoxelCharacter({ isIsiOwu: true });
+    bossTeacher.mesh.position.set(0, 0, 10);
+    scene.add(bossTeacher.mesh);
+
+    const ringGeo = new THREE.RingGeometry(0.1, 5.0, 16);
+    ringGeo.rotateX(-Math.PI / 2);
+    const ringMat = new THREE.MeshBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0.25, side: THREE.DoubleSide });
+    const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+    ringMesh.position.y = 0.22;
+    bossTeacher.mesh.add(ringMesh);
+
+    // Interactive hotspot zones (Using fallback empty array if ZONES_LORE isn't defined yet)
+    const activeZones = typeof ZONES_LORE !== 'undefined' ? ZONES_LORE : {};
+    Object.values(activeZones).forEach(zone => {
+        const cylinderGeo = new THREE.CylinderGeometry(3.6, 3.6, 0.25, 16);
+        const cylinderMat = new THREE.MeshBasicMaterial({ 
+            color: zone.color, 
+            transparent: true, 
+            opacity: 0.35,
+            wireframe: true 
+        });
+        const mesh = new THREE.Mesh(cylinderGeo, cylinderMat);
+        mesh.position.set(zone.x, zone.y + 0.1, zone.z);
+        scene.add(mesh);
+
+        const blockGeo = new THREE.BoxGeometry(1.6, 1.6, 1.6);
+        const blockMat = new THREE.MeshStandardMaterial({
+            color: zone.color,
+            emissive: zone.color,
+            emissiveIntensity: 0.5,
+            transparent: true,
+            opacity: 0.75
+        });
+        const block = new THREE.Mesh(blockGeo, blockMat);
+        block.position.set(zone.x, zone.y + 1, zone.z);
+        scene.add(block);
+
+        zoneIndicators.push({
+            ...zone,
+            mesh: block,
+            floorMesh: mesh
+        });
+    });
+
+    // Class Rep
+    const classRep = buildVoxelCharacter({ gender: 'girl' });
+    classRep.mesh.position.set(-18, 0, -5);
+    classRep.mesh.rotation.y = Math.PI / 2;
+    scene.add(classRep.mesh);
+    npcsList.push({ mesh: classRep.mesh, name: "Class Rep", icon: '📚', dialogue: "Michael! Submit your homework assignment before Isi Owu catches you." });
+
+    // Gossip NPC
+    const gossipNPC = buildVoxelCharacter({ gender: 'boy' });
+    gossipNPC.mesh.position.set(0, 0, -20);
+    scene.add(gossipNPC.mesh);
+    npcsList.push({ mesh: gossipNPC.mesh, name: "Gossip NPC", icon: '💬', dialogue: "Omo news dey fly! The Aura Core is shaking underneath the hallway. Better gather resources fast." });
+
+    // Food Lover
+    const foodLover = buildVoxelCharacter({ gender: 'boy' });
+    foodLover.mesh.position.set(18, 0, -8);
+    scene.add(foodLover.mesh);
+    npcsList.push({ mesh: foodLover.mesh, name: "Food Lover", icon: '🍕', dialogue: "Munching this Jollof rice is pure joy (+20 Aura)! I can share with you in exchange for 3 Brain Cells." });
+
+    // Study Genius
+    const studyGenius = buildVoxelCharacter({ gender: 'girl' });
+    studyGenius.mesh.position.set(-18, 0, 18);
+    scene.add(studyGenius.mesh);
+    npcsList.push({ mesh: studyGenius.mesh, name: "Study Genius", icon: '🧠', dialogue: "Reading is power. Let's tackle some organic chemistry concepts (+3 Brain Cells, -5 Aura)." });
+
+    // Ifeoma Curvy Dark-Skinned Girl (White thigh stockings)
+    const ifeoma = buildVoxelCharacter({ gender: 'girl', isThick: true });
+    ifeoma.mesh.position.set(12, 0, -4);
+    ifeoma.mesh.rotation.y = -Math.PI / 4;
+    scene.add(ifeoma.mesh);
+    npcsList.push({ mesh: ifeoma.mesh, name: "Ifeoma", icon: '👧🏾', dialogue: "Hey Michael! Ngozi told me about your black Rolling Loud hoodie. Abeg you look super sharp with those red trousers! Stay safe." });
+
+    // Ngozi (Thick dark skin with white stockings)
+    const ngozi = buildVoxelCharacter({ gender: 'girl', isThick: true });
+    ngozi.mesh.position.set(8, 0, 15);
+    ngozi.mesh.rotation.y = -Math.PI / 3;
+    scene.add(ngozi.mesh);
+    npcsList.push({ mesh: ngozi.mesh, name: "Ngozi", icon: '🧦', dialogue: "Michael, let's keep school spirit high! We need the Aura Core back in order. No let strict teacher catch you." });
+
+    // Chidi (Rebellious Girl with Hand Tattoo)
+    const chidi = buildVoxelCharacter({ gender: 'girl', hasTattoo: true });
+    chidi.mesh.position.set(-10, 0, -18);
+    chidi.mesh.rotation.y = Math.PI / 3;
+    scene.add(chidi.mesh);
+    npcsList.push({ mesh: chidi.mesh, name: "Chidi", icon: '✒️', dialogue: "This hand tattoo is my rebel code. Isi Owu tried to make me clean it up, but she failed. Omo, no shaking!" });
+
+    // Favour (Thick Girl with Rose forearm sleeve Tattoo)
+    const favour = buildVoxelCharacter({ gender: 'girl', isThick: true, hasTattoo: true, tattooType: 'roseSleeve' });
+    favour.mesh.position.set(-6, 0, 14);
+    favour.mesh.rotation.y = -Math.PI / 6;
+    scene.add(favour.mesh);
+    npcsList.push({ mesh: favour.mesh, name: "Favour", icon: '🌹', dialogue: "What's up Michael! Abeg look at my rose sleeve forearm tattoo, clean right? Isi Owu hate rebels, but she no fit handle my logic strike!" });
+
+    // Spawn 3 wandering students to populate paths
+    for(let k = 0; k < 3; k++) {
+        const randBoy = buildVoxelCharacter({ gender: 'boy' });
+        randBoy.mesh.position.set(-5 + (k * 6), 0, -12);
+        scene.add(randBoy.mesh);
+        npcsList.push({ mesh: randBoy.mesh, name: "Wandering Student", icon: '👤', dialogue: "Keep moving, Michael! The school is unstable today." });
+    }
+}
+
+function spawnPickups() {
+    const list = [
+        { name: 'Spicy Jollof Rice', icon: '🍕', x: 18, y: 0, z: -10, desc: 'Hot student recovery pack!' },
+        { name: 'Lost Assignment File', icon: '📝', x: -18, y: 0, z: 22, desc: 'Class Rep needs this file.' },
+        { name: 'Aura Core Shard', icon: '💠', x: 0, y: -4.5, z: 0, desc: 'Glows with immense power.' }
+    ];
+
+    list.forEach(item => {
+        const group = new THREE.Group();
+        const box = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.8, 0.8), new THREE.MeshStandardMaterial({ color: 0xffff00, emissive: 0xffff00, emissiveIntensity: 0.3 }));
+        box.position.y = 0.4;
+        group.add(box);
+
+        const floatLight = new THREE.PointLight(0xffff00, 0.5, 3);
+        floatLight.position.set(0, 1, 0);
+        group.add(floatLight);
+
+        group.position.set(item.x, item.y, item.z);
+        scene.add(group);
+
+        pickupItems.push({
+            ...item,
+            mesh: group
+        });
+    });
+}
+
+function createParticleSystem() {
+    const particlesCount = 350;
+    const geometry = new THREE.BufferGeometry();
+    const positions = new Float32Array(particlesCount * 3);
+
+    for (let i = 0; i < particlesCount * 3; i += 3) {
+        positions[i] = (Math.random() - 0.5) * 65;
+        positions[i+1] = Math.random() * 14;
+        positions[i+2] = (Math.random() - 0.5) * 65;
+    }
+
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    const material = new THREE.PointsMaterial({
+        size: 0.14,
+        color: 0x9f5cf6,
+        transparent: true,
+        opacity: 0.65,
+        blending: THREE.AdditiveBlending
+    });
+
+    const particles = new THREE.Points(geometry, material);
+    scene.add(particles);
+}
+
+// Touch Joystick & Button Logic
+function setupTouchControls() {
+    const joyZone = document.getElementById('joystick-zone');
+    const joyKnob = document.getElementById('joystick-knob');
+    const actBtn = document.getElementById('action-btn');
+
+    let joyCenter = {x:0, y:0};
+    let activeTouchId = null;
+
+    joyZone.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        const touch = e.changedTouches[0];
+        activeTouchId = touch.identifier;
+        const rect = joyZone.getBoundingClientRect();
+        joyCenter = { x: rect.left + rect.width/2, y: rect.top + rect.height/2 };
+        updateJoy(touch);
+    });
+
+    joyZone.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        for(let i=0; i<e.changedTouches.length; i++) {
+            if(e.changedTouches[i].identifier === activeTouchId) {
+                updateJoy(e.changedTouches[i]);
+            }
+        }
+    });
+
+    const resetJoy = (e) => {
+        e.preventDefault();
+        for(let i=0; i<e.changedTouches.length; i++) {
+            if(e.changedTouches[i].identifier === activeTouchId) {
+                activeTouchId = null;
+                joyKnob.style.transform = `translate(0px, 0px)`;
+                input.moveX = 0; input.moveY = 0;
+            }
+        }
+    };
+
+    joyZone.addEventListener('touchend', resetJoy);
+    joyZone.addEventListener('touchcancel', resetJoy);
+
+    function updateJoy(touch) {
+        let dx = touch.clientX - joyCenter.x;
+        let dy = touch.clientY - joyCenter.y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        const maxR = 40;
+        if(dist > maxR) { dx = (dx/dist)*maxR; dy = (dy/dist)*maxR; }
+        
+        joyKnob.style.transform = `translate(${dx}px, ${dy}px)`;
+        input.moveX = dx / maxR;
+        input.moveY = dy / maxR;
+    }
+
+    // Action Button
+    actBtn.addEventListener('touchstart', (e) => { e.preventDefault(); input.action = true; });
+    actBtn.addEventListener('touchend', (e) => { e.preventDefault(); input.action = false; processAction(); });
+}
+
+// ==========================================
+// GAME LOGIC & UI
+// ==========================================
+
+function startGame() {
+    initAudio(); // Required to unlock sound on mobile
+    gsap.to("#menu-screen", { duration: 0.5, opacity: 0, onComplete: () => {
+        document.getElementById('menu-screen').style.display = 'none';
+        state.currentScreen = 'gameplay';
+        document.getElementById('hud-top').classList.remove('hidden');
+        document.getElementById('mobile-controls').classList.remove('hidden');
+        updateUI();
+        updateInventoryGrid();
+
+        // Cinematic camera sweep to Michael
+        gsap.to(camera.position, {
+            duration: 2,
+            x: 0,
+            y: 15,
+            z: 20,
+            ease: "power3.out"
+        });
+    }});
+}
+
+function showToast(msg, type = "info") {
+    const toastContainer = document.getElementById('ui-overlay');
+    const toast = document.createElement('div');
+    toast.className = `absolute right-4 bottom-24 p-4 rounded-xl border font-bold pointer-events-auto shadow-lg z-50 text-xs
+        ${type === 'success' ? 'bg-purple-900/95 border-cyan-400 text-cyan-200 shadow-purple-500/20' : 
+          type === 'error' ? 'bg-red-900/95 border-red-500 text-red-200 shadow-red-500/20' : 
+          'bg-slate-900/95 border-purple-500 text-purple-200 shadow-purple-500/10'}`;
+    toast.innerText = msg;
+    toastContainer.appendChild(toast);
+    
+    // Elastic entrance bounce using GSAP
+    gsap.from(toast, { duration: 0.5, scale: 0.3, y: 50, ease: "elastic.out(1, 0.5)" });
+
+    setTimeout(() => { 
+        gsap.to(toast, { duration: 0.3, scale: 0, opacity: 0, onComplete: () => toast.remove() });
+    }, 2500);
+}
+
+function updateUI() {
+    document.getElementById('aura-bar').style.width = `${(state.aura / state.maxAura) * 100}%`;
+    document.getElementById('aura-val').innerText = `${state.aura}/${state.maxAura}`;
+    document.getElementById('stat-brain').innerText = `🧠 ${state.brainCells}`;
+    document.getElementById('stat-food').innerText = `🍕 ${state.foodTokens}`;
+
+    // Compute updated ranks based on Aura
+    const foundRankObj = [...RANKS].reverse().find(r => state.aura >= r.min);
+    const currentRank = foundRankObj ? foundRankObj.name : 'New Student';
+    state.rank = currentRank;
+    document.getElementById('player-rank').innerText = currentRank;
+
+    // Toggle styling configurations
+    const overlay = document.getElementById('ui-overlay');
+    if (state.focusMode) {
+        overlay.classList.add('focus-active');
+    } else {
+        overlay.classList.remove('focus-active');
+    }
+}
+
+const RANKS = [
+    { name: 'New Student', min: 0 },
+    { name: 'Explorer', min: 100 },
+    { name: 'Scholar', min: 250 },
+    { name: 'Aura Guardian', min: 500 }
+];
+
+function updateInventoryGrid() {
+    // Basic inventory UI updates if a grid is present in the HTML
+    const grid = document.getElementById('inventory-grid');
+    if(grid) {
+        grid.innerHTML = '';
+        state.inventory.forEach((item, idx) => {
+            const slot = document.createElement('div');
+            slot.className = "bg-purple-950/50 p-2 rounded border border-purple-800 text-center flex flex-col items-center justify-center relative";
+            slot.innerHTML = `
+                <div class="text-xl">${item.icon}</div>
+                <div class="text-[9px] font-bold mt-1 text-slate-300">${item.name}</div>
+                <span class="absolute top-1 right-1 bg-cyan-500 text-black font-black text-[8px] px-1 rounded-full">${item.qty}</span>
+            `;
+            grid.appendChild(slot);
+        });
+    }
+}
+
+function modifyStats(changes) {
+    let newAura = state.aura + (changes.aura || 0);
+    if (newAura > state.maxAura) newAura = state.maxAura;
+    state.aura = Math.max(0, newAura); // Keep aura from falling into negative values
+
+    state.brainCells = Math.max(0, state.brainCells + (changes.brainCells || 0));
+    state.foodTokens = Math.max(0, state.foodTokens + (changes.foodTokens || 0));
+
+    updateUI();
+
+    if (state.aura <= 0) {
+        state.currentScreen = 'gameover';
+        document.getElementById('gameover-screen').classList.remove('hidden');
+        document.getElementById('hud-top').classList.add('hidden');
+        playSound('damage');
+    }
+}
+
+function processAction() {
+    if (state.currentScreen === 'gameplay' && state.activeInteractable) {
+        playSound('boing');
+        state.currentScreen = 'dialogue';
+        document.getElementById('dialogue-screen').classList.remove('hidden');
+        
+        // Elastic entrance bounce for dialogue card using GSAP
+        gsap.from("#dialogue-box", { duration: 0.5, scale: 0.8, opacity: 0, y: 100, ease: "back.out(1.5)" });
+
+        const dName = document.getElementById('dialogue-name');
+        const dAvatar = document.getElementById('dialogue-avatar');
+        const dOptions = document.getElementById('dialogue-options');
+
+        dName.innerText = state.activeInteractable.name;
+        dAvatar.innerText = state.activeInteractable.icon || '🎒';
+        dOptions.innerHTML = '';
+
+        const textToType = state.activeInteractable.dialogue || state.activeInteractable.desc;
+        typeDialogText(textToType, 'dialogue-text', () => {
+            // Specialized dialog options load after type completion
+            if (state.activeInteractable.id === 'classroom' || state.activeInteractable.name === "Class Rep") {
+                const assignmentItem = state.inventory.find(item => item.name === 'Lost Assignment File');
+                if (assignmentItem && assignmentItem.qty > 0) {
+                    createOption(dOptions, "Submit physical Lost Assignment File", () => {
+                        assignmentItem.qty = 0;
+                        state.quests.find(q => q.id === 'homework').done = true;
+                        modifyStats({ aura: 40 });
+                        updateInventoryGrid();
+                        showToast("Omo Class Rep happy die! +40 Aura!", "success");
+                        exitDialogue();
+                    });
+                } else {
+                    createOption(dOptions, "Submit homework (Costs 2 Brain Cells)", () => {
+                        if (state.brainCells >= 2) {
+                            const reward = state.focusMode ? 40 : 20;
+                            modifyStats({ brainCells: -2, aura: reward });
+                            state.quests.find(q => q.id === 'homework').done = true;
+                            showToast("Sharp guy! Homework sorted. +" + reward + " Aura!", "success");
+                            exitDialogue();
+                        } else {
+                            showToast("You no do assignment! Zero brain cells 😭", "error");
+                        }
+                    });
+                }
+                createOption(dOptions, "Sneak away silently", () => {
+                    if (Math.random() > 0.4) {
+                        showToast("Smooth escape! 🥷", "success");
+                    } else {
+                        modifyStats({ aura: -15 });
+                        showToast("Isi Owu caught you loitering! -15 Aura.", "error");
+                    }
+                    exitDialogue();
+                });
+            } else if (state.activeInteractable.name === "Gossip NPC" || state.activeInteractable.id === 'gate') {
+                createOption(dOptions, "Listen to rumors (Costs 1 Brain Cell)", () => {
+                    if (state.brainCells >= 1) {
+                        modifyStats({ brainCells: -1, aura: 15 });
+                        showToast("Gossip sweet! Discovered secret shortcut! +15 Aura", "success");
+                    } else {
+                        showToast("Too exhausted to analyze gossips...", "error");
+                    }
+                    exitDialogue();
+                });
+            } else if (state.activeInteractable.name === "Food Lover" || state.activeInteractable.id === 'canteen') {
+                createOption(dOptions, "Buy Jollof Food (Costs 3 Brain Cells)", () => {
+                    if (state.brainCells >= 3) {
+                        modifyStats({ brainCells: -3, foodTokens: 1 });
+                        showToast("Got Jollof pack from Food Lover 🍕!", "success");
+                    } else {
+                        showToast("Not enough Brain Cells to trade with Food Lover!", "error");
+                    }
+                    exitDialogue();
+                });
+            } else if (state.activeInteractable.name === "Study Genius" || state.activeInteractable.id === 'library') {
+                createOption(dOptions, "Solve complex physics calculus (+3 Brain Cells, -5 Aura)", () => {
+                    modifyStats({ brainCells: 3, aura: -5 });
+                    showToast("Brain cells upgraded! 🧠 (+3)", "success");
+                    exitDialogue();
+                });
+            } else if (state.activeInteractable.id === 'rooftop') {
+                createOption(dOptions, "Meditate on high platform (+15 Aura)", () => {
+                    modifyStats({ aura: 15 });
+                    showToast("Inner peace achieved on rooftop!", "success");
+                    exitDialogue();
+                });
+            } else if (state.activeInteractable.id === 'underground') {
+                const shardItem = state.inventory.find(item => item.name === 'Aura Core Shard');
+                if (shardItem && shardItem.qty > 0) {
+                    createOption(dOptions, "Fit the glowing Core Shard into the machine", () => {
+                        shardItem.qty = 0;
+                        state.quests.find(q => q.id === 'stabilize').done = true;
+                        modifyStats({ aura: 50, maxAura: 50 });
+                        updateInventoryGrid();
+                        showToast("The Chamber Hummed. Aura Core fully Stabilized!", "success");
+                        exitDialogue();
+                    });
+                } else {
+                    createOption(dOptions, "Secure the Core fragment (Costs 3 Brain Cells)", () => {
+                        if (state.brainCells >= 3) {
+                            modifyStats({ brainCells: -3, aura: 30 });
+                            showToast("Aura Core stabilized partially! Core fragment secured.", "success");
+                        } else {
+                            showToast("Requires 3 Brain Cells to align the Core mechanics!", "error");
+                        }
+                        exitDialogue();
+                    });
+                }
+            } else if (state.activeInteractable.name === "Ifeoma") {
+                createOption(dOptions, "Compliment her white stockings (+15 Aura)", () => {
+                    modifyStats({ aura: 15 });
+                    showToast("Omo, Ifeoma thick die! She giggles: 'You look dope in that hoodie!'", "success");
+                    exitDialogue();
+                });
+            } else if (state.activeInteractable.name === "Ngozi") {
+                createOption(dOptions, "Compliment her white stockings (+10 Aura)", () => {
+                    modifyStats({ aura: 10 });
+                    showToast("Ngozi smiles! 'You get eye, Michael! See white stockings!'", "success");
+                    exitDialogue();
+                });
+            } else if (state.activeInteractable.name === "Chidi") {
+                createOption(dOptions, "Ask about her rebel hand tattoo (+2 Brain Cells)", () => {
+                    modifyStats({ brainCells: 2 });
+                    showToast("Chidi hand tattoo clean! She gives you hacker hacks.", "success");
+                    exitDialogue();
+                });
+            } else if (state.activeInteractable.name === "Favour") {
+                createOption(dOptions, "Admire her bad rose sleeve tattoo (+20 Aura)", () => {
+                    modifyStats({ aura: 20 });
+                    showToast("Favour curvy model smiles! 'My rose tattoo bad, right?'", "success");
+                    exitDialogue();
+                });
+            }
+            createOption(dOptions, "Keep walking", () => {
+                exitDialogue();
+            });
+        });
+    }
+}
+
+function createOption(container, text, callback) {
+    const btn = document.createElement('button');
+    btn.className = "w-full p-3 bg-purple-900/35 hover:bg-cyan-900/40 border border-purple-700/50 hover:border-cyan-400 text-left rounded-lg text-xs font-bold transition-all text-slate-200 cursor-pointer pointer-events-auto";
+    btn.innerText = text;
+    btn.onclick = callback;
+    container.appendChild(btn);
+}
+
+function exitDialogue() {
+    gsap.to("#dialogue-box", { 
+        duration: 0.3, 
+        scale: 0.8, 
+        opacity: 0, 
+        y: 100, 
+        onComplete: () => {
+            state.currentScreen = 'gameplay';
+            document.getElementById('dialogue-screen').classList.add('hidden');
+            playSound('interact');
+        }
+    });
+}
+
+function eatFood() {
+    if (state.foodTokens > 0) {
+        modifyStats({ foodTokens: -1, aura: 20 });
+        playSound('eat');
+        showToast("Omo, you chopped Jollof and recovered +20 Aura! 🔥", "success");
+    } else {
+        showToast("No Jollof Rice in your pocket!", "error");
+    }
+}
+
+// BOSS ENCOUNTER CONTROLLER
+function startBossFight(name, quote) {
+    state.currentScreen = 'boss';
+    state.boss = { hp: 100, maxHp: 100, name };
+    
+    document.getElementById('boss-screen').classList.remove('hidden');
+    document.getElementById('boss-name').innerText = name; // Element is static in HTML, just updating logic
+    document.getElementById('boss-quote').innerText = `"${quote}"`;
+    playSound('damage');
+    
+    // Elastic entrance pop on boss card
+    gsap.from("#boss-combat-card", { duration: 0.6, scale: 0.7, opacity: 0, rotation: -10, ease: "elastic.out(1, 0.4)" });
+    
+    updateBossUI();
+}
+
+function updateBossUI() {
+    if (!state.boss) return;
+    document.getElementById('boss-hp-bar').style.width = `${(state.boss.hp / state.boss.maxHp) * 100}%`;
+}
+
+function attackBoss(attackType) {
+    let damage = 0;
+    if (attackType === 'brain') {
+        if (state.brainCells < 2) {
+            showToast("No brain cells left to formulate logic!", "error");
+            return;
+        }
+        modifyStats({ brainCells: -2 });
+        damage = state.focusMode ? 40 : 20;
+    } else if (attackType === 'food') {
+        if (state.foodTokens < 1) {
+            showToast("No energy food left!", "error");
+            return;
+        }
+        modifyStats({ foodTokens: -1 });
+        damage = state.focusMode ? 50 : 25;
+    }
+
+    state.boss.hp -= damage;
+    const retaliation = Math.floor(Math.random() * 12) + 8;
+    modifyStats({ aura: -retaliation });
+    playSound('damage');
+
+    // Red damage flash on canvas container using GSAP
+    gsap.fromTo("#game-canvas", { filter: "brightness(2) sepia(1) hue-rotate(320deg)" }, { duration: 0.4, filter: "none" });
+
+    if (state.boss.hp <= 0) {
+        state.boss.hp = 0;
+        updateBossUI();
+        state.quests.find(q => q.id === 'escape').done = true;
+        showToast("YOU DEFEATED THE STRICT SENTINEL! +50 Aura!", "success");
+        modifyStats({ aura: 50, maxAura: 25 });
+        
+        // Relocate boss
+        bossTeacher.mesh.position.set(0, 0, 10);
+        
+        gsap.to("#boss-combat-card", { 
+            duration: 0.4, 
+            scale: 0.5, 
+            opacity: 0, 
+            onComplete: () => {
+                document.getElementById('boss-screen').classList.add('hidden');
+                state.currentScreen = 'gameplay';
+                state.boss = null;
+            }
+        });
+    } else {
+        updateBossUI();
+        showToast(`Isi Owu attacks back! -${retaliation} Aura`, "error");
+    }
+}
+
+// Cinematic Dialogue Scroll Typewriter Engine
+function typeDialogText(fullText, elementId, onComplete) {
+    const el = document.getElementById(elementId);
+    el.innerText = '';
+    let currentIdx = 0;
+    if (dialogueTextTimer) clearInterval(dialogueTextTimer);
+
+    dialogueTextTimer = setInterval(() => {
+        if (currentIdx < fullText.length) {
+            el.innerText += fullText[currentIdx];
+            currentIdx++;
+            if (currentIdx % 2 === 0) playSound('typewriter');
+        } else {
+            clearInterval(dialogueTextTimer);
+            if (onComplete) onComplete();
+        }
+    }, 25);
+}
+let dialogueTextTimer = null;
+
+// ==========================================
+// PHYSICS & GRAPHICS RENDER LOOP
+// ==========================================
+let patrolDir = 1;
+let stepTimer = 0;
+
+function updatePhysics(delta) {
+    if (state.currentScreen !== 'gameplay') return;
+
+    const nightSpeedModifier = state.dayTime ? 1 : 1.25;
+    const speed = state.focusMode ? 15.5 * delta : 9 * delta;
+    let isMoving = false;
+
+    // Movement tracking via Joystick vectors
+    let tx = player.mesh.position.x + (input.moveX * speed);
+    let tz = player.mesh.position.z + (input.moveY * speed);
+
+    if (Math.abs(input.moveX) > 0.1 || Math.abs(input.moveY) > 0.1) {
+        player.mesh.rotation.y = Math.atan2(input.moveX, input.moveY);
+        isMoving = true;
+    }
+
+    // boundary limits
+    tx = Math.max(-23, Math.min(23, tx));
+    tz = Math.max(-28, Math.min(28, tz));
+
+    // Simple Collision Check
+    const pBox = new THREE.Box3().setFromCenterAndSize(new THREE.Vector3(tx, 0.9, tz), new THREE.Vector3(1.2, 1.8, 1.2));
+    let collision = false;
+    for(let box of staticColliders) {
+        if(pBox.intersectsBox(box)) { collision = true; break; }
+    }
+
+    if(!collision) {
+        player.mesh.position.x = tx;
+        player.mesh.position.z = tz;
+    }
+
+    // Vertical stair scale translations
+    if (player.mesh.position.x > 14 && player.mesh.position.z > 10 && player.mesh.position.z < 20) {
+        const ratio = (player.mesh.position.z - 10) / 10;
+        player.mesh.position.y = THREE.MathUtils.lerp(0, 5.2, ratio);
+    } 
+    else if (player.mesh.position.x > -4 && player.mesh.position.x < 4 && player.mesh.position.z < -10 && player.mesh.position.z > -22) {
+        const ratio = (-10 - player.mesh.position.z) / 12;
+        player.mesh.position.y = THREE.MathUtils.lerp(0, -4.5, ratio);
+    } else {
+        if (player.mesh.position.z > 14 && player.mesh.position.x > 12) {
+            player.mesh.position.y = 5.2;
+        } else if (player.mesh.position.z < -4 && player.mesh.position.x > -6 && player.mesh.position.x < 6) {
+            player.mesh.position.y = -4.5;
+        } else {
+            player.mesh.position.y = 0;
+        }
+    }
+
+    // Dynamic swing limb configurations
+    if (isMoving) {
+        const swing = Math.sin(clock.getElapsedTime() * (state.focusMode ? 16 : 10)) * 0.65;
+        player.joints.rArm.rotation.x = swing;
+        player.joints.lArm.rotation.x = -swing;
+        player.joints.rLeg.rotation.x = -swing;
+        player.joints.lLeg.rotation.x = swing;
+
+        stepTimer -= delta;
+        if (stepTimer <= 0) {
+            playSound('footstep');
+            stepTimer = state.focusMode ? 0.2 : 0.35;
+        }
+    } else {
+        player.joints.rArm.rotation.x = 0;
+        player.joints.lArm.rotation.x = 0;
+        player.joints.rLeg.rotation.x = 0;
+        player.joints.lLeg.rotation.x = 0;
+    }
+
+    // Camera follow (Tracking vertical displacement seamlessly with smooth lerping)
+    camera.position.x += (player.mesh.position.x - camera.position.x) * 0.08;
+    camera.position.z += (player.mesh.position.z + 18 - camera.position.z) * 0.08;
+    camera.position.y += (player.mesh.position.y + 10 - camera.position.y) * 0.08;
+    camera.lookAt(player.mesh.position);
+
+    // Active AI spotlight patrol sweep for Isi Owu
+    const patrolSpeed = (state.dayTime ? 3.5 : 5.0) * nightSpeedModifier;
+    bossTeacher.mesh.position.x += patrolDir * patrolSpeed * delta;
+    if (bossTeacher.mesh.position.x > 18) { patrolDir = -1; bossTeacher.mesh.rotation.y = -Math.PI/2; }
+    if (bossTeacher.mesh.position.x < -18) { patrolDir = 1; bossTeacher.mesh.rotation.y = Math.PI/2; }
+
+    const tSwing = Math.sin(clock.getElapsedTime() * 8.5) * 0.55;
+    bossTeacher.joints.rArm.rotation.x = tSwing;
+    bossTeacher.joints.lArm.rotation.x = -tSwing;
+    bossTeacher.joints.rLeg.rotation.x = -tSwing;
+    bossTeacher.joints.lLeg.rotation.x = tSwing;
+
+    // Trigger Combat Arena if spotted by Teacher
+    const distanceToTeacher = player.mesh.position.distanceTo(bossTeacher.mesh.position);
+    if (distanceToTeacher < 5.0 && Math.abs(player.mesh.position.y - bossTeacher.mesh.position.y) < 2) {
+        startBossFight("Isi Owu", "WHERE IS YOUR EXAM REGISTRATION PASS?! COME HERE!");
+        return;
+    }
+
+    // Hallway dangerous flags activation
+    if (player.mesh.position.z > 3 && player.mesh.position.z < 15 && player.mesh.position.y < 2) {
+        document.getElementById('hallway-warning').classList.remove('hidden');
+    } else {
+        document.getElementById('hallway-warning').classList.add('hidden');
+    }
+
+    // Evaluate proximity with physical pickups on the floor
+    pickupItems.forEach((item, idx) => {
+        item.mesh.rotation.y += 1.5 * delta;
+        const distToPickup = player.mesh.position.distanceTo(item.mesh.position);
+        
+        if (distToPickup < 1.6 && Math.abs(player.mesh.position.y - item.mesh.position.y) < 1.5) {
+            playSound('interact');
+            scene.remove(item.mesh);
+            pickupItems.splice(idx, 1);
+            
+            const targetInv = state.inventory.find(i => i.name === item.name);
+            if (targetInv) {
+                targetInv.qty++;
+            } else {
+                state.inventory.push({ name: item.name, icon: item.icon, qty: 1, type: 'pickup' });
+            }
+            showToast(`Found and stored: ${item.name} ${item.icon}!`, "success");
+            updateUI();
+            updateInventoryGrid();
+        }
+    });
+
+    // Check interaction range
+    let currentFocusInteractable = null;
+
+    zoneIndicators.forEach(zone => {
+        const distance = player.mesh.position.distanceTo(zone.mesh.position);
+        zone.mesh.rotation.y += 1.6 * delta;
+        
+        if (distance < 3.3 && Math.abs(player.mesh.position.y - zone.mesh.position.y) < 2) {
+            currentFocusInteractable = zone;
+        }
+    });
+
+    npcsList.forEach(npc => {
+        const distance = player.mesh.position.distanceTo(npc.mesh.position);
+        if (distance < 3.2 && Math.abs(player.mesh.position.y - npc.mesh.position.y) < 2) {
+            currentFocusInteractable = npc;
+        }
+    });
+
+    // Alert interactive popup overlays
+    const interactPopup = document.getElementById('interact-popup');
+    if (currentFocusInteractable) {
+        if (!state.activeInteractable) {
+            // GSAP elastic scale-up on active interact box
+            interactPopup.classList.remove('hidden');
+            gsap.from(interactPopup, { duration: 0.4, scale: 0.5, ease: "elastic.out(1, 0.4)" });
+        }
+        state.activeInteractable = currentFocusInteractable;
+        document.getElementById('interact-title').innerText = currentFocusInteractable.name;
+        document.getElementById('interact-icon').innerText = currentFocusInteractable.icon || "👤";
+    } else {
+        state.activeInteractable = null;
+        interactPopup.classList.add('hidden');
+    }
+
+    // Prevent minimap error if canvas isn't populated
+    const mmapCanvas = document.getElementById('minimap');
+    if(mmapCanvas && window.updateMinimap) {
+        updateMinimap();
+    }
+}
+
+function renderLoop() {
+    requestAnimationFrame(renderLoop);
+    updatePhysics(clock.getDelta());
+    renderer.render(scene, camera);
+}
+
+window.onload = () => { initEngine(); renderLoop(); };
+</script>
+
+</body>
+</html>
