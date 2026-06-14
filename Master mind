@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Melting Point Chronicles: Anime RPG Edition</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #0c050a;
+            color: #fcefe3;
+            user-select: none;
+            overflow-x: hidden;
+        }
+        .heading-font {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        /* Glassmorphism stylings */
+        .glass-panel {
+            background: rgba(23, 11, 20, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(157, 23, 29, 0.25);
+        }
+        .glass-panel-heavy {
+            background: rgba(15, 6, 12, 0.95);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(157, 23, 29, 0.4);
+        }
+        /* Anime Glowing Effects */
+        .glow-red {
+            box-shadow: 0 0 20px rgba(157, 23, 29, 0.6);
+        }
+        .glow-purple {
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.6);
+        }
+        .glow-gold {
+            box-shadow: 0 0 20px rgba(234, 179, 8, 0.6);
+        }
+        /* Custom scrollbars */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f060c;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #9d171d;
+            border-radius: 4px;
+        }
+        /* Character transition animations */
+        .avatar-hover:hover {
+            transform: translateY(-8px) scale(1.02);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        /* Shake effect for angry moments */
+        @keyframes customShake {
+            0%, 100% { transform: translate(0, 0); }
+            10%, 30%, 50%, 70%, 90% { transform: translate(-4px, 2px); }
+            20%, 40%, 60%, 80% { transform: translate(4px, -2px); }
+        }
+        .shake-active {
+            animation: customShake 0.4s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+
+    <!-- Sound Synthesizer Node -->
+    <script>
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(type) {
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'click') {
+                    osc.frequency.setValueAtTime(350, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.12);
+                    gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+                    gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.12);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.12);
+                } else if (type === 'level') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+                    osc.frequency.setValueAtTime(450, audioCtx.currentTime + 0.15);
+                    osc.frequency.setValueAtTime(600, audioCtx.currentTime + 0.3);
+                    gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+                    gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.5);
+                } else if (type === 'attack') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(900, audioCtx.currentTime + 0.3);
+                    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                    gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.35);
+                } else if (type === 'item') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.25);
+                    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                    gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.25);
+                } else if (type === 'damage') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(100, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(30, audioCtx.currentTime + 0.4);
+                    gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+                    gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.4);
+                }
+            } catch(e) { console.log("Audio contextual block active."); }
+        }
+    </script>
+
+    <!-- TOP HEADER BAR -->
+    <header class="bg-[#12050e]/90 border-b border-[#470f14] p-4 sticky top-0 z-50 shadow-lg backdrop-blur-md">
+        <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-4">
+            
+            <!-- Logo & Active Character Title -->
+            <div class="flex items-center gap-4">
+                <div class="relative w-12 h-12 rounded-xl border-2 border-red-600 bg-black flex items-center justify-center overflow-hidden shadow-inner" id="headerAvatarContainer">
+                    <span id="headerAvatarEmoji" class="text-2xl animate-bounce">⚡</span>
+                </div>
+                <div>
+                    <h1 class="heading-font font-extrabold text-xl tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-orange-400 to-purple-500" id="headerGameTitle">
+                        MELTING POINT CHRONICLES
+                    </h1>
+                    <p class="text-xs text-stone-400 flex items-center gap-2">
+                        Playing as: <span class="font-bold text-yellow-400" id="headerCharacterName">None Selected</span>
+                        <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-ping"></span>
+                        <span class="text-[10px] bg-red-950 text-red-400 px-2 py-0.2 rounded border border-red-800" id="weatherDisplay">🌤️ Sunny Heatwave</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- RPG STATS BLOCK -->
+            <div class="flex flex-wrap items-center gap-3 text-xs md:text-sm" id="headerStatsContainer">
+                <div class="bg-[#1c0813] border border-[#5c1c25] px-3 py-1.5 rounded-lg flex items-center gap-2 shadow-sm">
+                    <span class="text-purple-400 font-semibold"><i class="fa-solid fa-sparkles"></i> Aura:</span>
+                    <span class="font-bold text-white" id="valAura">100</span>
+                </div>
+                <div class="bg-[#1c0813] border border-[#5c1c25] px-3 py-1.5 rounded-lg flex items-center gap-2 shadow-sm">
+                    <span class="text-cyan-400 font-semibold"><i class="fa-solid fa-graduation-cap"></i> Intellect:</span>
+                    <span class="font-bold text-white" id="valIntel">75</span>
+                </div>
+                <div class="bg-[#1c0813] border border-[#5c1c25] px-3 py-1.5 rounded-lg flex items-center gap-2 shadow-sm">
+                    <span class="text-orange-400 font-semibold"><i class="fa-solid fa-fire-flame-curved"></i> Conf:</span>
+                    <span class="font-bold text-white" id="valConf">80</span>
+                </div>
+                <div class="bg-[#1c0813] border border-[#5c1c25] px-3 py-1.5 rounded-lg flex items-center gap-2 shadow-sm">
+                    <span class="text-green-400 font-semibold"><i class="fa-solid fa-battery-three-quarters"></i> Energy:</span>
+                    <span class="font-bold text-white" id="valEnergy">100</span>
+                </div>
+            </div>
+
+        </div>
+    </header>
+
+    <!-- MAIN IMMERSIVE CONTAINER -->
+    <main class="flex-grow max-w-7xl w-full mx-auto p-4 md:py-6 flex flex-col justify-center items-center relative" id="mainContainer">
+        
+        <!-- ================= SCREEN 1: ANIME CHARACTER SELECTOR ================= -->
+        <div id="characterSelectScreen" class="w-full max-w-5xl glass-panel rounded-3xl p-6 md:p-10 text-center shadow-2xl relative overflow-hidden flex flex-col items-center">
+            
+            <div class="absolute -right-24 -top-24 w-64 h-64 bg-red-800/20 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -left-24 -bottom-24 w-64 h-64 bg-purple-800/20 rounded-full blur-3xl pointer-events-none"></div>
+
+            <span class="text-xs bg-red-950 text-red-400 px-3 py-1 rounded-full border border-red-800 font-extrabold tracking-widest uppercase mb-4 heading-font">
+                🇳🇬 Welcome to Melting Point College RPG
+            </span>
+
+            <h2 class="text-3xl md:text-5xl font-extrabold heading-font tracking-tight text-white mb-2 uppercase">
+                Select Your <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-orange-500 to-yellow-500">Avatar</span>
+            </h2>
+            <p class="text-stone-300 max-w-lg mb-8 text-sm md:text-base">
+                Your selected avatar changes dialogues, special passives, school story options, and how other student factions treat you. Pick wisely!
+            </p>
+
+            <!-- Character Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 w-full mb-8">
+                
+                <!-- IFEOMA CARD -->
+                <div onclick="selectCharacter('ifeoma')" class="avatar-hover glass-panel rounded-2xl p-5 border-2 border-yellow-600/30 hover:border-yellow-500 cursor-pointer flex flex-col justify-between text-left transition relative bg-gradient-to-b from-[#1c0d18] to-[#0c050a]">
+                    <div class="absolute top-3 right-3 bg-yellow-600 text-black font-extrabold text-[10px] px-2 py-0.5 rounded uppercase">POPULAR QUEEN</div>
+                    
+                    <div class="w-20 h-20 mx-auto my-3 rounded-full bg-yellow-950/40 border border-yellow-500 flex items-center justify-center text-4xl overflow-hidden">
+                        👧🏾
+                    </div>
+
+                    <div>
+                        <h3 class="heading-font font-bold text-lg text-yellow-400 uppercase tracking-wide">Ifeoma</h3>
+                        <p class="text-[11px] text-stone-400 italic mb-2">"Think you can compete with me, study partner?"</p>
+                        <p class="text-xs text-stone-300 mb-3 font-light">Dark-skinned beauty, petite, competitive, extremely witty. High stockings state-shifter.</p>
+                        
+                        <!-- Mini Stats & Specialties -->
+                        <div class="space-y-1.5 border-t border-yellow-900/40 pt-3">
+                            <div class="flex justify-between text-[11px]"><span class="text-stone-400">Specialty:</span> <b class="text-yellow-400">Honor Student (+20% study)</b></div>
+                            <div class="flex justify-between text-[11px]"><span class="text-stone-400">Starting Intellect:</span> <b class="text-white">95</b></div>
+                            <div class="flex justify-between text-[11px]"><span class="text-stone-400">Confidence:</span> <b class="text-white">85</b></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MICHAEL CARD -->
+                <div onclick="selectCharacter('michael')" class="avatar-hover glass-panel rounded-2xl p-5 border-2 border-purple-600/30 hover:border-purple-500 cursor-pointer flex flex-col justify-between text-left transition relative bg-gradient-to-b from-[#140f22] to-[#0c050a]">
+                    <div class="absolute top-3 right-3 bg-purple-600 text-white font-extrabold text-[10px] px-2 py-0.5 rounded uppercase">AURA REBEL</div>
+                    
+                    <div class="w-20 h-20 mx-auto my-3 rounded-full bg-purple-950/40 border border-purple-500 flex items-center justify-center text-4xl overflow-hidden">
+                        😎
+                    </div>
+
+                    <div>
+                        <h3 class="heading-font font-bold text-lg text-purple-400 uppercase tracking-wide">Michael</h3>
+                        <p class="text-[11px] text-stone-400 italic mb-2">"Rolling Loud back home. We set our rules."</p>
+                        <p class="text-xs text-stone-300 mb-3 font-light">Tall, caramel-skinned, always wearing a black hoodie. The only student ununiformed.</p>
+                        
+                        <div class="space-y-1.5 border-t border-purple-900/40 pt-3">
+                            <div class="flex justify-between text-[11px]"><span class="text-stone-400">Specialty:</span> <b class="text-purple-400">Main Character Energy</b></div>
+                            <div class="flex justify-between text-[11px]"><span class="text-stone-400">Starting Aura:</span> <b class="text-white">120</b></div>
+                            <div class="flex justify-between text-[11px]"><span class="text-stone-400">Starting Speed:</span> <b class="text-white">85</b></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AMARA CARD -->
+                <div onclick="selectCharacter('amara')" class="avatar-hover glass-panel rounded-2xl p-5 border-2 border-cyan-600/30 hover:border-cyan-500 cursor-pointer flex flex-col justify-between text-left transition relative bg-gradient-to-b from-[#0d1c22] to-[#0c050a]">
+                    <div class="absolute top-3 right-3 bg-cyan-600 text-white font-extrabold text-[10px] px-2 py-0.5 rounded uppercase">LORE SEEKER</div>
+                    
+                    <div class="w-20 h-20 mx-auto my-3 rounded-full bg-cyan-950/40 border border-cyan-500 flex items-center justify-center text-4xl overflow-hidden">
+                        🔮
+                    </div>
+
+                    <div>
+                        <h3 class="heading-font font-bold text-lg text-cyan-400 uppercase tracking-wide">Amara</h3>
+                        <p class="text-[11px] text-stone-400 italic mb-2">"Some secrets are better kept locked."</p>
+                        <p class="text-xs text-stone-300 mb-3 font-light">Fair skinned, subtle wrist tattoo. Knows hidden pathways, old archives, and school basement codes.</p>
+                        
+                        <div class="space-y-1.5 border-t border-cyan-900/40 pt-3">
+                            <div class="flex justify-between text-[11px]"><span class="text-stone-400">Specialty:</span> <b class="text-cyan-400">Rooftop Secrets unlocked</b></div>
+                            <div class="flex justify-between text-[11px]"><span class="text-stone-400">Intellect:</span> <b class="text-white">90</b></div>
+                            <div class="flex justify-between text-[11px]"><span class="text-stone-400">Special Ability:</span> <b class="text-white">Ghost Slip</b></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TREVOR CARD -->
+                <div onclick="selectCharacter('trevor')" class="avatar-hover glass-panel rounded-2xl p-5 border-2 border-red-600/30 hover:border-red-500 cursor-pointer flex flex-col justify-between text-left transition relative bg-gradient-to-b from-[#220d0f] to-[#0c050a]">
+                    <div class="absolute top-3 right-3 bg-red-600 text-white font-extrabold text-[10px] px-2 py-0.5 rounded uppercase">CHAOS BUDDY</div>
+                    
+                    <div class="w-20 h-20 mx-auto my-3 rounded-full bg-red-950/40 border border-red-500 flex items-center justify-center text-4xl overflow-hidden">
+                        🤪
+                    </div>
+
+                    <div>
+                        <h3 class="heading-font font-bold text-lg text-red-400 uppercase tracking-wide">Trevor</h3>
+                        <p class="text-[11px] text-stone-400 italic mb-2">"Trust me, this prank is going to be legend!"</p>
+                        <p class="text-xs text-stone-300 mb-3 font-light">Fair-skinned, cozy school sweater. Full of awful advice, hilarious stories, and secret cafeteria food supplies.</p>
+                        
+                        <div class="space-y-1.5 border-t border-red-900/40 pt-3">
+                            <div class="flex justify-between text-[11px]"><span class="text-stone-400">Specialty:</span> <b class="text-red-400">Cafeteria discount / Pranks</b></div>
+                            <div class="flex justify-between text-[11px]"><span class="text-stone-400">Confidence:</span> <b class="text-white">95</b></div>
+                            <div class="flex justify-between text-[11px]"><span class="text-stone-400">Stamina:</span> <b class="text-white">100</b></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <p class="text-xs text-stone-500 font-mono">Select an avatar and start exploring Melting Point College!</p>
+        </div>
+
+
+        <!-- ================= SCREEN 2: MAIN RPG ENGINE ================= -->
+        <div id="gameplayScreen" class="w-full hidden grid grid-cols-1 lg:grid-cols-4 gap-6">
+            
+            <!-- Left Side: Dynamic Anime Visual & Interactive Narrative -->
+            <div class="lg:col-span-2 flex flex-col gap-4">
+                
+                <!-- Anime Render Window -->
+                <div id="animeRenderWindow" class="relative h-72 md:h-80 rounded-2xl border border-[#5c1c25] bg-cover bg-center overflow-hidden flex flex-col justify-between p-4" style="background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.85)), url('https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=800&auto=format&fit=crop');">
+                    
+                    <!-- Location Status and Dynamic Day Cycle Info -->
+                    <div class="flex justify-between items-start w-full">
+                        <span id="labelCurrentLocation" class="px-3 py-1 bg-black/80 backdrop-blur-md border border-red-900/50 rounded-full text-xs font-bold text-red-400 uppercase tracking-widest flex items-center gap-1.5">
+                            <i class="fa-solid fa-map-pin animate-pulse"></i> School Gate
+                        </span>
+                        <div class="flex gap-2">
+                            <span id="labelTimeCycle" class="px-2.5 py-1 bg-black/85 backdrop-blur-md border border-yellow-800/50 rounded-full text-[10px] font-bold text-yellow-400 uppercase tracking-wider">
+                                🌅 Morning Prep
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Centered Custom Expressive Anime SVG Face -->
+                    <div class="flex justify-center items-end h-full relative" id="animeAvatarFrame">
+                        <!-- High-quality reactive anime face generated by state engine -->
+                    </div>
+
+                    <!-- Ambient Subtitle ticker -->
+                    <div class="bg-black/90 border border-[#5a1a20] p-2.5 rounded-xl text-xs flex justify-between items-center">
+                        <span class="text-stone-400" id="labelAmbientTicker">Birds fly over the busy school town. Keke and Okada drivers blow horns.</span>
+                        <span id="labelAtmosphereRank" class="text-[9px] bg-purple-950 text-purple-400 px-2 py-0.5 rounded font-extrabold">AURA RATING: S-CLASS</span>
+                    </div>
+
+                </div>
+
+                <!-- Story Script and Dialogue Output Box -->
+                <div class="glass-panel rounded-2xl p-5 flex flex-col justify-between gap-4 min-h-[220px]">
+                    <div>
+                        <!-- Speaker tag with specialty bubble -->
+                        <div class="flex justify-between items-center mb-2.5">
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full bg-red-600 shadow-[0_0_8px_rgba(239,68,68,0.8)]"></span>
+                                <span id="labelDialogueSpeaker" class="heading-font font-extrabold text-white text-base uppercase tracking-wider">Ifeoma</span>
+                            </div>
+                            <span id="labelSpeakerSubtext" class="text-[10px] bg-yellow-950 text-yellow-400 px-2.5 py-0.5 rounded border border-yellow-800 uppercase font-semibold">Study Partner</span>
+                        </div>
+
+                        <!-- Dialogue script content -->
+                        <p id="labelDialogueText" class="text-stone-200 text-sm md:text-[15px] leading-relaxed">
+                            "Ah! Look who decided to finally show up. Michael! If we fail this mock WAEC chemistry test, I will never let you hear the end of it. Let's study!"
+                        </p>
+                    </div>
+
+                    <!-- Player dynamic branch options -->
+                    <div class="grid grid-cols-1 gap-2.5" id="containerBranchOptions">
+                        <!-- Dynamic generated buttons with choice indices -->
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Middle Column: Map Nav, Quest Board & Inventory -->
+            <div class="lg:col-span-1 flex flex-col gap-4">
+                
+                <!-- MAP ROUTER -->
+                <div class="glass-panel rounded-2xl p-4">
+                    <h3 class="heading-font text-xs font-bold text-white uppercase tracking-wider mb-3 pb-2 border-b border-red-950 flex items-center gap-2">
+                        <i class="fa-solid fa-map text-red-500"></i> Explore Campus Areas
+                    </h3>
+                    <div class="grid grid-cols-2 gap-1.5" id="containerMapNav">
+                        <!-- Location nav buttons -->
+                    </div>
+                </div>
+
+                <!-- QUEST LOG -->
+                <div class="glass-panel rounded-2xl p-4 flex-grow flex flex-col justify-between">
+                    <div>
+                        <h3 class="heading-font text-xs font-bold text-white uppercase tracking-wider mb-3 pb-2 border-b border-red-950 flex items-center gap-2">
+                            <i class="fa-solid fa-list-check text-yellow-500"></i> Active Quest Log
+                        </h3>
+                        <div class="space-y-2.5" id="containerQuestItems">
+                            <!-- Dynamically generated active mission indicators -->
+                        </div>
+                    </div>
+
+                    <!-- BACKPACK INVENTORY -->
+                    <div class="mt-4 pt-4 border-t border-red-950">
+                        <h4 class="text-[11px] font-bold text-stone-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                            <i class="fa-solid fa-suitcase text-purple-400"></i> Michael's / Ifeoma's Backpack
+                        </h4>
+                        <div class="grid grid-cols-4 gap-2 text-center" id="containerBackpack">
+                            <!-- Standard inventory items inside school -->
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Column: School Relationships & Interactive NPCs -->
+            <div class="lg:col-span-1 flex flex-col gap-4">
+                
+                <!-- NPC RELATIONSHIP METERS -->
+                <div class="glass-panel rounded-2xl p-4 flex flex-col h-full justify-between">
+                    <div>
+                        <h3 class="heading-font text-xs font-bold text-white uppercase tracking-wider mb-3.5 pb-2 border-b border-red-950 flex items-center gap-2">
+                            <i class="fa-solid fa-heart-crack text-pink-500 animate-pulse"></i> Relationship & Rivalry
+                        </h3>
+                        
+                        <div class="space-y-4" id="containerRelationships">
+                            <!-- Relationship status items -->
+                        </div>
+                    </div>
+
+                    <!-- Quick mini-game hubs -->
+                    <div class="mt-4 pt-4 border-t border-red-950">
+                        <h4 class="text-[11px] font-bold text-stone-400 uppercase tracking-widest mb-2.5 flex items-center gap-1">
+                            <i class="fa-solid fa-gamepad text-green-500"></i> Mini-Game Training Hub
+                        </h4>
+                        <div class="space-y-2">
+                            <button onclick="triggerMiniGame('football')" class="w-full text-left bg-[#1a0812] border border-red-950 hover:bg-[#2e1022] p-2 rounded-xl text-xs flex justify-between items-center transition">
+                                <span class="text-stone-300 font-semibold">⚽ Football Shootout</span>
+                                <span class="text-[10px] bg-green-950 text-green-400 px-1.5 py-0.2 rounded font-mono">Speed +</span>
+                            </button>
+                            <button onclick="triggerMiniGame('exam')" class="w-full text-left bg-[#1a0812] border border-red-950 hover:bg-[#2e1022] p-2 rounded-xl text-xs flex justify-between items-center transition">
+                                <span class="text-stone-300 font-semibold">📝 WAEC Mock Quiz</span>
+                                <span class="text-[10px] bg-cyan-950 text-cyan-400 px-1.5 py-0.2 rounded font-mono">Intellect +</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ================= EXTRAS: INTERACTIVE BATTLE vs ISI OWU ================= -->
+        <div id="bossBattleScreen" class="w-full max-w-4xl glass-panel rounded-3xl p-6 hidden flex-col justify-between min-h-[500px] border-2 border-red-700/50">
+            <!-- Header -->
+            <div class="flex justify-between items-center pb-3 border-b border-red-950">
+                <span class="text-xs font-extrabold text-red-500 uppercase tracking-widest flex items-center gap-1.5 animate-pulse">
+                    <span class="w-2.5 h-2.5 rounded-full bg-red-600"></span> BOSS SHOWDOWN: ISI OWU (WAEC GUARDIAN FORM)
+                </span>
+                <span id="bossBattleSubtext" class="text-xs text-yellow-500 font-semibold">CHAPTER 8: FINAL TRIALS</span>
+            </div>
+
+            <!-- Health systems -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-4">
+                <!-- Boss health -->
+                <div class="bg-red-950/20 border border-red-900/40 rounded-xl p-3">
+                    <div class="flex justify-between items-center text-xs mb-1.5">
+                        <span class="font-bold text-red-400 uppercase tracking-wider">ISI OWU WAEC SHIELD</span>
+                        <span id="bossHPText" class="font-bold text-white">100 / 100 HP</span>
+                    </div>
+                    <div class="w-full bg-stone-900 h-3 rounded-full overflow-hidden">
+                        <div id="bossHPBar" class="bg-gradient-to-r from-red-600 to-orange-500 h-full w-full transition-all duration-300"></div>
+                    </div>
+                </div>
+
+                <!-- Player health -->
+                <div class="bg-purple-950/20 border border-purple-900/40 rounded-xl p-3">
+                    <div class="flex justify-between items-center text-xs mb-1.5">
+                        <span class="font-bold text-purple-400 uppercase tracking-wider" id="bossBattlePlayerLabel">MICHAEL'S AURA FOCUS</span>
+                        <span id="playerHPText" class="font-bold text-white">100 / 100 Focus</span>
+                    </div>
+                    <div class="w-full bg-stone-900 h-3 rounded-full overflow-hidden">
+                        <div id="playerHPBar" class="bg-gradient-to-r from-purple-600 to-indigo-500 h-full w-full transition-all duration-300"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Battle Arena Visual Frame -->
+            <div class="relative h-64 rounded-2xl bg-gradient-to-b from-[#24050f] to-[#0c0309] border border-red-950 overflow-hidden flex justify-between items-center px-10">
+                <!-- Mathematical formulae sliding backdrop -->
+                <div class="absolute inset-0 opacity-15 select-none text-[10px] font-mono text-red-500 leading-relaxed pointer-events-none p-4">
+                    $$\int_{0}^{\infty} \text{Failure} \cdot dt = \text{Detention}$$<br>
+                    $$\sum \text{Aura} \neq \text{Uniform}$$<br>
+                    $$\text{WAEC MOCK EXAMS} - \text{MICHAEL} + \text{IFEOMA}$$
+                </div>
+
+                <!-- Hero Side -->
+                <div class="flex flex-col items-center gap-2.5 z-10">
+                    <div id="bossBattleHeroEmoji" class="w-20 h-20 rounded-full bg-purple-950/70 border-2 border-purple-500 flex items-center justify-center text-5xl shadow-[0_0_20px_rgba(139,92,246,0.5)]">
+                        😎
+                    </div>
+                    <span id="bossBattleHeroName" class="text-xs bg-purple-600 text-white px-2.5 py-0.5 rounded-full font-extrabold uppercase tracking-wide">Michael</span>
+                </div>
+
+                <!-- Center Clash Visual dynamic icon -->
+                <div id="bossClashIndicator" class="text-4xl animate-bounce font-bold text-red-500 z-10">
+                    ⚡
+                </div>
+
+                <!-- Boss Side -->
+                <div class="flex flex-col items-center gap-2.5 z-10">
+                    <div class="w-24 h-24 rounded-full bg-red-950/70 border-2 border-red-500 flex items-center justify-center text-5xl shadow-[0_0_30px_rgba(239,68,68,0.6)] animate-pulse">
+                        😈
+                    </div>
+                    <span class="text-xs bg-red-600 text-white px-2.5 py-0.5 rounded-full font-extrabold uppercase tracking-wide">Isi Owu</span>
+                </div>
+            </div>
+
+            <!-- Action dialogue logger -->
+            <div class="bg-[#12050b] border border-red-950 rounded-2xl p-4 my-4 min-h-[80px] flex items-center">
+                <p id="bossBattleLog" class="text-stone-300 text-xs md:text-sm leading-relaxed">
+                    The exam hall temperature spikes. Isi Owu hovers! "Where is your neat stocking, Ifeoma?! Michael, remove that black hoodie immediately!" Formulate your exam attack strategy.
+                </p>
+            </div>
+
+            <!-- Action control buttons -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3" id="bossBattleActionsContainer">
+                <!-- Populated dynamically based on chosen character traits -->
+            </div>
+        </div>
+
+
+        <!-- ================= LOCAL MINI GAME: FOOTBALL MATCH ================= -->
+        <div id="miniGameFootball" class="w-full max-w-xl glass-panel rounded-3xl p-6 hidden">
+            <div class="flex justify-between items-center pb-3 border-b border-red-950 mb-4">
+                <span class="text-xs font-extrabold text-green-400 uppercase tracking-widest"><i class="fa-solid fa-futbol"></i> David's Penalty Shootout</span>
+                <button onclick="exitMiniGame()" class="text-stone-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <p class="text-xs text-stone-300 mb-4">Take the kick! Select one of the targets in the football goalposts. David's defense matches your reflexes.</p>
+
+            <div class="relative w-full h-44 bg-emerald-950 border-4 border-white rounded-t-xl overflow-hidden flex flex-col justify-end">
+                <!-- Grass Floor -->
+                <div class="w-full h-10 bg-emerald-800 border-t border-white/40"></div>
+                <!-- David -->
+                <div id="davidGoalkeeper" class="absolute w-10 h-20 bg-yellow-600 rounded-lg bottom-4 left-1/2 -translate-x-1/2 flex flex-col items-center justify-center text-2xl font-bold text-white transition-all duration-300">
+                    🥅
+                </div>
+
+                <!-- Targets -->
+                <div class="absolute top-4 left-6 w-8 h-8 rounded-full border border-yellow-500 bg-yellow-500/20 flex items-center justify-center cursor-pointer font-extrabold text-[10px]" onclick="kickShootout('top-left')">🎯</div>
+                <div class="absolute top-4 right-6 w-8 h-8 rounded-full border border-yellow-500 bg-yellow-500/20 flex items-center justify-center cursor-pointer font-extrabold text-[10px]" onclick="kickShootout('top-right')">🎯</div>
+                <div class="absolute bottom-12 left-10 w-8 h-8 rounded-full border border-yellow-500 bg-yellow-500/20 flex items-center justify-center cursor-pointer font-extrabold text-[10px]" onclick="kickShootout('bottom-left')">🎯</div>
+                <div class="absolute bottom-12 right-10 w-8 h-8 rounded-full border border-yellow-500 bg-yellow-500/20 flex items-center justify-center cursor-pointer font-extrabold text-[10px]" onclick="kickShootout('bottom-right')">🎯</div>
+            </div>
+
+            <div class="flex justify-between items-center mt-4">
+                <span class="text-xs text-stone-300">Attempt: <b class="text-yellow-400" id="shootoutAttemptsText">0 / 5</b></span>
+                <span id="shootoutFeedbackText" class="text-xs font-bold text-emerald-400">Aim for the corner spaces!</span>
+            </div>
+        </div>
+
+
+        <!-- ================= EXTRAS: EPILOGUE ARCHIVE ENDINGS ================= -->
+        <div id="endingScreen" class="w-full max-w-2xl glass-panel rounded-3xl p-8 md:p-12 text-center shadow-2xl relative overflow-hidden flex flex-col items-center hidden">
+            <span class="text-6xl mb-4" id="endingBadge">👑</span>
+            <h2 id="endingTitle" class="text-3xl md:text-5xl font-extrabold heading-font text-white uppercase tracking-tight mb-3">
+                Top Student Legend
+            </h2>
+            <p id="endingDescription" class="text-stone-300 mb-8 text-sm md:text-base leading-relaxed">
+                You triumphed over the rigorous exams of Melting Point College, and proved to Isi Owu that your styling, school aura, and academic excellence are unbeatable!
+            </p>
+            <button onclick="restartRpg()" class="bg-gradient-to-r from-red-600 to-yellow-500 hover:from-red-500 hover:to-yellow-400 text-black font-extrabold tracking-widest py-4 px-10 rounded-xl shadow-lg transition duration-200">
+                CHOOSE ANOTHER PORTRAIT / REPLAY
+            </button>
+        </div>
+
+    </main>
+
+    <!-- FOOTER WITH NIGERIAN HIGH SCHOOL VIBES -->
+    <footer class="bg-[#0b0308] border-t border-[#290a10] py-4 text-center text-xs text-stone-500">
+        <p>🇳🇬 MELTING POINT ACADEMY CHRONICLES v2.0 • Propose to study hard, wear clean socks, and rule the hallways • Developed for Michael & Ifeoma</p>
+    </footer>
+
+    <!-- DYNAMIC CORE SCRIPT ENGINE -->
+    <script>
+        // Game state variables
+        let selectedCharacterKey = null; // ifeoma, michael, amara, trevor
+        let stats = {
+            aura: 100,
+            intellect: 75,
+            confidence: 80,
+            energy: 100,
+            speed: 70
+        };
+
+        let activeQuests = [
+            { id: 'waec', title: 'Prepare for mock WAEC chemistry', complete: false },
+            { id: 'stockings', title: 'Fix Ifeoma\'s high stocking mystery', complete: false },
+            { id: 'contraband', title: 'Avoid getting caught with phone by Isi Owu', complete: false }
+        ];
+
+        let inventory = [
+            { id: 'jollof', name: '🍛 Smokey Jollof', type: 'food', value: 40, count: 1 },
+            { id: 'cheat', name: '📝 Chemistry Notes', type: 'item', value: 15, count: 1 }
+        ];
+
+        let npcRelations = {
+            ifeoma: { level: 50, tag: "Rival Studious Partner" },
+            michael: { level: 60, tag: "Hoodie Idol" },
+            amara: { level: 30, tag: "Silent Observer" },
+            trevor: { level: 45, tag: "Chaos Instigator" },
+            david: { level: 40, tag: "Football Captain" }
+        };
+
+        let currentLocationKey = 'gate';
+        let currentTimePeriod = 'morning'; // morning, noon, sunset
+        let scoreShootout = 0;
+        let attemptsShootout = 0;
+
+        // Custom Expression SVGs for active portrait window
+        const characterSVGs = {
+            ifeoma: {
+                neutral: `<svg viewBox="0 0 100 100" class="w-32 h-36 drop-shadow-[0_0_15px_rgba(234,179,8,0.4)]"><circle cx="50" cy="50" r="40" fill="#a16207"/><circle cx="50" cy="40" r="30" fill="#312e81" opacity="0.1"/><circle cx="38" cy="42" r="3.5" fill="#fef08a"/><circle cx="62" cy="42" r="3.5" fill="#fef08a"/><path d="M42 58 Q50 64 58 58" stroke="#fef08a" stroke-width="3" fill="none"/><path d="M30 25 C35 15, 65 15, 70 25" stroke="#9d171d" stroke-width="4" fill="none"/></svg>`,
+                happy: `<svg viewBox="0 0 100 100" class="w-32 h-36 drop-shadow-[0_0_15px_rgba(234,179,8,0.6)]"><circle cx="50" cy="50" r="40" fill="#a16207"/><circle cx="35" cy="42" r="4" fill="#000"/><circle cx="65" cy="42" r="4" fill="#000"/><path d="M38 55 Q50 70 62 55" fill="#9d171d" stroke="#fef08a" stroke-width="2"/><circle cx="38" cy="42" r="2" fill="#fff"/><circle cx="65" cy="42" r="2" fill="#fff"/></svg>`,
+                angry: `<svg viewBox="0 0 100 100" class="w-32 h-36 drop-shadow-[0_0_15px_rgba(239,68,68,0.6)]"><circle cx="50" cy="50" r="40" fill="#78350f"/><path d="M30 35 L45 42" stroke="#fff" stroke-width="3"/><path d="M70 35 L55 42" stroke="#fff" stroke-width="3"/><circle cx="38" cy="46" r="3" fill="#000"/><circle cx="62" cy="46" r="3" fill="#000"/><path d="M42 62 Q50 54 58 62" stroke="#f00" stroke-width="3.5" fill="none"/></svg>`
+            },
+            michael: {
+                neutral: `<svg viewBox="0 0 100 100" class="w-32 h-36 drop-shadow-[0_0_15px_rgba(139,92,246,0.4)]"><circle cx="50" cy="50" r="40" fill="#b45309"/><path d="M25 40 L75 40 L65 85 L35 85 Z" fill="#18181b"/><circle cx="38" cy="42" r="3" fill="#000"/><circle cx="62" cy="42" r="3" fill="#000"/><path d="M30 25 C35 12, 65 12, 70 25 Z" fill="#18181b"/><rect x="30" y="38" width="40" height="8" rx="2" fill="#000"/></svg>`,
+                happy: `<svg viewBox="0 0 100 100" class="w-32 h-36 drop-shadow-[0_0_15px_rgba(139,92,246,0.6)]"><circle cx="50" cy="50" r="40" fill="#b45309"/><path d="M25 40 L75 40 L65 85 L35 85 Z" fill="#18181b"/><rect x="28" y="38" width="44" height="8" rx="2" fill="#2e1065" stroke="#a78bfa"/><path d="M42 58 Q50 66 58 58" stroke="#fff" stroke-width="2" fill="none"/></svg>`,
+                angry: `<svg viewBox="0 0 100 100" class="w-32 h-36 drop-shadow-[0_0_15px_rgba(239,68,68,0.6)]"><circle cx="50" cy="50" r="40" fill="#92400e"/><path d="M25 40 L75 40 L65 85 L35 85 Z" fill="#18181b"/><rect x="30" y="40" width="40" height="10" rx="2" fill="#000"/><path d="M42 62 Q50 50 58 62" stroke="#ef4444" stroke-width="3" fill="none"/></svg>`
+            },
+            amara: {
+                neutral: `<svg viewBox="0 0 100 100" class="w-32 h-36 drop-shadow-[0_0_15px_rgba(6,182,212,0.4)]"><circle cx="50" cy="50" r="40" fill="#f59e0b"/><path d="M25 30 Q50 10 75 30 Z" fill="#1e293b"/><circle cx="38" cy="44" r="3" fill="#22d3ee"/><circle cx="62" cy="44" r="3" fill="#22d3ee"/><path d="M44 58 L56 58" stroke="#22d3ee" stroke-width="2"/></svg>`
+            },
+            trevor: {
+                neutral: `<svg viewBox="0 0 100 100" class="w-32 h-36 drop-shadow-[0_0_15px_rgba(239,68,68,0.4)]"><circle cx="50" cy="50" r="40" fill="#d97706"/><circle cx="36" cy="42" r="4" fill="#000"/><circle cx="64" cy="42" r="4" fill="#000"/><path d="M40 58 Q50 72 60 58" fill="#ef4444"/><rect x="30" y="15" width="40" height="15" fill="#450a0a" rx="4"/></svg>`
+            }
+        };
+
+        // Complete story flow dynamic script
+        const stories = {
+            gate: {
+                getDialogue: (char) => {
+                    if (char === 'ifeoma') {
+                        return "Ah, you're playing as Ifeoma! The morning heat outside Melting Point is chaotic. The guard frowns at you: 'Your scarlet skirt is looking slightly too stylish, mistress.' Trevor waves from the view center: 'Ifeoma! Your study rival Michael is wearing that ununiformed black hoodie again!'";
+                    } else if (char === 'michael') {
+                        return "The legendary black hoodie is on. Your back reads 'ROLLING LOUD'. Trevor pulls your shoulder: 'My guy! You really are the only person defying Isi Owu's uniform code. Ifeoma is already inside the classroom prepping for the Chemistry test.'";
+                    } else {
+                        return "You look around the chaotic gate. Students are dropping off, puff-puff sellers are yelling, and school buses are arriving. The aura here is buzzing with high potential.";
+                    }
+                },
+                getBranches: (char) => {
+                    if (char === 'ifeoma') {
+                        return [
+                            { text: "Adjust your stockings high & snap back at the guard (+Confidence)", act: "adjust_stockings" },
+                            { text: "Find Michael and challenge him to a pre-exam study match (+Intellect)", act: "challenge_michael" }
+                        ];
+                    } else {
+                        return [
+                            { text: "Do a sleek 'Aura Walk' through the gates (+Aura)", act: "gate_aura" },
+                            { text: "Greet Ifeoma with cool, calm energy (+Relationship)", act: "gate_greet_ifeoma" }
+                        ];
+                    }
+                }
+            },
+            classroom: {
+                getDialogue: (char) => {
+                    if (char === 'ifeoma') {
+                        return "Inside the Class block, the fans spin lazily. Michael is leaning against a desk looking way too relaxed. 'So,' he says, 'is our top student ready to get outperformed?' The test papers are ready.";
+                    } else if (char === 'michael') {
+                        return "Ifeoma has her Chemistry formulas written out meticulously. 'Michael,' she calls out with a competitive smirk. 'If you fail this test, I'm telling everyone your 'Rolling Loud' aura is purely fraudulent!'";
+                    } else {
+                        return "The classroom chatter fades as mock test sheets are distributed. The pressure is rising.";
+                    }
+                },
+                getBranches: (char) => {
+                    return [
+                        { text: "Initiate absolute study grind with dynamic formulas (+25 Intellect)", act: "classroom_study" },
+                        { text: "Offer half your Puff Puff snack to build loyalty (+Relationship)", act: "classroom_puffpuff" }
+                    ];
+                }
+            },
+            library: {
+                getDialogue: (char) => {
+                    return "The library is dead silent. Amara is seated in the shadow of a grand bookshelf. She slides a secret document titled 'Isi Owu\'s Exam Archive' toward you. 'This contains his past questions,' she whispers.";
+                },
+                getBranches: (char) => {
+                    return [
+                        { text: "Accept the secret document (+30 Intellect)", act: "library_cheat" },
+                        { text: "Ask Amara what her wrist tattoo means (+Relationship)", act: "library_tattoo" }
+                    ];
+                }
+            },
+            cafeteria: {
+                getDialogue: (char) => {
+                    return "Hot steam rises from the food counters. The puff puff is fresh, and the Jollof Rice smells heavenly. Trevor is trying to convince the vendor to give him double beef on credit.";
+                },
+                getBranches: (char) => {
+                    return [
+                        { text: "Buy hot Smokey Jollof Rice to replenish Energy (+40 Energy)", act: "cafeteria_jollof" },
+                        { text: "Stir up a massive cafeteria prank with Trevor (+Confidence, -Aura)", act: "cafeteria_prank" }
+                    ];
+                }
+            },
+            staffroom: {
+                getDialogue: (char) => {
+                    return "The Red Pen Zone. Teachers are writing red ink marks on report sheets. Suddenly, Isi Owu's eyes catch yours! 'Hey! No students allowed here! Present your purpose now!'";
+                },
+                getBranches: (char) => {
+                    return [
+                        { text: "Use your high Confidence to smooth talk out of detention (+Confidence)", act: "staffroom_talk" },
+                        { text: "Sprint away before he gets your badge number (+Speed)", act: "staffroom_sprint" }
+                    ];
+                }
+            }
+        };
+
+        // Game Setup Init
+        function selectCharacter(charKey) {
+            playSound('level');
+            selectedCharacterKey = charKey;
+            
+            // Set stats depending on chosen character
+            if (charKey === 'ifeoma') {
+                stats = { aura: 105, intellect: 95, confidence: 85, energy: 100, speed: 70 };
+                document.getElementById('headerCharacterName').innerText = "IFEOMA (Honor Queen)";
+                document.getElementById('headerAvatarEmoji').innerText = "👧🏾";
+            } else if (charKey === 'michael') {
+                stats = { aura: 125, intellect: 70, confidence: 90, energy: 100, speed: 85 };
+                document.getElementById('headerCharacterName').innerText = "MICHAEL (Hoodie King)";
+                document.getElementById('headerAvatarEmoji').innerText = "😎";
+            } else if (charKey === 'amara') {
+                stats = { aura: 90, intellect: 90, confidence: 75, energy: 100, speed: 80 };
+                document.getElementById('headerCharacterName').innerText = "AMARA (Lore Seeker)";
+                document.getElementById('headerAvatarEmoji').innerText = "🔮";
+            } else if (charKey === 'trev') {
+                stats = { aura: 95, intellect: 65, confidence: 100, energy: 100, speed: 75 };
+                document.getElementById('headerCharacterName').innerText = "TREVOR (Chaos Catalyst)";
+                document.getElementById('headerAvatarEmoji').innerText = "🤪";
+            }
+
+            // Transition Screens
+            document.getElementById('characterSelectScreen').classList.add('hidden');
+            document.getElementById('gameplayScreen').classList.remove('hidden');
+            
+            updateStatsBar();
+            loadLocation('gate');
+        }
+
+        function updateStatsBar() {
+            document.getElementById('valAura').innerText = stats.aura;
+            document.getElementById('valIntel').innerText = stats.intellect;
+            document.getElementById('valConf').innerText = stats.confidence;
+            document.getElementById('valEnergy').innerText = stats.energy;
+
+            // Manage dynamic Aura rank badge
+            const banner = document.getElementById('labelAtmosphereRank');
+            if (stats.aura >= 130) {
+                banner.innerText = "AURA: GOD-TIER 🌟";
+                banner.className = "text-[9px] bg-yellow-950 text-yellow-400 px-2 py-0.5 rounded font-extrabold glow-gold";
+            } else if (stats.aura >= 100) {
+                banner.innerText = "AURA: S-CLASS 🔥";
+                banner.className = "text-[9px] bg-purple-950 text-purple-400 px-2 py-0.5 rounded font-extrabold glow-purple";
+            } else {
+                banner.innerText = "AURA: SCHOOL SLACKER";
+                banner.className = "text-[9px] bg-stone-900 text-stone-400 px-2 py-0.5 rounded font-semibold";
+            }
+        }
+
+        // Render Active Location Scene
+        function loadLocation(locKey) {
+            currentLocationKey = locKey;
+            const scene = stories[locKey];
+
+            // Setup cover backgrounds dynamically
+            const cover = document.getElementById('animeRenderWindow');
+            if (locKey === 'gate') {
+                cover.style.backgroundImage = "linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.85)), url('https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=800&auto=format&fit=crop')";
+                document.getElementById('labelCurrentLocation').innerHTML = `<i class="fa-solid fa-school"></i> School Gate`;
+            } else if (locKey === 'classroom') {
+                cover.style.backgroundImage = "linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.85)), url('https://images.unsplash.com/photo-1580582932707-520aed937b7b?q=80&w=800&auto=format&fit=crop')";
+                document.getElementById('labelCurrentLocation').innerHTML = `<i class="fa-solid fa-graduation-cap"></i> Classroom Block`;
+            } else if (locKey === 'library') {
+                cover.style.backgroundImage = "linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.85)), url('https://images.unsplash.com/photo-1521587760476-6c12a4b040da?q=80&w=800&auto=format&fit=crop')";
+                document.getElementById('labelCurrentLocation').innerHTML = `<i class="fa-solid fa-book"></i> Quiet Library`;
+            } else if (locKey === 'cafeteria') {
+                cover.style.backgroundImage = "linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.85)), url('https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=800&auto=format&fit=crop')";
+                document.getElementById('labelCurrentLocation').innerHTML = `<i class="fa-solid fa-bowl-food"></i> Cafeteria`;
+            } else if (locKey === 'staffroom') {
+                cover.style.backgroundImage = "linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.85)), url('https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=800&auto=format&fit=crop')";
+                document.getElementById('labelCurrentLocation').innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Staff Room`;
+            }
+
+            // Load reactive anime portrait in window
+            const faceContainer = document.getElementById('animeAvatarFrame');
+            if (selectedCharacterKey === 'ifeoma') {
+                faceContainer.innerHTML = characterSVGs.ifeoma.neutral;
+            } else {
+                faceContainer.innerHTML = characterSVGs.michael.neutral;
+            }
+
+            // Set dialog texts
+            document.getElementById('labelDialogueText').innerText = scene.getDialogue(selectedCharacterKey);
+            
+            // Set speaker name
+            if (selectedCharacterKey === 'ifeoma') {
+                document.getElementById('labelDialogueSpeaker').innerText = "Michael";
+                document.getElementById('labelSpeakerSubtext').innerText = "Hoodie Rebel";
+            } else {
+                document.getElementById('labelDialogueSpeaker').innerText = "Ifeoma";
+                document.getElementById('labelSpeakerSubtext').innerText = "Study Rival";
+            }
+
+            // Build dynamic branch option buttons
+            const branchOptionsContainer = document.getElementById('containerBranchOptions');
+            branchOptionsContainer.innerHTML = '';
+
+            const branches = scene.getBranches(selectedCharacterKey);
+            branches.forEach(b => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left bg-[#1d0d17] hover:bg-red-950/40 text-stone-200 border border-red-900/40 p-3 rounded-xl text-xs md:text-sm transition transform hover:translate-x-1";
+                btn.innerText = b.text;
+                btn.onclick = () => handleDialogueChoice(b.act);
+                branchOptionsContainer.appendChild(btn);
+            });
+
+            renderMapNav();
+            renderQuestLog();
+            renderBackpack();
+            renderRelationships();
+        }
+
+        // Render Sidebar Map Navigation
+        const mapKeys = ['gate', 'classroom', 'library', 'cafeteria', 'staffroom'];
+        function renderMapNav() {
+            const container = document.getElementById('containerMapNav');
+            container.innerHTML = '';
+            mapKeys.forEach(m => {
+                const active = currentLocationKey === m;
+                const btn = document.createElement('button');
+                btn.className = `p-2 rounded-lg text-[10px] md:text-xs font-bold text-center transition capitalize ${
+                    active ? 'bg-red-700 text-white shadow-md' : 'bg-[#180811] text-stone-300 border border-red-950 hover:bg-[#250d1a]'
+                }`;
+                btn.innerText = m;
+                btn.onclick = () => {
+                    playSound('click');
+                    loadLocation(m);
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        // Handle branches & story path decisions
+        function handleDialogueChoice(actionKey) {
+            playSound('click');
+            let txt = "";
+
+            // Dynamic portrait animation trigger
+            const faceContainer = document.getElementById('animeAvatarFrame');
+
+            if (actionKey === 'adjust_stockings') {
+                stats.confidence += 20;
+                stats.aura += 15;
+                if (selectedCharacterKey === 'ifeoma') faceContainer.innerHTML = characterSVGs.ifeoma.happy;
+                txt = "You adjust your scarlet socks high with absolute confidence. The guard stammers and looks away. 'Oya go inside!' he grunts. (+20 Confidence, +15 Aura)";
+                npcRelations.ifeoma.level += 15;
+                activeQuests.find(q => q.id === 'stockings').complete = true;
+            } 
+            else if (actionKey === 'challenge_michael') {
+                stats.intellect += 20;
+                npcRelations.michael.level += 25;
+                txt = "You slam your textbook on the desk before Michael. He smiles, 'You're on, Ifeoma!' You prep for WAEC dynamically. (+20 Intellect, +25 Michael Relationship)";
+            } 
+            else if (actionKey === 'gate_aura') {
+                stats.aura += 25;
+                stats.confidence += 15;
+                if (selectedCharacterKey === 'michael') faceContainer.innerHTML = characterSVGs.michael.happy;
+                txt = "You perform the ultimate Aura Walk. Other students whisper, 'That hoodie guy got infinite swagger!' (+25 Aura)";
+            } 
+            else if (actionKey === 'gate_greet_ifeoma') {
+                npcRelations.ifeoma.level += 30;
+                stats.confidence += 10;
+                txt = "You slide down your hood partially, offering her a calm smile. Ifeoma blushes but smiles back, 'Hurry up, test starts soon!' (+30 Ifeoma Relation)";
+            } 
+            else if (actionKey === 'classroom_study') {
+                stats.intellect += 30;
+                stats.energy -= 15;
+                txt = "You completely master the dynamic organic structures. Your brain cells are optimized for final WAEC battle! (+30 Intellect, -15 Energy)";
+                activeQuests.find(q => q.id === 'waec').complete = true;
+            } 
+            else if (actionKey === 'classroom_puffpuff') {
+                npcRelations.ifeoma.level += 25;
+                npcRelations.michael.level += 25;
+                stats.energy -= 10;
+                txt = "You share your delicious puff puff snack. 'Wow, you're sweet!' she says with a bright smile. (+25 Relationship)";
+            } 
+            else if (actionKey === 'library_cheat') {
+                stats.intellect += 30;
+                npcRelations.amara.level += 20;
+                inventory.push({ id: 'notes', name: '📂 Past Questions', type: 'item', value: 25, count: 1 });
+                txt = "Amara hands you the key solutions. You hiddenly slide it in your backpack. 'Use it wisely,' she whispers. (+30 Intellect, Item added)";
+            } 
+            else if (actionKey === 'library_tattoo') {
+                npcRelations.amara.level += 35;
+                txt = "She traces her wrist tattoo and says, 'It's a symbol of infinite focus.' Her dark eyes sparkle. (+35 Amara Relation)";
+            } 
+            else if (actionKey === 'cafeteria_jollof') {
+                stats.energy = Math.min(100, stats.energy + 45);
+                txt = "The smokey Jollof Rice tastes legendary. Full stomach, full stamina! (+45 Energy)";
+            } 
+            else if (actionKey === 'cafeteria_prank') {
+                stats.confidence += 25;
+                stats.aura -= 15;
+                txt = "You and Trevor drop a fake spider in the principal\'s chair. The students laugh hysterically, but you lose respect from teachers. (+25 Confidence, -15 Aura)";
+            } 
+            else if (actionKey === 'staffroom_talk') {
+                if (stats.confidence >= 80) {
+                    stats.aura += 20;
+                    txt = "With supreme charisma, you make up an assignment story. The teacher nods: 'Alright, return to your seat.' (+20 Aura)";
+                } else {
+                    stats.aura -= 20;
+                    txt = "You stutter! Isi Owu confiscates your badge. 'Detention after hours!' (-20 Aura)";
+                }
+            } 
+            else if (actionKey === 'staffroom_sprint') {
+                if (stats.speed >= 80) {
+                    txt = "You turn around and sprint down the corridor like an anime champion! Escaped without traces!";
+                } else {
+                    stats.energy -= 20;
+                    txt = "You tripped on the doorway and Isi Owu caught you. You did 30 frog jumps. (-20 Energy)";
+                }
+            }
+
+            // Check if final boss criteria are met
+            if (stats.intellect >= 105 && stats.aura >= 115) {
+                triggerBossShowdownMessage();
+                return;
+            }
+
+            // Update dialogues
+            document.getElementById('labelDialogueText').innerText = txt;
+            updateStatsBar();
+            renderQuestLog();
+            renderBackpack();
+            renderRelationships();
+        }
+
+        // Boss Battle initialization
+        function triggerBossShowdownMessage() {
+            playSound('damage');
+            const box = document.getElementById('labelDialogueText');
+            box.innerHTML = `<span class="text-red-500 font-extrabold text-lg">"MICHAEL! IFEOMA! PRINCIPAL'S OFFICE, NOW!"</span> <br><br> The corridor walls shake! Isi Owu has entered his final WAEC Guardian Form, with floating calculators and red reports! prepare yourself.`;
+            
+            const actionContainer = document.getElementById('containerBranchOptions');
+            actionContainer.innerHTML = `
+                <button onclick="startBossShowdown()" class="w-full bg-gradient-to-r from-red-700 to-purple-800 text-white font-extrabold p-4 rounded-xl text-xs uppercase tracking-widest animate-pulse">
+                    ⚠️ ENTER THE WAEC FINAL BATTLE VS ISI OWU
+                </button>
+            `;
+        }
+
+        // Render Active Quests List
+        function renderQuestLog() {
+            const container = document.getElementById('containerQuestItems');
+            container.innerHTML = '';
+            activeQuests.forEach(q => {
+                const item = document.createElement('div');
+                item.className = "flex items-center gap-2 text-xs text-stone-300";
+                item.innerHTML = `
+                    <i class="fa-solid ${q.complete ? 'fa-square-check text-green-500' : 'fa-square text-stone-600'}"></i>
+                    <span class="${q.complete ? 'line-through text-stone-500' : ''}">${q.title}</span>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        // Render Inventory backpack slots
+        function renderBackpack() {
+            const container = document.getElementById('containerBackpack');
+            container.innerHTML = '';
+            inventory.forEach((item, index) => {
+                const slot = document.createElement('button');
+                slot.className = "bg-[#1d0d17] border border-red-950 p-1.5 rounded-lg text-[10px] text-white hover:bg-red-900/30 transition";
+                slot.innerText = item.name;
+                slot.onclick = () => useInventoryItem(index);
+                container.appendChild(slot);
+            });
+            // Fill empty slots
+            for (let i = inventory.length; i < 4; i++) {
+                const empty = document.createElement('div');
+                empty.className = "bg-[#0f050b] border border-red-950/20 rounded-lg h-9 flex items-center justify-center text-[10px] text-stone-700";
+                empty.innerText = "Empty";
+                container.appendChild(empty);
+            }
+        }
+
+        function useInventoryItem(index) {
+            playSound('item');
+            const item = inventory[index];
+            if (item.id === 'jollof') {
+                stats.energy = Math.min(100, stats.energy + item.value);
+                document.getElementById('labelDialogueText').innerText = "You ate the smokey Jollof Rice from your backpack! Your stamina is fully restored. (+40 Energy)";
+            } else if (item.id === 'cheat') {
+                stats.intellect += item.value;
+                document.getElementById('labelDialogueText').innerText = "You read over your quick Chemistry notes! Your intelligence levels spiked! (+15 Intellect)";
+            }
+            inventory.splice(index, 1);
+            updateStatsBar();
+            renderBackpack();
+        }
+
+        // Render Relationship status meters
+        function renderRelationships() {
+            const container = document.getElementById('containerRelationships');
+            container.innerHTML = '';
+            Object.keys(npcRelations).forEach(key => {
+                const npc = npcRelations[key];
+                const block = document.createElement('div');
+                block.className = "space-y-1";
+                block.innerHTML = `
+                    <div class="flex justify-between text-[11px] font-semibold">
+                        <span class="capitalize text-stone-300">${key} <span class="text-[9px] text-stone-500 font-normal">(${npc.tag})</span></span>
+                        <span class="text-yellow-400">${npc.level}%</span>
+                    </div>
+                    <div class="w-full bg-stone-900 h-1.5 rounded-full overflow-hidden">
+                        <div class="bg-gradient-to-r from-red-700 to-yellow-500 h-full" style="width: ${npc.level}%"></div>
+                    </div>
+                `;
+                container.appendChild(block);
+            });
+        }
+
+
+        // ================= MINI GAME REFLEX CHANNELS =================
+
+        let activeMiniGame = null;
+
+        function triggerMiniGame(gameKey) {
+            playSound('click');
+            activeMiniGame = gameKey;
+            document.getElementById('gameplayScreen').classList.add('hidden');
+
+            if (gameKey === 'football') {
+                document.getElementById('miniGameFootball').classList.remove('hidden');
+                attemptsShootout = 0;
+                scoreShootout = 0;
+                document.getElementById('shootoutAttemptsText').innerText = "0 / 5";
+                document.getElementById('shootoutFeedbackText').innerText = "Shoot the corners to evade David!";
+            } else if (gameKey === 'exam') {
+                // Instantly open library for high study benefits
+                document.getElementById('gameplayScreen').classList.remove('hidden');
+                loadLocation('library');
+                document.getElementById('labelDialogueText').innerText = "You sat in the silent Study Cabinets of the library, reading chemistry exam records. (+20 Intellect)";
+                stats.intellect += 20;
+                updateStatsBar();
+            }
+        }
+
+        function exitMiniGame() {
+            playSound('click');
+            document.getElementById('miniGameFootball').classList.add('hidden');
+            document.getElementById('gameplayScreen').classList.remove('hidden');
+            activeMiniGame = null;
+        }
+
+        function kickShootout(target) {
+            if (attemptsShootout >= 5) return;
+            attemptsShootout++;
+
+            const gk = document.getElementById('davidGoalkeeper');
+            const moves = ['top-left', 'top-right', 'bottom-left', 'bottom-right'];
+            const gkMove = moves[Math.floor(Math.random() * moves.length)];
+
+            // Goalkeeper react positioning animation
+            if (gkMove === 'top-left') gk.style.transform = 'translate(-60px, -20px)';
+            else if (gkMove === 'top-right') gk.style.transform = 'translate(60px, -20px)';
+            else if (gkMove === 'bottom-left') gk.style.transform = 'translate(-70px, 10px)';
+            else if (gkMove === 'bottom-right') gk.style.transform = 'translate(70px, 10px)';
+
+            setTimeout(() => {
+                if (target === gkMove) {
+                    playSound('damage');
+                    document.getElementById('shootoutFeedbackText').innerHTML = "<span class='text-red-500'>SAVE! David read your kicking angle perfectly!</span>";
+                } else {
+                    playSound('item');
+                    scoreShootout++;
+                    document.getElementById('shootoutFeedbackText').innerHTML = "<span class='text-green-400'>GOOOOAL! Absolute precision kick!</span>";
+                }
+
+                document.getElementById('shootoutAttemptsText').innerText = `${attemptsShootout} / 5 attempts`;
+
+                // Reset goalie
+                setTimeout(() => {
+                    gk.style.transform = 'translate(-50%, 0)';
+                }, 1000);
+
+                if (attemptsShootout === 5) {
+                    setTimeout(() => {
+                        if (scoreShootout >= 3) {
+                            stats.aura += 30;
+                            stats.speed += 15;
+                            document.getElementById('shootoutFeedbackText').innerText = `Shootout match won! Score: ${scoreShootout}/5. (+30 Aura, +15 Speed)`;
+                        } else {
+                            stats.aura -= 10;
+                            document.getElementById('shootoutFeedbackText').innerText = `Match lost. Score: ${scoreShootout}/5. David wins. (-10 Aura)`;
+                        }
+                        updateStatsBar();
+                        setTimeout(exitMiniGame, 2000);
+                    }, 1200);
+                }
+
+            }, 400);
+        }
+
+
+        // ================= FINAL SHOWDOWN vs ISI OWU =================
+
+        let bossHP = 100;
+        let playerFocus = 100;
+
+        function startBossShowdown() {
+            playSound('level');
+            document.getElementById('gameplayScreen').classList.add('hidden');
+            document.getElementById('bossBattleScreen').classList.remove('hidden');
+
+            bossHP = 100;
+            playerFocus = 100;
+
+            // Set battle hero identifiers
+            if (selectedCharacterKey === 'ifeoma') {
+                document.getElementById('bossBattleHeroEmoji').innerText = "👧🏾";
+                document.getElementById('bossBattleHeroName').innerText = "Ifeoma";
+                document.getElementById('bossBattlePlayerLabel').innerText = "IFEOMA'S ACADEMIC STAMINA";
+            } else {
+                document.getElementById('bossBattleHeroEmoji').innerText = "😎";
+                document.getElementById('bossBattleHeroName').innerText = "Michael";
+                document.getElementById('bossBattlePlayerLabel').innerText = "MICHAEL'S REBEL AURA";
+            }
+
+            renderBossActions();
+            updateBossMeters();
+        }
+
+        function updateBossMeters() {
+            document.getElementById('bossHPText').innerText = `${bossHP} / 100 HP`;
+            document.getElementById('bossHPBar').style.width = `${bossHP}%`;
+
+            document.getElementById('playerHPText').innerText = `${playerFocus} / 100 Focus`;
+            document.getElementById('playerHPBar').style.width = `${playerFocus}%`;
+        }
+
+        function renderBossActions() {
+            const container = document.getElementById('bossBattleActionsContainer');
+            container.innerHTML = '';
+
+            let actions = [];
+            if (selectedCharacterKey === 'ifeoma') {
+                actions = [
+                    { name: "STOCKING SHIFT", type: "heal", desc: "Confuses teacher and restores stamina", act: "ifeoma_stock" },
+                    { name: "DYNAMIC RESPONSE", type: "attack", desc: "Crush him with perfect logic", act: "ifeoma_intel" },
+                    { name: "REPUTATION GUARD", type: "shield", desc: "Block surprise test damage", act: "ifeoma_shield" },
+                    { name: "CHEAT CODES", type: "extreme", desc: "Reveal past chemistry answers", act: "ifeoma_cheat" }
+                ];
+            } else {
+                actions = [
+                    { name: "HOODIE STYLED WALK", type: "heal", desc: "Stun hallways and heal focus", act: "michael_hood" },
+                    { name: "ROLLING LOUD BURST", type: "attack", desc: "Ultimate energy wave attack", act: "michael_loud" },
+                    { name: "COSMIC COUNTER", type: "shield", desc: "Deflect detention strikes", act: "michael_counter" },
+                    { name: "TREVOR'S PRANK", type: "extreme", desc: "Create high classroom chaos", act: "michael_prank" }
+                ];
+            }
+
+            actions.forEach(a => {
+                const btn = document.createElement('button');
+                btn.className = "bg-[#1f0d19] hover:bg-red-950/40 border border-red-900/40 text-stone-100 p-2.5 rounded-xl font-bold text-xs uppercase flex flex-col items-center justify-center text-center transition active:scale-95";
+                btn.innerHTML = `
+                    <span>${a.name}</span>
+                    <span class="text-[9px] font-normal text-stone-400 mt-1">${a.desc}</span>
+                `;
+                btn.onclick = () => executeShowdownAction(a.act);
+                container.appendChild(btn);
+            });
+        }
+
+        function executeShowdownAction(action) {
+            playSound('attack');
+            let damage = 0;
+            let heal = 0;
+            let msg = "";
+
+            if (action === 'ifeoma_stock') {
+                heal = 30;
+                msg = "Ifeoma folds her stockings perfectly straight. Isi Owu stops his homework attack, completely baffled by her high-school swagger! (+30 Focus)";
+            } else if (action === 'ifeoma_intel' || action === 'michael_loud') {
+                damage = 25 + Math.floor(Math.random() * 10);
+                msg = `A massive clash of theories! Your ultimate counter-reasoning strikes down Isi Owu's WAEC barrier by ${damage} points!`;
+            } else if (action === 'ifeoma_shield' || action === 'michael_counter') {
+                heal = 15;
+                damage = 10;
+                msg = "You predict his question and raise a textbook shield! Absorbed incoming damage and counter-struck for 10 damage!";
+            } else if (action === 'ifeoma_cheat') {
+                damage = 40;
+                msg = "You reveal the complete past examination cheats Amara gave you. Isi Owu\'s test papers dissolve! Dealing 40 damage!";
+            } else if (action === 'michael_hood') {
+                heal = 35;
+                msg = "Michael adjusts his 'ROLLING LOUD' hood with cool caramel skin focus. 'This is how we roll, Sir.' (+35 Focus)";
+            } else if (action === 'michael_prank') {
+                damage = 40;
+                msg = "Trevor sets off a fireworks show in the chemistry cabinets. Isi Owu panics, dropping his grade files! Dealing 40 damage!";
+            }
+
+            bossHP = Math.max(0, bossHP - damage);
+            playerFocus = Math.min(100, playerFocus + heal);
+            updateBossMeters();
+
+            document.getElementById('bossBattleLog').innerText = msg;
+
+            // Trigger visual crash sign
+            const indicator = document.getElementById('bossClashIndicator');
+            indicator.innerText = "💥";
+            indicator.className = "text-5xl animate-ping font-extrabold text-red-500 z-10";
+            setTimeout(() => {
+                indicator.innerText = "⚡";
+                indicator.className = "text-4xl animate-bounce font-bold text-red-500 z-10";
+            }, 600);
+
+            if (bossHP <= 0) {
+                setTimeout(showEndingVictory, 1500);
+                return;
+            }
+
+            // Disable combat panel during teacher turn
+            toggleCombatButtons(false);
+
+            setTimeout(executeIsiOwuTurn, 1500);
+        }
+
+        function toggleCombatButtons(enable) {
+            const btns = document.getElementById('bossBattleActionsContainer').querySelectorAll('button');
+            btns.forEach(b => b.disabled = !enable);
+        }
+
+        function executeIsiOwuTurn() {
+            playSound('damage');
+            const mainScr = document.getElementById('mainContainer');
+            mainScr.classList.add('shake-active');
+            setTimeout(() => mainScr.classList.remove('shake-active'), 500);
+
+            const counterAttacks = [
+                { name: "CONFISCATION EYE BEAM", val: 15, txt: "Isi Owu shoots a red ray! 'GIVE ME THAT CONTRABAND SNARE!' You lose 15 Focus!" },
+                { name: "HOMEWORK TSUNAMI", val: 20, txt: "A storm of red marked scripts strikes your shield! You lose 20 Focus!" },
+                { name: "DETENTION GAVEL", val: 25, txt: "A massive floating grade-book slams the floor. You lose 25 Focus!" }
+            ];
+
+            const attack = counterAttacks[Math.floor(Math.random() * counterAttacks.length)];
+            playerFocus = Math.max(0, playerFocus - attack.val);
+            updateBossMeters();
+
+            document.getElementById('bossBattleLog').innerHTML = `<span class="text-red-500 font-bold">${attack.name}</span>: ${attack.txt}`;
+
+            if (playerFocus <= 0) {
+                setTimeout(showEndingDefeat, 1500);
+                return;
+            }
+
+            toggleCombatButtons(true);
+        }
+
+        function showEndingVictory() {
+            document.getElementById('bossBattleScreen').classList.add('hidden');
+            document.getElementById('endingScreen').classList.remove('hidden');
+
+            if (selectedCharacterKey === 'ifeoma') {
+                document.getElementById('endingBadge').innerText = "👑🎒";
+                document.getElementById('endingTitle').innerText = "Academic Legend: Ifeoma's Victory";
+                document.getElementById('endingDescription').innerHTML = `
+                    <b>Incredible achievement!</b> You triumphed as Ifeoma! You cleared the WAEC trials with 100% scores. <br><br>
+                    Isi Owu smiles warmly and adjusts his glasses: <i>"Ifeoma, you truly are the academic pride of Melting Point College."</i> Michael walks over, slaps your hand, and congratulates his study rival. You have become an absolute legend!
+                `;
+            } else {
+                document.getElementById('endingBadge').innerText = "😎🔥";
+                document.getElementById('endingTitle').innerText = "Aura King: Michael's Legend";
+                document.getElementById('endingDescription').innerHTML = `
+                    <b>Pure Main Character Energy!</b> You defeated Isi Owu as Michael! Your ROLLING LOUD hoodie shines with infinite purple aura. <br><br>
+                    The school gate erupts in cheers. Ifeoma adjustments her high socks and smiles: <i>"Okay Rebel, you got swag."</i> Trevor declares you the absolute hallway idol of Melting Point!
+                `;
+            }
+        }
+
+        function showEndingDefeat() {
+            document.getElementById('bossBattleScreen').classList.add('hidden');
+            document.getElementById('endingScreen').classList.remove('hidden');
+
+            document.getElementById('endingBadge').innerText = "🧹💀";
+            document.getElementById('endingTitle').innerText = "Assembly Detention Ending";
+            document.getElementById('endingDescription').innerHTML = `
+                Isi Owu towers tall over your sheet. <i>"I TOLD YOU TO READ!"</i> <br><br>
+                You ran completely out of focus, your contraband materials got locked up, and you've been assigned 3 weeks of morning sweeping duties. Re-align your stats and try again!
+            `;
+        }
+
+        function restartRpg() {
+            playSound('click');
+            document.getElementById('endingScreen').classList.add('hidden');
+            document.getElementById('characterSelectScreen').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
