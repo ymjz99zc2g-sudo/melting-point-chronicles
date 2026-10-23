@@ -34,13 +34,8 @@
         --glow: rgba(103, 232, 249, 0.25);
       }
 
-      * {
-        box-sizing: border-box;
-      }
-
-      html {
-        scroll-behavior: smooth;
-      }
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
 
       body {
         margin: 0;
@@ -228,6 +223,43 @@
         color: #f5d0fe;
         font-weight: 700;
         font-size: 1.02rem;
+      }
+
+      .hero-meta {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 18px;
+      }
+
+      .loading-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border-radius: 999px;
+        padding: 0.55rem 0.8rem;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid var(--border);
+        color: var(--text-dim);
+        font-size: 0.72rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      .loading-pill .dot {
+        width: 8px;
+        height: 8px;
+        display: inline-block;
+        border-radius: 999px;
+        background: var(--green);
+        box-shadow: 0 0 12px rgba(52, 211, 153, 0.8);
+        animation: pulse 1.5s ease-in-out infinite;
+      }
+
+      @keyframes pulse {
+        0%, 100% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.2); opacity: 0.7; }
       }
 
       .hero-btns {
@@ -701,13 +733,16 @@
               MELTING POINT<br />
               <span class="accent">CHRONICLES</span>
             </h1>
+            <div class="hero-meta">
+              <span class="loading-pill"><span class="dot"></span> Opening school portal</span>
+            </div>
             <p class="hero-sub">
               A story-driven anime school RPG set in a Nigerian secondary school in Port Harcourt.
               Choose your character, build your aura, survive exams, and uncover the secrets of Melting Point College.
             </p>
             <p class="hero-pidgin">“I be Aura King — nobody fit stop me for this school!” 🔥</p>
             <div class="hero-btns">
-              <a class="btn-primary" href="#play">🎮 Play Now</a>
+              <a class="btn-primary" href="#play">🎮 Enter App</a>
               <a class="btn-secondary" href="#creator">👤 Choose Character</a>
             </div>
           </div>
@@ -978,6 +1013,17 @@
         mainNav.classList.toggle('open');
         menuToggle.textContent = mainNav.classList.contains('open') ? '✕' : '☰';
       });
+
+      const continueToApp = () => {
+        const target = document.getElementById('play');
+        if (!target) return;
+        setTimeout(() => {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          window.location.hash = '#play';
+        }, 1200);
+      };
+
+      window.addEventListener('load', continueToApp);
     </script>
   </body>
 </html>
