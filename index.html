@@ -389,7 +389,15 @@
       aura: 35,
       level: 1,
       weather: 'Sunny',
-      story: 'Welcome to the school grounds. Explore and make your story.'
+      story: 'Welcome to the school grounds. Explore and make your story.',
+      quests: [
+        { id: 'gate', text: 'Walk the gate route', done: false },
+        { id: 'student', text: 'Talk to a student', done: false },
+        { id: 'aura', text: 'Train your aura', done: false },
+        { id: 'explore', text: 'Explore the campus', done: false }
+      ],
+      npcList: [],
+      nearestNpc: null
     };
 
     const avatarData = [
@@ -563,38 +571,129 @@
 
     function renderQuests() {
       const questList = document.getElementById('questList');
-      const quests = [
-        'Walk the gate route',
-        'Talk to a student',
-        'Train your aura',
-        'Explore the campus'
-      ];
-      questList.innerHTML = quests.map((q, idx) => {
-        const done = idx === 0 ? 'done' : '';
-        return `<li class="${done ? 'text-emerald-300' : 'text-slate-200'}">${q}</li>`;
+      questList.innerHTML = appState.quests.map((quest) => {
+        const doneClass = quest.done ? 'text-emerald-300 line-through' : 'text-slate-200';
+        return `<li class="${doneClass}">${quest.text}</li>`;
       }).join('');
+    }
+
+    function markQuestDone(id) {
+      const quest = appState.quests.find(item => item.id === id);
+      if (quest) quest.done = true;
+      renderQuests();
     }
 
     function setupAudio() {
       const audio = new Audio('https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3');
       audio.loop = true;
       audio.volume = 0.25;
+
       document.getElementById('muteButton').addEventListener('click', () => {
         audio.muted = !audio.muted;
         document.getElementById('muteButton').textContent = audio.muted ? 'Unmute' : 'Mute';
       });
+
       document.getElementById('trainAuraButton').addEventListener('click', () => {
         appState.aura = Math.min(100, appState.aura + 12);
+        markQuestDone('aura');
         updateHud();
+        appState.story = 'Your aura is rising. The campus feels alive.';
+        document.getElementById('storyFeed').textContent = appState.story;
         toast('Aura forged. You feel stronger.', 'success');
       });
-      try {
-        audio.play().catch(() => {});
-      } catch (e) {}
+
+      try { audio.play().catch(() => {}); } catch (e) {}
     }
 
     let scene, camera, renderer, player, keys = {};
     let moveX = 0, moveZ = 0;
+
+    function createNPC(name, color, x, z) {
+      const group = new THREE.Group();
+      const body = new THREE.Mesh(
+        new THREE.BoxGeometry(1.5, 2, 1.2),
+        new THREE.MeshStandardMaterial({ color })
+      );
+      body.position.y = 1.8;
+      group.add(body);
+
+      const head = new THREE.Mesh(
+        new THREE.BoxGeometry(1.1, 1.1, 1.1),
+        new THREE.MeshStandardMaterial({ color: 0xf2d0b7 })
+      );
+      head.position.y = 3.3;
+      group.add(head);
+
+      const aura = new THREE.Mesh(
+        new THREE.RingGeometry(1.3, 1.8, 24),
+        new THREE.MeshBasicMaterial({ color: 0x22d3ee, side: THREE.DoubleSide, transparent: true, opacity: 0.3 })
+      );
+      aura.rotation.x = -Math.PI / 2;
+      aura.position.y = 0.12;
+      group.add(aura);
+
+      group.position.set(x, 0, z);
+      scene.add(group);
+
+      return { name, mesh: group, color, done: false };
+    }
+
+    function spawnNPCs() {
+      const crowd = [
+        { name: 'Security Musa', color: 0x1d4ed8, x: -20, z: 34 },
+        { name: 'Ifeoma', color: 0xf97316, x: -10, z: -12 },
+        { name: 'Trevor', color: 0x22c55e, x: 18, z: 12 },
+        { name: 'Adaeze', color: 0xe879f9, x: 32, z: -10 }
+      ];
+
+      appState.npcList = crowd.map((npc) => createNPC(npc.name, npc.color, npc.x, npc.z));
+    }
+
+    function updateNearestNPC() {
+      if (!player || !appState.npcList.length) {
+        appState.nearestNpc = null;
+        return;
+      }
+
+      let nearest = null;
+      let nearestDistance = Infinity;
+
+      appState.npcList.forEach((npc) => {
+        const dx = player.position.x - npc.mesh.position.x;
+        const dz = player.position.z - npc.mesh.position.z;
+        const d = Math.hypot(dx, dz);
+
+        if (d < nearestDistance) {
+          nearestDistance = d;
+          nearest = npc;
+        }
+      });
+
+      appState.nearestNpc = nearestDistance < 4 ? nearest : null;
+      const actionButton = document.getElementById('actionButton');
+      if (actionButton) {
+        actionButton.textContent = appState.nearestNpc ? 'Talk' : 'Act';
+      }
+    }
+
+    function handleInteraction() {
+      const npc = appState.nearestNpc;
+
+      if (!npc) {
+        toast('No student nearby. Walk closer and try again.', 'info');
+        return;
+      }
+
+      const message = `You spoke with ${npc.name}. The school is getting more suspicious.`;
+      appState.story = message;
+      document.getElementById('storyFeed').textContent = message;
+      markQuestDone('student');
+      toast(message, 'success');
+
+      if (npc.name === 'Security Musa') {
+        markQuestDone('gate');
+      }
+    }
 
     function initThreeGame() {
       if (appState.gameStarted) return;
@@ -682,6 +781,8 @@
       auraRing.position.y = 0.15;
       player.add(auraRing);
 
+      spawnNPCs();
+
       window.addEventListener('keydown', (event) => {
         keys[event.key.toLowerCase()] = true;
       });
@@ -697,6 +798,8 @@
       pad.style.display = 'block';
       jumpButton.style.display = 'block';
       actionButton.style.display = 'block';
+
+      actionButton.addEventListener('click', handleInteraction);
 
       let drag = false;
       let centerX = 0;
@@ -740,10 +843,6 @@
         player.position.y = 1.2 + 3.8;
       });
 
-      actionButton.addEventListener('click', () => {
-        toast('School interaction ready. Next stage adds NPC dialog and quests.', 'info');
-      });
-
       window.addEventListener('resize', () => {
         if (!renderer || !camera) return;
         camera.aspect = window.innerWidth / window.innerHeight;
@@ -785,6 +884,15 @@
       camera.position.y = 9.5;
       camera.lookAt(player.position.x, 1.2, player.position.z);
 
+      if (player.position.z < -20) {
+        markQuestDone('gate');
+      }
+
+      if (player.position.x > 20 || player.position.x < -20 || player.position.z > 20 || player.position.z < -20) {
+        markQuestDone('explore');
+      }
+
+      updateNearestNPC();
       renderer.render(scene, camera);
     }
 
