@@ -397,7 +397,23 @@
         { id: 'explore', text: 'Explore the campus', done: false }
       ],
       npcList: [],
-      nearestNpc: null
+      nearestNpc: null,
+      stats: {
+        academics: 1,
+        sports: 1,
+        tech: 1,
+        leadership: 1,
+        reputation: 0,
+        money: 100,
+        health: 100,
+        stamina: 100
+      },
+      inventory: [
+        { id: 'book', name: 'School Book', icon: '📘', quantity: 1 },
+        { id: 'aura-core', name: 'Aura Core', icon: '💠', quantity: 0 },
+        { id: 'food', name: 'Snack', icon: '🍕', quantity: 2 }
+      ],
+      saveVersion: 1
     };
 
     const avatarData = [
@@ -583,6 +599,43 @@
       renderQuests();
     }
 
+    function saveGameState() {
+      const payload = {
+        version: appState.saveVersion,
+        selectedCharacter: appState.selectedCharacter,
+        tutorialDone: appState.tutorialDone,
+        creatorUnlocked: appState.creatorUnlocked,
+        aura: appState.aura,
+        level: appState.level,
+        weather: appState.weather,
+        stats: appState.stats,
+        inventory: appState.inventory,
+        quests: appState.quests
+      };
+      localStorage.setItem('melting-point-chronicles-save', JSON.stringify(payload));
+    }
+
+    function loadGameState() {
+      const raw = localStorage.getItem('melting-point-chronicles-save');
+      if (!raw) return false;
+      try {
+        const save = JSON.parse(raw);
+        if (!save || save.version !== appState.saveVersion) return false;
+        appState.selectedCharacter = save.selectedCharacter || appState.selectedCharacter;
+        appState.tutorialDone = !!save.tutorialDone;
+        appState.creatorUnlocked = !!save.creatorUnlocked;
+        appState.aura = save.aura || appState.aura;
+        appState.level = save.level || appState.level;
+        appState.weather = save.weather || appState.weather;
+        appState.stats = save.stats || appState.stats;
+        appState.inventory = save.inventory || appState.inventory;
+        appState.quests = save.quests || appState.quests;
+        return true;
+      } catch (e) {
+        return false;
+      }
+    }
+
     function setupAudio() {
       const audio = new Audio('https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3');
       audio.loop = true;
@@ -595,8 +648,10 @@
 
       document.getElementById('trainAuraButton').addEventListener('click', () => {
         appState.aura = Math.min(100, appState.aura + 12);
+        appState.stats.reputation += 2;
         markQuestDone('aura');
         updateHud();
+        saveGameState();
         appState.story = 'Your aura is rising. The campus feels alive.';
         document.getElementById('storyFeed').textContent = appState.story;
         toast('Aura forged. You feel stronger.', 'success');
@@ -687,7 +742,9 @@
       const message = `You spoke with ${npc.name}. The school is getting more suspicious.`;
       appState.story = message;
       document.getElementById('storyFeed').textContent = message;
+      appState.stats.reputation += 1;
       markQuestDone('student');
+      saveGameState();
       toast(message, 'success');
 
       if (npc.name === 'Security Musa') {
@@ -909,10 +966,17 @@
       renderQuests();
       document.getElementById('storyFeed').textContent = `You are playing as ${selected.name}. The school is alive.`;
       initThreeGame();
+      saveGameState();
       toast(`Starting ${selected.name}'s route.`, 'success');
     }
 
     function boot() {
+      const existing = loadGameState();
+      if (existing) {
+        appState.tutorialDone = true;
+        appState.creatorUnlocked = true;
+      }
+
       bindPlannedButtons();
       bindMenuFlow();
       renderAvatarCards();
