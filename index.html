@@ -31,19 +31,24 @@
         --scarlet: #ff4d6d;
         --green: #34d399;
         --shadow: rgba(0, 0, 0, 0.38);
-        --glow: rgba(103, 232, 249, 0.32);
+        --glow: rgba(103, 232, 249, 0.25);
       }
 
-      * { box-sizing: border-box; }
-      html { scroll-behavior: smooth; }
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
 
       body {
         margin: 0;
         min-height: 100vh;
         background:
-          radial-gradient(circle at top, rgba(168, 85, 247, 0.14), transparent 18%),
-          radial-gradient(circle at 80% 20%, rgba(34, 211, 238, 0.12), transparent 18%),
-          linear-gradient(180deg, #070b14 0%, #090f1b 100%);
+          radial-gradient(circle at top, rgba(168, 85, 247, 0.18), transparent 18%),
+          radial-gradient(circle at 80% 20%, rgba(34, 211, 238, 0.14), transparent 18%),
+          linear-gradient(180deg, #070b14 0%, #0a0e18 100%);
         color: var(--text);
         font-family: "Exo 2", sans-serif;
         overflow-x: hidden;
@@ -56,14 +61,14 @@
         width: 38rem;
         height: 38rem;
         border-radius: 50%;
-        filter: blur(110px);
-        opacity: 0.14;
+        filter: blur(120px);
+        opacity: 0.15;
         z-index: 0;
         pointer-events: none;
       }
 
       body::before {
-        top: -13rem;
+        top: -12rem;
         left: -9rem;
         background: #7c3aed;
       }
@@ -72,10 +77,6 @@
         right: -10rem;
         bottom: -14rem;
         background: #22d3ee;
-      }
-
-      body::selection {
-        background: rgba(103, 232, 249, 0.28);
       }
 
       a {
@@ -99,7 +100,7 @@
         position: sticky;
         top: 0;
         z-index: 50;
-        background: rgba(9, 12, 19, 0.74);
+        background: rgba(9, 12, 19, 0.7);
         backdrop-filter: blur(18px);
         -webkit-backdrop-filter: blur(18px);
         border-bottom: 1px solid var(--border);
@@ -112,7 +113,7 @@
         align-items: center;
         justify-content: space-between;
         gap: 24px;
-        min-height: 74px;
+        min-height: 72px;
       }
 
       .nav-logo {
@@ -135,7 +136,7 @@
         border-radius: 10px;
         background: linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(255, 123, 84, 0.24));
         border: 1px solid rgba(251, 191, 36, 0.28);
-        box-shadow: 0 0 20px rgba(251, 191, 36, 0.2);
+        box-shadow: 0 0 18px rgba(251, 191, 36, 0.2);
       }
 
       .nav-links {
@@ -382,7 +383,7 @@
         background: linear-gradient(180deg, rgba(255,255,255,0.025), rgba(255,255,255,0.01));
         border: 1px solid var(--border);
         border-radius: 22px;
-        box-shadow: 0 16px 28px rgba(0, 0, 0, 0.20);
+        box-shadow: 0 16px 28px rgba(0, 0, 0, 0.2);
         transition: transform 0.2s ease, border-color 0.2s ease;
       }
 
