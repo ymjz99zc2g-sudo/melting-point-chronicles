@@ -368,6 +368,65 @@
         text-transform: uppercase;
       }
 
+      .quick-links-section {
+        padding-top: 28px;
+      }
+
+      .quick-links {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(220px, 1fr));
+        gap: 16px;
+        margin-top: 22px;
+      }
+
+      .quick-link-card {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 18px 18px;
+        border-radius: 22px;
+        background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015));
+        border: 1px solid var(--border);
+        box-shadow: 0 18px 30px rgba(0, 0, 0, 0.12);
+        transition: transform 0.2s ease, border-color 0.2s ease;
+      }
+
+      .quick-link-card:hover {
+        transform: translateY(-2px);
+        border-color: rgba(103, 232, 249, 0.28);
+      }
+
+      .quick-link-kicker {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 6px;
+        color: var(--accent);
+        font-size: 0.68rem;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        font-weight: 700;
+      }
+
+      .quick-link-title {
+        font-weight: 800;
+        font-size: 1.04rem;
+      }
+
+      .quick-link-arrow {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 42px;
+        height: 42px;
+        border-radius: 14px;
+        background: linear-gradient(135deg, rgba(103, 232, 249, 0.14), rgba(192, 132, 252, 0.14));
+        border: 1px solid rgba(103, 232, 249, 0.18);
+        color: var(--text);
+        font-size: 1.2rem;
+      }
+
       .section {
         padding: 86px 0 24px;
       }
@@ -655,7 +714,8 @@
           grid-template-columns: repeat(2, minmax(220px, 1fr));
         }
 
-        .gallery-grid {
+        .gallery-grid,
+        .quick-links {
           grid-template-columns: repeat(2, minmax(200px, 1fr));
         }
       }
@@ -689,12 +749,14 @@
           justify-content: center;
         }
 
-        .stats-strip {
+        .stats-strip,
+        .quick-links {
           grid-template-columns: repeat(2, minmax(110px, 1fr));
         }
 
         .features-grid,
-        .gallery-grid {
+        .gallery-grid,
+        .quick-links {
           grid-template-columns: 1fr;
         }
 
@@ -717,6 +779,7 @@
         <nav class="nav-links" id="mainNav">
           <a class="nav-link active" href="#top">🏠 Home</a>
           <a class="nav-link" href="#features">🎮 Features</a>
+          <a class="nav-link" href="#quick-links">🔗 Sites</a>
           <a class="nav-link" href="#chapters">📖 Story</a>
           <a class="nav-link" href="#gallery">🖼️ Gallery</a>
           <a class="nav-link" href="#creator">🎬 About</a>
@@ -781,6 +844,32 @@
         <div class="stat-item">
           <div class="stat-num">7+</div>
           <div class="stat-label">Mini Games</div>
+        </div>
+      </section>
+
+      <section class="section quick-links-section" id="quick-links">
+        <div class="section-head">
+          <p class="section-kicker">// Quick Access</p>
+          <h2 class="section-title">Live <span class="accent2">Sites</span></h2>
+          <p class="section-sub">Open the active builds instantly and keep track of your deployments.</p>
+        </div>
+
+        <div class="quick-links">
+          <a class="quick-link-card" href="https://melting-point-chronicles.netlify.app" target="_blank" rel="noreferrer">
+            <div>
+              <div class="quick-link-kicker">Primary</div>
+              <div class="quick-link-title">Melting Point Chronicles</div>
+            </div>
+            <span class="quick-link-arrow">↗</span>
+          </a>
+
+          <a class="quick-link-card" href="https://thriving-jalebi-3c1253.netlify.app" target="_blank" rel="noreferrer">
+            <div>
+              <div class="quick-link-kicker">Backup</div>
+              <div class="quick-link-title">Thriving Jalebi</div>
+            </div>
+            <span class="quick-link-arrow">↗</span>
+          </a>
         </div>
       </section>
 
