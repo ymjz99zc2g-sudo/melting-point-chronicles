@@ -316,7 +316,7 @@
   </div>
 
   <div id="avatarSelectionScreen" class="screen hidden" style="padding:32px; overflow:auto;">
-    <div class="relative z-10 w-full max-w-6xl">
+    <div class="relative z-10 w-full max-w-7xl">
       <div class="flex items-center justify-between mb-7">
         <div>
           <div class="text-[10px] uppercase tracking-[0.3em] text-cyan-300 font-black mb-2">Choose</div>
@@ -325,7 +325,51 @@
         <button id="backToMenuBtn" class="panel-btn px-4 py-2 rounded-full text-white text-xs uppercase tracking-[0.2em] font-bold">Back</button>
       </div>
 
-      <div id="avatarGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5"></div>
+      <div class="grid grid-cols-1 xl:grid-cols-[1.5fr_0.9fr] gap-6 items-start">
+        <div id="avatarGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+
+        <aside id="characterDetailsCard" class="glass rounded-[28px] p-5 sticky top-4">
+          <div class="relative mb-4">
+            <img id="detailsPortrait" src="" alt="Selected character" class="w-full h-56 object-cover rounded-[22px] border border-white/10" />
+            <div class="absolute inset-0 rounded-[22px] bg-gradient-to-t from-slate-950/80 via-transparent to-transparent"></div>
+          </div>
+
+          <div class="flex items-center justify-between gap-3 mb-3">
+            <div>
+              <div id="detailsRole" class="text-[10px] uppercase tracking-[0.2em] text-cyan-300 font-black">Role</div>
+              <h3 id="detailsName" class="text-2xl font-black text-white">Michael</h3>
+            </div>
+            <div class="rounded-full border border-cyan-400/30 bg-cyan-500/10 px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-cyan-200 font-black">Level 1</div>
+          </div>
+
+          <p id="detailsQuote" class="text-sm text-slate-300 leading-relaxed mb-4">No one gets to be quiet forever.</p>
+
+          <div class="grid grid-cols-2 gap-3 mb-4">
+            <div class="rounded-2xl border border-white/10 bg-white/[0.04] p-3">
+              <div class="text-[10px] uppercase tracking-[0.18em] text-violet-300 font-black">Passive</div>
+              <div id="detailsPassive" class="text-sm font-semibold text-white mt-1">Aura Flow</div>
+            </div>
+            <div class="rounded-2xl border border-white/10 bg-white/[0.04] p-3">
+              <div class="text-[10px] uppercase tracking-[0.18em] text-amber-300 font-black">Style</div>
+              <div id="detailsStyle" class="text-sm font-semibold text-white mt-1">Calm</div>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <div class="text-[10px] uppercase tracking-[0.18em] text-pink-300 font-black mb-2">Personal Quest</div>
+            <p id="detailsQuest" class="text-sm text-slate-200 leading-relaxed"></p>
+          </div>
+
+          <div class="mb-5">
+            <div class="text-[10px] uppercase tracking-[0.18em] text-emerald-300 font-black mb-2">Abilities</div>
+            <div id="detailsStats" class="space-y-3"></div>
+          </div>
+
+          <button id="confirmCharacterBtn" class="primary-btn w-full py-3 rounded-2xl text-white font-black uppercase tracking-[0.22em] text-xs">
+            Start Story
+          </button>
+        </aside>
+      </div>
     </div>
   </div>
 
@@ -417,14 +461,134 @@
     };
 
     const avatarData = [
-      { id: 'michael', name: 'Michael', role: 'Main Protagonist', aura: 'Main Character Syndrome', img: 'https://i.postimg.cc/Prh2fKyL/47C569FA-49D9-4495-9FB0-225527702F92.png' },
-      { id: 'ifeoma', name: 'Ifeoma', role: 'Sports Queen', aura: 'Speed + Focus', img: 'https://i.postimg.cc/ZKZVYjHB/6411284C-EA81-4EB8-BB99-3535C7E8A4BB.png' },
-      { id: 'amara', name: 'Amara', role: 'Mystery Keeper', aura: 'Hidden Lore Sense', img: 'https://i.postimg.cc/PNsxhPYL/DC972A45-EC19-441B-B451-B7A18578242C.png' },
-      { id: 'trevor', name: 'Trevor', role: 'Tech Genius', aura: 'Hack + Logic', img: 'https://i.postimg.cc/ZKZVYjHC/06BA4789-560E-41F6-A9AD-92DF3C9CA591.png' },
-      { id: 'david', name: 'David', role: 'Football Captain', aura: 'Athletic Burst', img: 'https://i.postimg.cc/grFJdn8r/0A515472-047C-4206-9F56-54834EF6ED63.png' },
-      { id: 'mike', name: 'Mike', role: 'Mischievous Twin', aura: 'Chaotic Mobility', img: 'https://i.postimg.cc/LhKXRnLn/35D3D2CB-9CAC-45E9-AB8F-A6DC94DBBE30.png' },
-      { id: 'gabriel', name: 'Gabriel', role: 'Calm Twin', aura: 'Steady Resolve', img: 'https://i.postimg.cc/Z0tRZCpW/D56B732A-558A-49E2-81DA-E2BAD61AF235.png' },
-      { id: 'chidinma', name: 'Chidinma', role: 'Top Student', aura: 'Book Power', img: 'https://i.postimg.cc/6TJ3wynF/42F129FE-13DA-431B-BABB-9B0B2061241A.png' }
+      {
+        id: 'michael',
+        name: 'Michael',
+        role: 'Main Protagonist',
+        passive: 'Aura Flow',
+        style: 'Calm',
+        quote: 'No one gets to be quiet forever.',
+        quest: 'Protect the school rumor before it turns into a civil war between students and prefects.',
+        img: 'https://i.postimg.cc/Prh2fKyL/47C569FA-49D9-4495-9FB0-225527702F92.png',
+        statBars: [
+          { label: 'Academics', value: 72 },
+          { label: 'Sports', value: 66 },
+          { label: 'Tech', value: 58 },
+          { label: 'Leadership', value: 80 }
+        ]
+      },
+      {
+        id: 'ifeoma',
+        name: 'Ifeoma',
+        role: 'Sports Queen',
+        passive: 'Blazing Sprint',
+        style: 'Aggressive',
+        quote: 'I do not run from pressure, I outrun it.',
+        quest: 'Win the inter-house sprint and uncover who has been sabotaging the team bus.',
+        img: 'https://i.postimg.cc/ZKZVYjHB/6411284C-EA81-4EB8-BB99-3535C7E8A4BB.png',
+        statBars: [
+          { label: 'Academics', value: 62 },
+          { label: 'Sports', value: 94 },
+          { label: 'Tech', value: 48 },
+          { label: 'Leadership', value: 76 }
+        ]
+      },
+      {
+        id: 'amara',
+        name: 'Amara',
+        role: 'Mystery Keeper',
+        passive: 'Silent Reading',
+        style: 'Analytical',
+        quote: 'Truth hides in the quiet places.',
+        quest: 'Follow the hidden messages in the library and expose a stolen exam paper ring.',
+        img: 'https://i.postimg.cc/PNsxhPYL/DC972A45-EC19-441B-B451-B7A18578242C.png',
+        statBars: [
+          { label: 'Academics', value: 90 },
+          { label: 'Sports', value: 42 },
+          { label: 'Tech', value: 78 },
+          { label: 'Leadership', value: 70 }
+        ]
+      },
+      {
+        id: 'trevor',
+        name: 'Trevor',
+        role: 'Tech Genius',
+        passive: 'Quick Analysis',
+        style: 'Smart',
+        quote: 'If it can be hacked, it can be fixed.',
+        quest: 'Decrypt the mystery gate code before the principal closes the science lab.',
+        img: 'https://i.postimg.cc/ZKZVYjHC/06BA4789-560E-41F6-A9AD-92DF3C9CA591.png',
+        statBars: [
+          { label: 'Academics', value: 88 },
+          { label: 'Sports', value: 52 },
+          { label: 'Tech', value: 96 },
+          { label: 'Leadership', value: 65 }
+        ]
+      },
+      {
+        id: 'david',
+        name: 'David',
+        role: 'Football Captain',
+        passive: 'Crew Spirit',
+        style: 'Bold',
+        quote: 'The team is the real victory.',
+        quest: 'Lead the school team to the inter-state cup without losing the squad's trust.',
+        img: 'https://i.postimg.cc/grFJdn8r/0A515472-047C-4206-9F56-54834EF6ED63.png',
+        statBars: [
+          { label: 'Academics', value: 56 },
+          { label: 'Sports', value: 92 },
+          { label: 'Tech', value: 44 },
+          { label: 'Leadership', value: 83 }
+        ]
+      },
+      {
+        id: 'mike',
+        name: 'Mike',
+        role: 'Mischievous Twin',
+        passive: 'Chaos Step',
+        style: 'Playful',
+        quote: 'I always say, if the system is broken, break it beautifully.',
+        quest: 'Outsmart the hall monitors and uncover the secret midnight basketball match.',
+        img: 'https://i.postimg.cc/LhKXRnLn/35D3D2CB-9CAC-45E9-AB8F-A6DC94DBBE30.png',
+        statBars: [
+          { label: 'Academics', value: 60 },
+          { label: 'Sports', value: 82 },
+          { label: 'Tech', value: 69 },
+          { label: 'Leadership', value: 58 }
+        ]
+      },
+      {
+        id: 'gabriel',
+        name: 'Gabriel',
+        role: 'Calm Twin',
+        passive: 'Steady Resolve',
+        style: 'Patient',
+        quote: 'A calm mind is always sharper than a loud one.',
+        quest: 'Keep the class together while the school election tension grows.',
+        img: 'https://i.postimg.cc/Z0tRZCpW/D56B732A-558A-49E2-81DA-E2BAD61AF235.png',
+        statBars: [
+          { label: 'Academics', value: 78 },
+          { label: 'Sports', value: 58 },
+          { label: 'Tech', value: 60 },
+          { label: 'Leadership', value: 85 }
+        ]
+      },
+      {
+        id: 'chidinma',
+        name: 'Chidinma',
+        role: 'Top Student',
+        passive: 'Book Burst',
+        style: 'Focused',
+        quote: 'Brains are always louder than rumors.',
+        quest: 'Protect the school prize list and stop a cheating ring from ruining a final exam.',
+        img: 'https://i.postimg.cc/6TJ3wynF/42F129FE-13DA-431B-BABB-9B0B2061241A.png',
+        statBars: [
+          { label: 'Academics', value: 98 },
+          { label: 'Sports', value: 48 },
+          { label: 'Tech', value: 72 },
+          { label: 'Leadership', value: 77 }
+        ]
+      }
     ];
 
     const tones = {
@@ -470,18 +634,51 @@
       });
     }
 
+    function renderCharacterDetails() {
+      const character = avatarData.find(item => item.id === appState.selectedCharacter) || avatarData[0];
+      const detailsName = document.getElementById('detailsName');
+      const detailsRole = document.getElementById('detailsRole');
+      const detailsQuote = document.getElementById('detailsQuote');
+      const detailsPassive = document.getElementById('detailsPassive');
+      const detailsStyle = document.getElementById('detailsStyle');
+      const detailsQuest = document.getElementById('detailsQuest');
+      const detailsPortrait = document.getElementById('detailsPortrait');
+      const detailsStats = document.getElementById('detailsStats');
+
+      detailsName.textContent = character.name;
+      detailsRole.textContent = character.role;
+      detailsQuote.textContent = `“${character.quote}”`;
+      detailsPassive.textContent = character.passive;
+      detailsStyle.textContent = character.style;
+      detailsQuest.textContent = character.quest;
+      detailsPortrait.src = character.img;
+
+      detailsStats.innerHTML = character.statBars.map((stat) => `
+        <div>
+          <div class="flex items-center justify-between text-[10px] uppercase tracking-[0.18em] text-slate-300 mb-1">
+            <span>${stat.label}</span>
+            <span>${stat.value}%</span>
+          </div>
+          <div class="h-2 w-full rounded-full bg-slate-800 overflow-hidden">
+            <div class="h-full rounded-full bg-gradient-to-r from-cyan-400 via-violet-500 to-pink-500" style="width:${stat.value}%"></div>
+          </div>
+        </div>
+      `).join('');
+    }
+
     function renderAvatarCards() {
       const grid = document.getElementById('avatarGrid');
       if (!grid) return;
 
       grid.innerHTML = '';
       avatarData.forEach((char) => {
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.className = 'group text-left overflow-hidden rounded-[26px] border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] transition shadow-[0_16px_40px_rgba(0,0,0,0.25)]';
-        button.innerHTML = `
+        const card = document.createElement('button');
+        card.type = 'button';
+        const active = char.id === appState.selectedCharacter;
+        card.className = `group text-left overflow-hidden rounded-[26px] border transition shadow-[0_16px_40px_rgba(0,0,0,0.25)] ${active ? 'border-cyan-400/50 bg-cyan-500/10' : 'border-white/10 bg-white/[0.04] hover:bg-white/[0.08]'}`;
+        card.innerHTML = `
           <div style="position:relative;">
-            <img src="${char.img}" alt="${char.name}" style="width:100%; height:230px; object-fit:cover; display:block;" />
+            <img src="${char.img}" alt="${char.name}" style="width:100%; height:220px; object-fit:cover; display:block;" />
             <div style="position:absolute; inset:0; background:linear-gradient(180deg, transparent, rgba(5,10,18,0.72));"></div>
           </div>
           <div class="p-4">
@@ -489,23 +686,18 @@
               <h3 class="text-xl font-black text-white">${char.name}</h3>
               <span class="text-[10px] uppercase tracking-[0.18em] text-cyan-300 font-black">${char.role}</span>
             </div>
-            <p class="text-xs text-slate-300">${char.aura}</p>
+            <p class="text-xs text-slate-300">${char.passive}</p>
           </div>
         `;
 
-        button.addEventListener('click', () => {
+        card.addEventListener('click', () => {
           appState.selectedCharacter = char.id;
-          toast(`Selected ${char.name}.`, 'success');
-          setTimeout(() => {
-            if (appState.creatorUnlocked) {
-              startGame(char.id);
-            } else {
-              showScreen('creatorRevealScreen');
-            }
-          }, 220);
+          renderAvatarCards();
+          renderCharacterDetails();
+          toast(`${char.name} selected.`, 'success');
         });
 
-        grid.appendChild(button);
+        grid.appendChild(card);
       });
     }
 
@@ -539,7 +731,9 @@
     }
 
     function showAvatarSelection() {
+      appState.selectedCharacter = appState.selectedCharacter || 'michael';
       renderAvatarCards();
+      renderCharacterDetails();
       showScreen('avatarSelectionScreen');
     }
 
@@ -567,6 +761,11 @@
 
       document.getElementById('backToMenuBtn').addEventListener('click', () => {
         goToMainMenu();
+      });
+
+      document.getElementById('confirmCharacterBtn').addEventListener('click', () => {
+        const char = avatarData.find(item => item.id === appState.selectedCharacter) || avatarData[0];
+        startGame(char.id);
       });
     }
 
@@ -980,6 +1179,7 @@
       bindPlannedButtons();
       bindMenuFlow();
       renderAvatarCards();
+      renderCharacterDetails();
       startIntroTyping();
       setTimeout(() => {
         showScreen('mainMenuScreen');
