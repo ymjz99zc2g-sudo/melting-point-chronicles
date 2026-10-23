@@ -1,1322 +1,823 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>🔥 MELTING POINT CHRONICLES - LEVEL 10 PRO 🔥</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <style>
-        body, html { 
-            margin: 0; padding: 0; width: 100vw; height: 100vh; 
-            overflow: hidden; background-color: #0c192c; 
-            font-family: 'Courier New', Courier, monospace; 
-            user-select: none; -webkit-user-select: none; touch-action: none;
-        }
-        #game-canvas { display: block; width: 100vw; height: 100vh; position: absolute; z-index: 1; }
-        
-        #ui-overlay { position: absolute; z-index: 10; inset: 0; pointer-events: none; display: flex; flex-direction: column; justify-content: space-between; }
-        
-        .pointer-events-auto { pointer-events: auto; }
-        .text-glow { text-shadow: 0 0 10px rgba(34,211,238,1); }
-        .glass-panel { background: rgba(8, 2, 16, 0.85); backdrop-filter: blur(8px); border: 1px solid rgba(168,85,247,0.5); }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Melting Point Chronicles</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <style>
+    :root {
+      --bg-1: #090b12;
+      --bg-2: #120d17;
+      --panel: rgba(18, 22, 32, 0.82);
+      --panel-soft: rgba(255,255,255,0.06);
+      --cyan: #22d3ee;
+      --purple: #a855f7;
+      --pink: #ec4899;
+      --gold: #fbbf24;
+      --green: #34d399;
+      --red: #f87171;
+      --text: #edf2ff;
+      --muted: #adb7d1;
+    }
 
-        /* Mobile Controls */
-        #mobile-controls {
-            display: flex; justify-content: space-between; align-items: flex-end;
-            padding: 20px; padding-bottom: 40px; width: 100%; box-sizing: border-box;
-        }
+    * { box-sizing: border-box; }
 
-        #joystick-zone {
-            width: 130px; height: 130px; background: rgba(0, 0, 0, 0.5);
-            border: 2px solid rgba(34,211,238,0.5); border-radius: 50%;
-            position: relative; box-shadow: inset 0 0 20px rgba(34,211,238,0.2);
-        }
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--bg-1);
+      color: var(--text);
+      font-family: 'Outfit', sans-serif;
+      overflow: hidden;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
 
-        #joystick-knob {
-            width: 50px; height: 50px; background: #22d3ee;
-            border-radius: 50%; position: absolute; top: 40px; left: 40px;
-            box-shadow: 0 0 15px #22d3ee; transform: translate(0px, 0px);
-        }
+    body {
+      background:
+        radial-gradient(circle at top, rgba(168,85,247,0.2), transparent 26%),
+        linear-gradient(180deg, var(--bg-2), var(--bg-1));
+    }
 
-        #action-btn {
-            width: 90px; height: 90px; background: rgba(168,85,247,0.85);
-            border: 3px solid #d8b4fe; border-radius: 50%;
-            display: flex; justify-content: center; align-items: center;
-            font-weight: 900; color: white; font-size: 14px;
-            box-shadow: 0 0 20px rgba(168,85,247,0.8); transition: transform 0.1s;
-        }
-        #action-btn:active { transform: scale(0.9); background: #d8b4fe; color: black; }
+    .title-font { font-family: 'Fredoka', sans-serif; }
 
-        .typewriter::after { content: "█"; animation: blink 0.8s infinite; }
-        @keyframes blink { 0%, 100% { opacity: 0; } 50% { opacity: 1; } }
+    .screen {
+      position: absolute;
+      inset: 0;
+      z-index: 30;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
 
-        /* Minimap Canvas Container */
-        #minimap-container {
-            position: absolute;
-            top: 90px;
-            right: 16px;
-            width: 140px;
-            height: 140px;
-            border-radius: 12px;
-            border: 2px solid #a855f7;
-            background: rgba(11, 3, 20, 0.9);
-            box-shadow: 0 0 15px rgba(168, 85, 247, 0.5);
-            overflow: hidden;
-            pointer-events: auto;
-        }
-    </style>
+    .glass {
+      background: rgba(13, 17, 26, 0.78);
+      border: 1px solid rgba(255,255,255,0.08);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: 0 18px 52px rgba(0,0,0,0.45);
+    }
+
+    .panel-btn {
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.04);
+      color: white;
+      transition: 0.2s ease;
+    }
+
+    .panel-btn:hover {
+      background: rgba(255,255,255,0.08);
+      transform: translateY(-1px);
+    }
+
+    .primary-btn {
+      background: linear-gradient(135deg, var(--cyan), var(--purple));
+      border: none;
+      box-shadow: 0 0 24px rgba(34, 211, 238, 0.4);
+      transition: .18s ease;
+    }
+
+    .primary-btn:hover {
+      transform: translateY(-1px) scale(1.01);
+    }
+
+    .action-btn {
+      background: linear-gradient(135deg, var(--purple), var(--pink));
+      border: none;
+      box-shadow: 0 0 18px rgba(168,85,247,0.35);
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border-radius: 999px;
+      padding: 7px 12px;
+      font-size: 10px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      font-weight: 800;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.04);
+      color: var(--text);
+    }
+
+    #canvasContainer {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      display: none;
+    }
+
+    #gameHUD {
+      position: absolute;
+      inset: 0;
+      z-index: 15;
+      pointer-events: none;
+      display: none;
+    }
+
+    .hud-box {
+      pointer-events: auto;
+      background: rgba(10, 13, 20, 0.74);
+      border: 1px solid rgba(255,255,255,0.08);
+      backdrop-filter: blur(8px);
+    }
+
+    #questList li::before {
+      content: "•";
+      margin-right: 8px;
+      color: var(--cyan);
+    }
+
+    #touchPad {
+      position: absolute;
+      left: 16px;
+      bottom: 22px;
+      width: 138px;
+      height: 138px;
+      border-radius: 50%;
+      z-index: 25;
+      pointer-events: none;
+      display: none;
+    }
+
+    #touchPadInner {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 62px;
+      height: 62px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.15);
+      border: 2px solid rgba(255,255,255,0.2);
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
+    }
+
+    #jumpButton {
+      position: absolute;
+      right: 28px;
+      bottom: 42px;
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      z-index: 25;
+      display: none;
+      pointer-events: auto;
+      color: white;
+      background: linear-gradient(135deg, rgba(168,85,247,0.85), rgba(236,72,153,0.9));
+      border: 1px solid rgba(255,255,255,0.24);
+      box-shadow: 0 12px 30px rgba(168,85,247,0.32);
+    }
+
+    #actionButton {
+      position: absolute;
+      right: 116px;
+      bottom: 42px;
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      z-index: 25;
+      display: none;
+      pointer-events: auto;
+      color: white;
+      background: linear-gradient(135deg, rgba(34,211,238,0.85), rgba(37,99,235,0.9));
+      border: 1px solid rgba(255,255,255,0.22);
+      box-shadow: 0 12px 30px rgba(34,211,238,0.25);
+    }
+
+    #toast {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      z-index: 1000;
+      padding: 12px 16px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(34,211,238,0.95), rgba(168,85,247,0.9));
+      color: white;
+      font-size: 12px;
+      font-weight: 700;
+      box-shadow: 0 16px 30px rgba(0,0,0,0.28);
+      opacity: 0;
+      transform: translateY(18px);
+      transition: 0.25s ease;
+      pointer-events: none;
+    }
+  </style>
 </head>
-<body class="text-slate-100">
+<body>
+  <div id="canvasContainer"></div>
 
-    <div id="game-canvas"></div>
+  <div id="introScreen" class="screen">
+    <video autoplay muted loop playsinline style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0.38; filter: saturate(1.15) contrast(1.08);">
+      <source src="https://cdn.pixabay.com/video/2020/05/25/40144-424843403_large.mp4" type="video/mp4" />
+    </video>
+    <div style="position:absolute; inset:0; background:linear-gradient(180deg, rgba(0,0,0,0.78), rgba(0,0,0,0.5), rgba(0,0,0,0.85));"></div>
 
-    <div id="minimap-container" class="hidden md:block">
-        <canvas id="minimap" width="140" height="140" class="w-full h-full"></canvas>
+    <div style="position:relative; z-index:1; max-width:900px; text-align:center; padding: 24px;">
+      <div class="chip mb-5">V6.0 Alpha</div>
+      <h1 class="title-font text-5xl md:text-8xl font-black tracking-widest" style="line-height:0.9; background:linear-gradient(135deg,#f5d0fe,#67e8f9,#c084fc); -webkit-background-clip:text; background-clip:text; color:transparent; text-shadow:0 0 30px rgba(34,211,238,0.15);">
+        Melting Point
+      </h1>
+      <h2 class="title-font text-2xl md:text-5xl font-extrabold mt-3 tracking-[0.28em] text-cyan-300">
+        CHRONICLES
+      </h2>
+      <p id="introText" class="mt-6 text-lg md:text-2xl text-white/80 italic min-h-[60px]" style="font-family:'Fredoka',sans-serif;">Welcome to Melting Point School...</p>
+      <p class="mt-8 text-sm uppercase tracking-[0.35em] text-slate-300 animate-pulse">Tap to continue</p>
     </div>
+  </div>
 
-    <div id="ui-overlay">
-        <div id="hud-top" class="hidden pointer-events-auto glass-panel p-3 mx-2 mt-4 flex justify-between items-center rounded-xl shadow-lg shadow-purple-900/50">
-            <div class="flex flex-col">
-                <h2 class="text-cyan-400 font-black text-lg leading-none text-glow">MICHAEL</h2>
-                <span id="player-rank" class="text-purple-300 text-[10px] font-bold">New Student</span>
-            </div>
+  <div id="mainMenuScreen" class="screen hidden">
+    <div style="position:absolute; inset:0; background:linear-gradient(180deg, rgba(6,8,15,0.75), rgba(8,10,16,0.9)), url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat; filter: saturate(1.05);"></div>
 
-            <div class="flex flex-col items-center flex-1 px-4">
-                <div class="w-full max-w-[150px] h-3 bg-slate-900 rounded-full border border-purple-500/50 overflow-hidden relative">
-                    <div id="aura-bar" class="h-full bg-cyan-400 shadow-[0_0_10px_#22d3ee] transition-all" style="width: 50%;"></div>
-                </div>
-                <span class="text-[9px] font-bold text-slate-300 mt-1">AURA <span id="aura-val" class="text-cyan-300">50/100</span></span>
-            </div>
-
-            <div class="flex gap-2 text-sm bg-black/60 p-1.5 rounded-lg border border-slate-700">
-                <span id="stat-brain" class="font-bold text-pink-400">🧠 5</span>
-                <span id="stat-food" class="font-bold text-orange-400 cursor-pointer" onclick="eatFood()">🍕 2</span>
-            </div>
-        </div>
-
-        <div class="flex justify-center mt-2">
-            <div id="hallway-warning" class="hidden bg-red-600/90 border border-red-400 text-white font-black px-4 py-1.5 rounded-full text-xs tracking-widest animate-pulse shadow-lg shadow-red-500/50">
-                🚨 WARNING: ISI OWU PATROLLING HALLWAYS! 🚨
-            </div>
-        </div>
-
-        <div id="interact-popup" class="hidden mx-auto bg-black/95 border-2 border-cyan-400 p-3 rounded-xl flex items-center gap-3 animate-bounce shadow-[0_0_15px_rgba(34,211,238,0.5)] mb-4 pointer-events-auto max-w-[240px]">
-            <div class="text-2xl" id="interact-icon">🎒</div>
-            <div>
-                <h4 class="text-cyan-300 font-bold text-xs" id="interact-title">Object</h4>
-                <p class="text-[9px] text-slate-400">Tap ACTION button to trigger!</p>
-            </div>
-        </div>
-
-        <div id="mobile-controls" class="hidden pointer-events-auto">
-            <div id="joystick-zone">
-                <div id="joystick-knob"></div>
-            </div>
-            <div id="action-btn">ACTION</div>
-        </div>
-    </div>
-
-    <div id="menu-screen" class="absolute inset-0 z-40 bg-[#06020f] flex flex-col items-center justify-center p-6 text-center">
-        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjMDYwMjBmIiAvPgo8cmVjdCB3aWR0aD0iMSIgaGVpZ2h0PSIxIiBmaWxsPSJyZ2JhKDE2OCwgODUsIDI0NywgMC4xNSkiIC8+Cjwvc3ZnPg==')] opacity-50"></div>
-        
-        <h1 id="menu-title-primary" class="text-5xl md:text-8xl font-black tracking-tighter mb-2 text-transparent bg-clip-text bg-gradient-to-b from-purple-400 via-cyan-300 to-purple-600 drop-shadow-[0_0_20px_rgba(34,211,238,0.8)] z-10 opacity-0">
-            MELTING POINT
+    <div style="position:relative; z-index:1; width:min(1100px, 92vw);">
+      <div class="text-center mb-10">
+        <div class="chip mb-6">School Life RPG</div>
+        <h1 class="title-font text-5xl md:text-7xl font-black tracking-tight leading-none">
+          Melting Point<br>
+          <span style="color:var(--cyan);">Chronicles</span>
         </h1>
-        <h2 id="menu-title-sub" class="text-xl md:text-3xl font-extrabold text-cyan-300 mb-8 tracking-[0.25em] z-10 text-glow opacity-0">
-            CHRONICLES - LEVEL 10
-        </h2>
-        
-        <div id="menu-description-box" class="max-w-sm glass-panel p-5 rounded-2xl mb-8 z-10 text-xs text-left leading-relaxed text-slate-300 opacity-0">
-            <p class="mb-3 text-cyan-400 font-bold">⚡ MOBILE PRO EDITION ⚡</p>
-            <p class="mb-3">Play as <b>Michael</b> wearing his black "Rolling Loud" hoodie and red trousers. Explore the fully structured campus grounds with an open canteen courtyard and a massive **Exam Hall** filled with rows of students sat at their desks!</p>
-            <p>Controls: Use the virtual touch thumbstick on the left to move. Tap the glowing purple <b>ACTION</b> button on the right to interact with objects and students.</p>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <button id="mainPlayButton" class="primary-btn col-span-2 md:col-span-4 text-white font-black uppercase tracking-[0.25em] text-sm py-5 rounded-2xl">Play Game</button>
+        <button class="panel-btn text-white font-bold uppercase tracking-[0.18em] text-xs py-4 rounded-2xl" data-planned="Character gallery is being expanded. This will be added in the next stage.">Characters</button>
+        <button class="panel-btn text-white font-bold uppercase tracking-[0.18em] text-xs py-4 rounded-2xl" data-planned="Lore encyclopedia is planned for a later stage.">Lore</button>
+        <button class="panel-btn text-white font-bold uppercase tracking-[0.18em] text-xs py-4 rounded-2xl" data-planned="Achievements are planned in the progression stage.">Achievements</button>
+        <button class="panel-btn text-white font-bold uppercase tracking-[0.18em] text-xs py-4 rounded-2xl" data-planned="News updates are planned after core gameplay is stable.">News</button>
+        <button class="panel-btn text-white font-bold uppercase tracking-[0.18em] text-xs py-4 rounded-2xl" data-planned="The music player is a future feature hook.">Music</button>
+        <button class="panel-btn text-white font-bold uppercase tracking-[0.18em] text-xs py-4 rounded-2xl" data-planned="Developer diary will be added after the build passes testing.">Diary</button>
+        <button class="panel-btn text-white font-bold uppercase tracking-[0.18em] text-xs py-4 rounded-2xl" data-planned="Fan art and memory gallery are planned.">Fan Art</button>
+        <button class="panel-btn text-white font-bold uppercase tracking-[0.18em] text-xs py-4 rounded-2xl" data-planned="Patch notes are added after the next content pass.">Patch Notes</button>
+        <button class="panel-btn text-white font-bold uppercase tracking-[0.18em] text-xs py-4 rounded-2xl" data-planned="Settings are planned once the game loop is stable.">Settings</button>
+        <button class="panel-btn text-white font-bold uppercase tracking-[0.18em] text-xs py-4 rounded-2xl" data-planned="Roadmap remains for later production milestones.">Roadmap</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="tutorialGateScreen" class="screen hidden">
+    <div style="position:absolute; inset:0; background:radial-gradient(circle at center, rgba(34,211,238,0.12), rgba(17,24,39,0.88) 54%, rgba(2,6,23,0.96));"></div>
+
+    <div class="glass relative z-10 w-[min(760px,92vw)] rounded-[28px] p-6 md:p-8">
+      <div class="chip mb-5">Beginner Trial</div>
+      <h2 class="title-font text-3xl md:text-5xl font-black text-white mb-4">Welcome, New Student</h2>
+      <p class="text-sm md:text-base text-slate-300 leading-relaxed mb-6">
+        Complete the school walkthrough, learn movement, interact with students, and power your aura before entering the full campus adventure.
+      </p>
+
+      <div class="grid grid-cols-2 gap-3 mb-6 text-left text-xs text-slate-200">
+        <div class="rounded-2xl border border-white/10 bg-white/5 p-3">
+          <div class="mb-1 font-black text-cyan-300">Move</div>
+          <div>WASD / joystick</div>
         </div>
-
-        <button id="menu-launch-btn" onclick="startGame()" class="z-10 px-10 py-4 bg-gradient-to-r from-purple-600 to-cyan-600 font-black text-xl rounded-full shadow-[0_0_20px_#a855f7] active:scale-95 transition-transform text-white opacity-0 scale-75">
-            ENTER GAME LOOP
-        </button>
-    </div>
-
-    <div id="dialogue-screen" class="hidden absolute inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
-        <div id="dialogue-box" class="glass-panel border-2 border-cyan-400 p-5 rounded-2xl w-full max-w-sm pointer-events-auto">
-            <div class="flex items-center gap-3 border-b border-purple-900/50 pb-3 mb-3">
-                <span id="dialogue-avatar" class="text-3xl">🎒</span>
-                <h3 id="dialogue-name" class="text-lg font-bold text-cyan-300">Name</h3>
-            </div>
-            <div class="bg-black/50 p-3 rounded-lg border border-purple-900/30 min-h-[70px] mb-4">
-                <p id="dialogue-text" class="text-slate-200 text-sm italic typewriter"></p>
-            </div>
-            <div id="dialogue-options" class="flex flex-col gap-2"></div>
+        <div class="rounded-2xl border border-white/10 bg-white/5 p-3">
+          <div class="mb-1 font-black text-fuchsia-300">Action</div>
+          <div>Interact / talk</div>
         </div>
-    </div>
-
-    <div id="boss-screen" class="hidden absolute inset-0 z-50 bg-red-950/95 flex flex-col justify-center items-center p-4 pointer-events-auto">
-        <div id="boss-combat-card" class="w-full max-w-sm bg-black border-4 border-red-600 p-5 rounded-3xl text-center shadow-[0_0_30px_red]">
-            <h2 class="text-red-500 font-black text-2xl mb-2 animate-bounce">🚨 BOSS COMBAT 🚨</h2>
-            <div class="text-6xl mb-3">👹</div>
-            <p id="boss-quote" class="text-red-200 italic text-sm mb-4">"WHERE IS YOUR EXAM CARD?!"</p>
-
-            <div class="w-full h-4 bg-slate-900 rounded-full border border-red-800 overflow-hidden mb-5">
-                <div id="boss-hp-bar" class="h-full bg-red-600" style="width: 100%;"></div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-2">
-                <button onclick="attackBoss('brain')" class="bg-purple-900 border border-purple-500 py-3 rounded-xl font-bold text-white text-[11px] active:bg-purple-700">
-                    🧠 Logic Strike
-                </button>
-                <button onclick="attackBoss('food')" class="bg-cyan-900 border border-cyan-500 py-3 rounded-xl font-bold text-white text-[11px] active:bg-cyan-700">
-                    🍕 Jollof Toss
-                </button>
-            </div>
+        <div class="rounded-2xl border border-white/10 bg-white/5 p-3">
+          <div class="mb-1 font-black text-amber-300">Aura</div>
+          <div>Train to build power</div>
         </div>
+        <div class="rounded-2xl border border-white/10 bg-white/5 p-3">
+          <div class="mb-1 font-black text-emerald-300">Goal</div>
+          <div>Reach the gate</div>
+        </div>
+      </div>
+
+      <button id="tutorialStartBtn" class="primary-btn w-full py-4 rounded-2xl text-white font-black uppercase tracking-[0.2em] text-sm">
+        Begin Tutorial
+      </button>
+    </div>
+  </div>
+
+  <div id="creatorRevealScreen" class="screen hidden">
+    <div style="position:absolute; inset:0; background:radial-gradient(circle at center, rgba(236,72,153,0.18), rgba(15,15,22,0.94));"></div>
+
+    <div class="glass relative z-10 w-[min(640px,92vw)] rounded-[30px] p-6 md:p-8 text-center">
+      <div class="chip mb-5">Creator Unlock</div>
+      <img src="https://i.postimg.cc/FHmpp9YB/43373877-80E6-4595-8C49-D18AA27B650F.jpg" alt="Michael" class="mx-auto mb-5 rounded-full object-cover border-4 border-white/15" style="width:150px; height:150px;" />
+      <h3 class="title-font text-3xl md:text-4xl font-black text-white mb-3">Michael</h3>
+      <p class="text-sm md:text-base text-slate-200 leading-relaxed mb-7">
+        “This game was made by Michael, also a student like you. We literally went to the same school, bruv. I'm still developing it and trying my best. If you're not in the game yet, start existing sharp sharp so I can add you. Enjoy the vibe!”
+      </p>
+      <button id="creatorContinueBtn" class="primary-btn w-full py-4 rounded-2xl text-white font-black uppercase tracking-[0.18em] text-sm">
+        Continue to Character Select
+      </button>
+    </div>
+  </div>
+
+  <div id="avatarSelectionScreen" class="screen hidden" style="padding:32px; overflow:auto;">
+    <div class="relative z-10 w-full max-w-6xl">
+      <div class="flex items-center justify-between mb-7">
+        <div>
+          <div class="text-[10px] uppercase tracking-[0.3em] text-cyan-300 font-black mb-2">Choose</div>
+          <h2 class="title-font text-4xl md:text-5xl font-black text-white">Your Legend</h2>
+        </div>
+        <button id="backToMenuBtn" class="panel-btn px-4 py-2 rounded-full text-white text-xs uppercase tracking-[0.2em] font-bold">Back</button>
+      </div>
+
+      <div id="avatarGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5"></div>
+    </div>
+  </div>
+
+  <div id="gameHUD">
+    <div style="position:absolute; top:18px; left:18px; width:min(360px, calc(100vw - 36px));" class="hud-box rounded-2xl p-3">
+      <div class="flex items-center gap-3">
+        <img id="hudPortrait" src="https://i.postimg.cc/Prh2fKyL/47C569FA-49D9-4495-9FB0-225527702F92.png" alt="Character portrait" style="width:56px; height:56px; border-radius:14px; object-fit:cover; border:1px solid rgba(255,255,255,0.1);" />
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center justify-between gap-3">
+            <div class="font-black uppercase tracking-[0.14em] text-sm text-white" id="hudName">Michael</div>
+            <div class="text-[10px] uppercase tracking-[0.12em] text-slate-300">Lvl <span id="hudLevel">1</span></div>
+          </div>
+          <div class="mt-2 h-2 rounded-full bg-slate-800 overflow-hidden">
+            <div id="hudAuraBar" class="h-full rounded-full bg-gradient-to-r from-cyan-400 to-violet-500" style="width:35%;"></div>
+          </div>
+          <div class="mt-2 flex items-center justify-between text-[10px] text-slate-300">
+            <span>Campus Aura</span>
+            <span id="hudAuraText">35%</span>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div id="gameover-screen" class="hidden absolute inset-0 z-50 bg-red-950 flex flex-col items-center justify-center p-6 text-center pointer-events-auto">
-        <h1 class="text-5xl font-black text-red-500 mb-4 drop-shadow-[0_0_15px_#ef4444]">AURA EMPTY</h1>
-        <p class="text-slate-300 text-sm mb-8">The school has turned completely strict. You were caught.<br><br><span class="text-red-400 italic font-bold">"Omo, you no try but you still try 😭"</span></p>
-        <button onclick="window.location.reload()" class="px-8 py-3 bg-red-600 text-white font-bold rounded-full shadow-[0_0_15px_red]">
-            RESTART GAME
-        </button>
+    <div style="position:absolute; top:18px; right:18px; width:220px;" class="hud-box rounded-2xl p-3">
+      <div class="flex items-center justify-between">
+        <div class="font-black uppercase tracking-[0.14em] text-[10px] text-cyan-300">Weather</div>
+        <div id="weatherText" class="font-bold text-sm text-white">Sunny</div>
+      </div>
+      <div class="mt-3 flex gap-2">
+        <button id="muteButton" class="panel-btn flex-1 py-2 rounded-xl text-white font-black uppercase text-[10px] tracking-[0.2em]">Mute</button>
+        <button id="trainAuraButton" class="action-btn flex-1 py-2 rounded-xl text-white font-black uppercase text-[10px] tracking-[0.2em]">Aura</button>
+      </div>
     </div>
 
-<script>
-// ==========================================
-// GAME STATE & AUDIO
-// ==========================================
-const state = {
-    aura: 50, maxAura: 100, brainCells: 5, foodTokens: 2, rank: 'New Student',
-    currentScreen: 'menu', activeInteractable: null, boss: null, dayTime: true,
-    quests: [
-        { id: 'homework', desc: '📚 Submit assignments to Class Rep.', done: false },
-        { id: 'escape', desc: '⚡ Evade Isi Owu detection spotlights.', done: false },
-        { id: 'stabilize', desc: '💠 Feed Shards into the Underground Core.', done: false }
-    ],
-    inventory: [
-        { name: 'Pencil Weapon', icon: '✏️', type: 'gear', power: 15, qty: 1 },
-        { name: 'Aura Core Shard', icon: '💠', type: 'shard', qty: 0 }
-    ]
-};
-
-let audioCtx = null;
-
-function initAudio() {
-    if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    }
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-}
-
-function playSound(type) {
-    if (!audioCtx) return;
-    try {
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.connect(gain); gain.connect(audioCtx.destination);
-        const now = audioCtx.currentTime;
-
-        if (type === 'footstep') {
-            osc.type = 'triangle'; osc.frequency.setValueAtTime(80, now);
-            osc.frequency.exponentialRampToValueAtTime(10, now + 0.1);
-            gain.gain.setValueAtTime(0.1, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
-            osc.start(now); osc.stop(now + 0.1);
-        } else if (type === 'eat') {
-            osc.type = 'square'; osc.frequency.setValueAtTime(300, now);
-            osc.frequency.setValueAtTime(150, now + 0.1);
-            gain.gain.setValueAtTime(0.2, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
-            osc.start(now); osc.stop(now + 0.2);
-        } else if (type === 'boing') { 
-            osc.type = 'sine'; osc.frequency.setValueAtTime(300, now);
-            osc.frequency.exponentialRampToValueAtTime(900, now + 0.3);
-            gain.gain.setValueAtTime(0.2, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
-            osc.start(now); osc.stop(now + 0.3);
-        } else if (type === 'damage') {
-            osc.type = 'sawtooth'; osc.frequency.setValueAtTime(200, now);
-            osc.frequency.exponentialRampToValueAtTime(40, now + 0.3);
-            gain.gain.setValueAtTime(0.3, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
-            osc.start(now); osc.stop(now + 0.3);
-        } else if (type === 'typewriter') {
-            osc.type = 'sine'; osc.frequency.setValueAtTime(650, now);
-            gain.gain.setValueAtTime(0.02, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
-            osc.start(now); osc.stop(now + 0.05);
-        }
-    } catch(e) {}
-}
-
-// ==========================================
-// THREE.JS ENGINE SETUP
-// ==========================================
-let scene, camera, renderer, clock;
-let player, bossTeacher;
-const npcsList = [];
-const zoneIndicators = [];
-const staticColliders = [];
-const pickupItems = [];
-
-// Input state
-const input = { moveX: 0, moveY: 0, action: false };
-
-// Mobile joystick parameters
-let joystickActive = false;
-let joystickStartPos = { x: 0, y: 0 };
-let joystickVector = { x: 0, y: 0 };
-
-const PALETTE = {
-    flesh: 0xffdbac, darkSkin: 0x8d5524, hairBlack: 0x111111, hairBlonde: 0xffd700, hairBrown: 0x5c4033,
-    redTrousers: 0xb91c1c, milkShirt: 0xfffad2, blackHoodie: 0x0f172a, isiOwuSuit: 0x7f1d1d,
-    wood: 0x78350f, brick: 0x7f1d1d, floor: 0x334155, grassGreen: 0x14532d, cloudWhite: 0xf1f5f9,
-    whiteSock: 0xffffff, tattooInk: 0x1e293b
-};
-
-function initEngine() {
-    const canvas = document.getElementById('game-canvas');
-    clock = new THREE.Clock();
-
-    scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x0c192c);
-    scene.fog = new THREE.FogExp2(0x0c192c, 0.02);
-
-    // Mobile specific camera setup (wider FOV, pulled back slightly)
-    camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.set(0, 45, 60);
-
-    renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    canvas.appendChild(renderer.domElement);
-
-    // Lighting
-    scene.add(new THREE.AmbientLight(0xffffff, 0.65));
-    const dirL = new THREE.DirectionalLight(0xa855f7, 0.95);
-    dirL.position.set(20, 30, 20);
-    scene.add(dirL);
-
-    // Build World
-    buildCampus();
-    buildExamHall();
-
-    // Build Player (Michael)
-    player = buildVoxelCharacter({ isMichael: true });
-    player.mesh.position.set(0, 0, -10);
-    scene.add(player.mesh);
-
-    // Build NPCs & Zones
-    spawnEntities();
-    spawnPickups();
-
-    // Event Listeners
-    window.addEventListener('resize', onWindowResize);
-    setupTouchControls();
-
-    // GSAP staggered loading animation on entry UI
-    gsap.to("#menu-title-primary", { duration: 1, opacity: 1, y: 0, ease: "bounce.out" });
-    gsap.to("#menu-title-sub", { duration: 1.2, opacity: 1, y: 0, ease: "bounce.out", delay: 0.2 });
-    gsap.to("#menu-description-box", { duration: 0.8, opacity: 1, scale: 1, ease: "power2.out", delay: 0.5 });
-    gsap.to("#menu-launch-btn", { duration: 1, opacity: 1, scale: 1, ease: "elastic.out(1, 0.5)", delay: 0.8 });
-}
-
-function onWindowResize() {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-}
-
-// Build Floor, Sky Scenery, Walkways & Gate
-function buildCampus() {
-    // Concrete Ground
-    const grassMat = new THREE.MeshStandardMaterial({ color: PALETTE.grassGreen, roughness: 0.9 });
-    const stoneMat = new THREE.MeshStandardMaterial({ color: PALETTE.floor, roughness: 0.8 });
-    
-    const lawnLeft = new THREE.Mesh(new THREE.BoxGeometry(22, 0.2, 58), grassMat);
-    lawnLeft.position.set(-13, -0.05, 0);
-    scene.add(lawnLeft);
-
-    const lawnRight = new THREE.Mesh(new THREE.BoxGeometry(22, 0.2, 58), grassMat);
-    lawnRight.position.set(13, -0.05, 0);
-    scene.add(lawnRight);
-
-    const mainWalkway = new THREE.Mesh(new THREE.BoxGeometry(4, 0.22, 58), stoneMat);
-    mainWalkway.position.set(0, -0.04, 0);
-    scene.add(mainWalkway);
-
-    // Brick Entrance Gate (Archway)
-    const brickMat = new THREE.MeshStandardMaterial({ color: PALETTE.brick, roughness: 0.95 });
-    const gateLeftPillar = new THREE.Mesh(new THREE.BoxGeometry(1.5, 6, 1.5), brickMat);
-    gateLeftPillar.position.set(-4, 3, -29);
-    scene.add(gateLeftPillar);
-    staticColliders.push(new THREE.Box3().setFromObject(gateLeftPillar));
-
-    const gateRightPillar = new THREE.Mesh(new THREE.BoxGeometry(1.5, 6, 1.5), brickMat);
-    gateRightPillar.position.set(4, 3, -29);
-    scene.add(gateRightPillar);
-    staticColliders.push(new THREE.Box3().setFromObject(gateRightPillar));
-
-    const gateArch = new THREE.Mesh(new THREE.BoxGeometry(9.5, 1.2, 1.5), brickMat);
-    gateArch.position.set(0, 6.6, -29);
-    scene.add(gateArch);
-
-    // Courtyard Trees
-    const woodMat = new THREE.MeshStandardMaterial({ color: 0x451a03, roughness: 0.95 });
-    const foliageMat = new THREE.MeshStandardMaterial({ color: 0x166534, roughness: 0.9 });
-    
-    const treeCoords = [
-        { x: -10, z: -18 }, { x: 10, z: -18 },
-        { x: -10, z: 12 }, { x: 10, z: 12 }
-    ];
-    
-    treeCoords.forEach(pos => {
-        const tree = new THREE.Group();
-        const trunk = new THREE.Mesh(new THREE.BoxGeometry(0.6, 3, 0.6), woodMat);
-        trunk.position.y = 1.5;
-        tree.add(trunk);
-        const foliage = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 2), foliageMat);
-        foliage.position.y = 3.5;
-        tree.add(foliage);
-        
-        tree.position.set(pos.x, 0, pos.z);
-        scene.add(tree);
-        staticColliders.push(new THREE.Box3().setFromObject(tree));
-    });
-
-    // Voxel Clouds
-    const cloudMat = new THREE.MeshStandardMaterial({ color: PALETTE.cloudWhite, transparent: true, opacity: 0.8 });
-    for(let i=0; i<5; i++){
-        const c = new THREE.Mesh(new THREE.BoxGeometry(6 + Math.random()*4, 2, 4 + Math.random()*3), cloudMat);
-        c.position.set((Math.random()-0.5)*60, 15 + Math.random()*5, (Math.random()-0.5)*60);
-        scene.add(c);
-    }
-}
-
-// Recreate the Exam Hall from the image link (Rows of desks and sitting students)
-function buildExamHall() {
-    const brickMat = new THREE.MeshStandardMaterial({ color: PALETTE.brick });
-    const woodMat = new THREE.MeshStandardMaterial({ color: PALETTE.wood });
-
-    // Exam Hall Back Wall Structure
-    const wall = new THREE.Mesh(new THREE.BoxGeometry(24, 6, 1), brickMat);
-    wall.position.set(0, 3, 29);
-    scene.add(wall);
-    staticColliders.push(new THREE.Box3().setFromObject(wall));
-
-    // Exam Desks and Sitting Students
-    for(let row = 0; row < 3; row++) {
-        for(let col = -2; col <= 2; col++) {
-            const x = col * 3.5;
-            const z = 22 + (row * 3);
-
-            // Desk
-            const desk = new THREE.Mesh(new THREE.BoxGeometry(1.6, 1.1, 0.8), woodMat);
-            desk.position.set(x, 0.55, z);
-            scene.add(desk);
-            staticColliders.push(new THREE.Box3().setFromObject(desk));
-
-            // Sitting Student
-            const student = buildVoxelCharacter({ isSitting: true, gender: Math.random() > 0.5 ? 'boy' : 'girl' });
-            student.mesh.position.set(x, 0.1, z - 0.5); // Behind desk
-            student.mesh.rotation.y = Math.PI; // Face forward towards main gate
-            scene.add(student.mesh);
-        }
-    }
-}
-
-// Canvas textures generator
-function createRollingLoudTexture() {
-    const canvas = document.createElement('canvas');
-    canvas.width = 128;
-    canvas.height = 128;
-    const ctx = canvas.getContext('2d');
-    
-    ctx.fillStyle = "#0f172a";
-    ctx.fillRect(0, 0, 128, 128);
-    
-    ctx.fillStyle = "#22d3ee";
-    ctx.font = "bold 16px monospace";
-    ctx.textAlign = "center";
-    ctx.fillText("ROLLING", 64, 52);
-    ctx.fillText("LOUD", 64, 82);
-
-    return new THREE.CanvasTexture(canvas);
-}
-
-function buildVoxelCharacter({ isMichael=false, isIsiOwu=false, gender='boy', isThick=false, isSitting=false, hasTattoo=false, tattooType='basic' }) {
-    const grp = new THREE.Group();
-    const fleshColor = isThick ? PALETTE.darkSkin : PALETTE.flesh;
-    
-    const skinMat = new THREE.MeshStandardMaterial({ color: fleshColor });
-    const hairMat = new THREE.MeshStandardMaterial({ color: (isMichael || isThick) ? PALETTE.hairBlack : PALETTE.hairBrown });
-    const shirtMat = new THREE.MeshStandardMaterial({ color: isMichael ? PALETTE.blackHoodie : PALETTE.milkShirt });
-    const pantsMat = new THREE.MeshStandardMaterial({ color: PALETTE.redTrousers });
-
-    // Torso
-    const torso = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.8, 0.6), shirtMat);
-    torso.position.y = 2.1;
-    grp.add(torso);
-
-    if (isMichael) {
-        // Back hoodie graphics
-        const backGeo = new THREE.PlaneGeometry(1.0, 1.55);
-        const backMat = new THREE.MeshBasicMaterial({ map: createRollingLoudTexture(), side: THREE.DoubleSide });
-        const backMesh = new THREE.Mesh(backGeo, backMat);
-        backMesh.position.set(0, 2.1, -0.31);
-        backMesh.rotation.y = Math.PI;
-        grp.add(backMesh);
-    }
-
-    // Head
-    const head = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.8, 0.8), skinMat);
-    head.position.y = 3.4;
-    grp.add(head);
-    
-    // Hair
-    const hair = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.3, 0.85), hairMat);
-    hair.position.y = 3.85;
-    grp.add(hair);
-
-    // Arms
-    const rArmGrp = new THREE.Group(); rArmGrp.position.set(-0.85, 2.8, 0);
-    const rArm = new THREE.Mesh(new THREE.BoxGeometry(0.4, 1.5, 0.4), shirtMat);
-    rArm.position.y = -0.65; rArmGrp.add(rArm); grp.add(rArmGrp);
-
-    const lArmGrp = new THREE.Group(); lArmGrp.position.set(0.85, 2.8, 0);
-    const lArm = new THREE.Mesh(new THREE.BoxGeometry(0.4, 1.5, 0.4), shirtMat);
-    lArm.position.y = -0.65; lArmGrp.add(lArm); grp.add(lArmGrp);
-
-    // Sleeve Tattoo implementation
-    if (hasTattoo) {
-        let tattooMesh;
-        if(tattooType === 'roseSleeve') {
-            tattooMesh = new THREE.Mesh(
-                new THREE.BoxGeometry(0.44, 0.8, 0.44), 
-                new THREE.MeshBasicMaterial({ color: PALETTE.tattooInk, transparent: true, opacity: 0.9 })
-            );
-            tattooMesh.position.set(0, -0.6, 0);
-        } else {
-            tattooMesh = new THREE.Mesh(
-                new THREE.BoxGeometry(0.2, 0.3, 0.42), 
-                new THREE.MeshBasicMaterial({ color: PALETTE.tattooInk })
-            );
-            tattooMesh.position.set(0, -1.0, 0);
-        }
-        lArm.add(tattooMesh);
-    }
-
-    // Legs
-    const rLegGrp = new THREE.Group(); rLegGrp.position.set(-0.35, 1.2, 0);
-    const lLegGrp = new THREE.Group(); lLegGrp.position.set(0.35, 1.2, 0);
-
-    if (gender === 'girl' && !isMichael && !isIsiOwu) {
-        // Red pleated skirt voxel piece
-        const rightSkirt = new THREE.Mesh(new THREE.BoxGeometry(0.46, 0.6, 0.46), pantsMat);
-        rightSkirt.position.y = -0.2; rLegGrp.add(rightSkirt);
-
-        const leftSkirt = new THREE.Mesh(new THREE.BoxGeometry(0.46, 0.6, 0.46), pantsMat);
-        leftSkirt.position.y = -0.2; lLegGrp.add(leftSkirt);
-
-        // Lower Leg - Stocking Check for Female Students (White stockings spec)
-        const legSkinMat = isThick ? 
-            new THREE.MeshStandardMaterial({ color: PALETTE.whiteSock, roughness: 0.9 }) : 
-            skinMat;
-
-        const rightSkin = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.6, 0.4), legSkinMat);
-        rightSkin.position.y = -0.8; rLegGrp.add(rightSkin);
-
-        const leftSkin = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.6, 0.4), legSkinMat);
-        leftSkin.position.y = -0.8; lLegGrp.add(leftSkin);
-    } else {
-        // Boys & Michael wear Red Trousers
-        const rightLeg = new THREE.Mesh(new THREE.BoxGeometry(0.45, 1.2, 0.45), pantsMat);
-        rightLeg.position.y = -0.6; rLegGrp.add(rightLeg);
-
-        const leftLeg = new THREE.Mesh(new THREE.BoxGeometry(0.45, 1.2, 0.45), pantsMat);
-        leftLeg.position.y = -0.6; lLegGrp.add(leftLeg);
-    }
-
-    grp.add(rLegGrp);
-    grp.add(lLegGrp);
-
-    // If Sitting pose (For Exam Hall)
-    if(isSitting) {
-        rLegGrp.rotation.x = -Math.PI / 2.2;
-        lLegGrp.rotation.x = -Math.PI / 2.2;
-        rArmGrp.rotation.x = -Math.PI / 6;
-        lArmGrp.rotation.x = -Math.PI / 6;
-    }
-
-    if(isThick) grp.scale.set(1.15, 0.88, 1.15); // Curvy dark skin model scale
-    else grp.scale.set(0.9, 0.9, 0.9);
-
-    return { mesh: grp, joints: { rArm: rArmGrp, lArm: lArmGrp, rLeg: rLegGrp, lLeg: lLegGrp }, isSitting };
-}
-
-function spawnEntities() {
-    // Isi Owu Boss
-    bossTeacher = buildVoxelCharacter({ isIsiOwu: true });
-    bossTeacher.mesh.position.set(0, 0, 10);
-    scene.add(bossTeacher.mesh);
-
-    const ringGeo = new THREE.RingGeometry(0.1, 5.0, 16);
-    ringGeo.rotateX(-Math.PI / 2);
-    const ringMat = new THREE.MeshBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0.25, side: THREE.DoubleSide });
-    const ringMesh = new THREE.Mesh(ringGeo, ringMat);
-    ringMesh.position.y = 0.22;
-    bossTeacher.mesh.add(ringMesh);
-
-    // Interactive hotspot zones (Using fallback empty array if ZONES_LORE isn't defined yet)
-    const activeZones = typeof ZONES_LORE !== 'undefined' ? ZONES_LORE : {};
-    Object.values(activeZones).forEach(zone => {
-        const cylinderGeo = new THREE.CylinderGeometry(3.6, 3.6, 0.25, 16);
-        const cylinderMat = new THREE.MeshBasicMaterial({ 
-            color: zone.color, 
-            transparent: true, 
-            opacity: 0.35,
-            wireframe: true 
-        });
-        const mesh = new THREE.Mesh(cylinderGeo, cylinderMat);
-        mesh.position.set(zone.x, zone.y + 0.1, zone.z);
-        scene.add(mesh);
-
-        const blockGeo = new THREE.BoxGeometry(1.6, 1.6, 1.6);
-        const blockMat = new THREE.MeshStandardMaterial({
-            color: zone.color,
-            emissive: zone.color,
-            emissiveIntensity: 0.5,
-            transparent: true,
-            opacity: 0.75
-        });
-        const block = new THREE.Mesh(blockGeo, blockMat);
-        block.position.set(zone.x, zone.y + 1, zone.z);
-        scene.add(block);
-
-        zoneIndicators.push({
-            ...zone,
-            mesh: block,
-            floorMesh: mesh
-        });
-    });
-
-    // Class Rep
-    const classRep = buildVoxelCharacter({ gender: 'girl' });
-    classRep.mesh.position.set(-18, 0, -5);
-    classRep.mesh.rotation.y = Math.PI / 2;
-    scene.add(classRep.mesh);
-    npcsList.push({ mesh: classRep.mesh, name: "Class Rep", icon: '📚', dialogue: "Michael! Submit your homework assignment before Isi Owu catches you." });
-
-    // Gossip NPC
-    const gossipNPC = buildVoxelCharacter({ gender: 'boy' });
-    gossipNPC.mesh.position.set(0, 0, -20);
-    scene.add(gossipNPC.mesh);
-    npcsList.push({ mesh: gossipNPC.mesh, name: "Gossip NPC", icon: '💬', dialogue: "Omo news dey fly! The Aura Core is shaking underneath the hallway. Better gather resources fast." });
-
-    // Food Lover
-    const foodLover = buildVoxelCharacter({ gender: 'boy' });
-    foodLover.mesh.position.set(18, 0, -8);
-    scene.add(foodLover.mesh);
-    npcsList.push({ mesh: foodLover.mesh, name: "Food Lover", icon: '🍕', dialogue: "Munching this Jollof rice is pure joy (+20 Aura)! I can share with you in exchange for 3 Brain Cells." });
-
-    // Study Genius
-    const studyGenius = buildVoxelCharacter({ gender: 'girl' });
-    studyGenius.mesh.position.set(-18, 0, 18);
-    scene.add(studyGenius.mesh);
-    npcsList.push({ mesh: studyGenius.mesh, name: "Study Genius", icon: '🧠', dialogue: "Reading is power. Let's tackle some organic chemistry concepts (+3 Brain Cells, -5 Aura)." });
-
-    // Ifeoma Curvy Dark-Skinned Girl (White thigh stockings)
-    const ifeoma = buildVoxelCharacter({ gender: 'girl', isThick: true });
-    ifeoma.mesh.position.set(12, 0, -4);
-    ifeoma.mesh.rotation.y = -Math.PI / 4;
-    scene.add(ifeoma.mesh);
-    npcsList.push({ mesh: ifeoma.mesh, name: "Ifeoma", icon: '👧🏾', dialogue: "Hey Michael! Ngozi told me about your black Rolling Loud hoodie. Abeg you look super sharp with those red trousers! Stay safe." });
-
-    // Ngozi (Thick dark skin with white stockings)
-    const ngozi = buildVoxelCharacter({ gender: 'girl', isThick: true });
-    ngozi.mesh.position.set(8, 0, 15);
-    ngozi.mesh.rotation.y = -Math.PI / 3;
-    scene.add(ngozi.mesh);
-    npcsList.push({ mesh: ngozi.mesh, name: "Ngozi", icon: '🧦', dialogue: "Michael, let's keep school spirit high! We need the Aura Core back in order. No let strict teacher catch you." });
-
-    // Chidi (Rebellious Girl with Hand Tattoo)
-    const chidi = buildVoxelCharacter({ gender: 'girl', hasTattoo: true });
-    chidi.mesh.position.set(-10, 0, -18);
-    chidi.mesh.rotation.y = Math.PI / 3;
-    scene.add(chidi.mesh);
-    npcsList.push({ mesh: chidi.mesh, name: "Chidi", icon: '✒️', dialogue: "This hand tattoo is my rebel code. Isi Owu tried to make me clean it up, but she failed. Omo, no shaking!" });
-
-    // Favour (Thick Girl with Rose forearm sleeve Tattoo)
-    const favour = buildVoxelCharacter({ gender: 'girl', isThick: true, hasTattoo: true, tattooType: 'roseSleeve' });
-    favour.mesh.position.set(-6, 0, 14);
-    favour.mesh.rotation.y = -Math.PI / 6;
-    scene.add(favour.mesh);
-    npcsList.push({ mesh: favour.mesh, name: "Favour", icon: '🌹', dialogue: "What's up Michael! Abeg look at my rose sleeve forearm tattoo, clean right? Isi Owu hate rebels, but she no fit handle my logic strike!" });
-
-    // Spawn 3 wandering students to populate paths
-    for(let k = 0; k < 3; k++) {
-        const randBoy = buildVoxelCharacter({ gender: 'boy' });
-        randBoy.mesh.position.set(-5 + (k * 6), 0, -12);
-        scene.add(randBoy.mesh);
-        npcsList.push({ mesh: randBoy.mesh, name: "Wandering Student", icon: '👤', dialogue: "Keep moving, Michael! The school is unstable today." });
-    }
-}
-
-function spawnPickups() {
-    const list = [
-        { name: 'Spicy Jollof Rice', icon: '🍕', x: 18, y: 0, z: -10, desc: 'Hot student recovery pack!' },
-        { name: 'Lost Assignment File', icon: '📝', x: -18, y: 0, z: 22, desc: 'Class Rep needs this file.' },
-        { name: 'Aura Core Shard', icon: '💠', x: 0, y: -4.5, z: 0, desc: 'Glows with immense power.' }
-    ];
-
-    list.forEach(item => {
-        const group = new THREE.Group();
-        const box = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.8, 0.8), new THREE.MeshStandardMaterial({ color: 0xffff00, emissive: 0xffff00, emissiveIntensity: 0.3 }));
-        box.position.y = 0.4;
-        group.add(box);
-
-        const floatLight = new THREE.PointLight(0xffff00, 0.5, 3);
-        floatLight.position.set(0, 1, 0);
-        group.add(floatLight);
-
-        group.position.set(item.x, item.y, item.z);
-        scene.add(group);
-
-        pickupItems.push({
-            ...item,
-            mesh: group
-        });
-    });
-}
-
-function createParticleSystem() {
-    const particlesCount = 350;
-    const geometry = new THREE.BufferGeometry();
-    const positions = new Float32Array(particlesCount * 3);
-
-    for (let i = 0; i < particlesCount * 3; i += 3) {
-        positions[i] = (Math.random() - 0.5) * 65;
-        positions[i+1] = Math.random() * 14;
-        positions[i+2] = (Math.random() - 0.5) * 65;
-    }
-
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    const material = new THREE.PointsMaterial({
-        size: 0.14,
-        color: 0x9f5cf6,
-        transparent: true,
-        opacity: 0.65,
-        blending: THREE.AdditiveBlending
-    });
-
-    const particles = new THREE.Points(geometry, material);
-    scene.add(particles);
-}
-
-// Touch Joystick & Button Logic
-function setupTouchControls() {
-    const joyZone = document.getElementById('joystick-zone');
-    const joyKnob = document.getElementById('joystick-knob');
-    const actBtn = document.getElementById('action-btn');
-
-    let joyCenter = {x:0, y:0};
-    let activeTouchId = null;
-
-    joyZone.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        const touch = e.changedTouches[0];
-        activeTouchId = touch.identifier;
-        const rect = joyZone.getBoundingClientRect();
-        joyCenter = { x: rect.left + rect.width/2, y: rect.top + rect.height/2 };
-        updateJoy(touch);
-    });
-
-    joyZone.addEventListener('touchmove', (e) => {
-        e.preventDefault();
-        for(let i=0; i<e.changedTouches.length; i++) {
-            if(e.changedTouches[i].identifier === activeTouchId) {
-                updateJoy(e.changedTouches[i]);
-            }
-        }
-    });
-
-    const resetJoy = (e) => {
-        e.preventDefault();
-        for(let i=0; i<e.changedTouches.length; i++) {
-            if(e.changedTouches[i].identifier === activeTouchId) {
-                activeTouchId = null;
-                joyKnob.style.transform = `translate(0px, 0px)`;
-                input.moveX = 0; input.moveY = 0;
-            }
-        }
+    <div style="position:absolute; left:18px; bottom:18px; width:290px;" class="hud-box rounded-2xl p-3">
+      <div class="font-black uppercase tracking-[0.18em] text-[10px] text-violet-300 mb-2">Active Quests</div>
+      <ul id="questList" class="text-xs text-slate-200 list-none m-0 p-0 space-y-2"></ul>
+    </div>
+
+    <div style="position:absolute; right:18px; bottom:18px; width:240px;" class="hud-box rounded-2xl p-3 text-right">
+      <div class="font-black uppercase tracking-[0.18em] text-[10px] text-pink-300 mb-2">School Feed</div>
+      <p id="storyFeed" class="text-xs text-slate-300 leading-relaxed">Welcome to the school grounds. Explore and make your story.</p>
+    </div>
+  </div>
+
+  <div id="touchPad">
+    <div id="touchPadInner"></div>
+  </div>
+  <button id="jumpButton">⤒</button>
+  <button id="actionButton">Act</button>
+
+  <div id="toast"></div>
+
+  <script>
+    const appState = {
+      introText: "Welcome to Melting Point School... no wahala yet, but the aura is waking up.",
+      tutorialDone: false,
+      creatorUnlocked: false,
+      selectedCharacter: 'michael',
+      gameStarted: false,
+      aura: 35,
+      level: 1,
+      weather: 'Sunny',
+      story: 'Welcome to the school grounds. Explore and make your story.'
     };
 
-    joyZone.addEventListener('touchend', resetJoy);
-    joyZone.addEventListener('touchcancel', resetJoy);
+    const avatarData = [
+      { id: 'michael', name: 'Michael', role: 'Main Protagonist', aura: 'Main Character Syndrome', img: 'https://i.postimg.cc/Prh2fKyL/47C569FA-49D9-4495-9FB0-225527702F92.png' },
+      { id: 'ifeoma', name: 'Ifeoma', role: 'Sports Queen', aura: 'Speed + Focus', img: 'https://i.postimg.cc/ZKZVYjHB/6411284C-EA81-4EB8-BB99-3535C7E8A4BB.png' },
+      { id: 'amara', name: 'Amara', role: 'Mystery Keeper', aura: 'Hidden Lore Sense', img: 'https://i.postimg.cc/PNsxhPYL/DC972A45-EC19-441B-B451-B7A18578242C.png' },
+      { id: 'trevor', name: 'Trevor', role: 'Tech Genius', aura: 'Hack + Logic', img: 'https://i.postimg.cc/ZKZVYjHC/06BA4789-560E-41F6-A9AD-92DF3C9CA591.png' },
+      { id: 'david', name: 'David', role: 'Football Captain', aura: 'Athletic Burst', img: 'https://i.postimg.cc/grFJdn8r/0A515472-047C-4206-9F56-54834EF6ED63.png' },
+      { id: 'mike', name: 'Mike', role: 'Mischievous Twin', aura: 'Chaotic Mobility', img: 'https://i.postimg.cc/LhKXRnLn/35D3D2CB-9CAC-45E9-AB8F-A6DC94DBBE30.png' },
+      { id: 'gabriel', name: 'Gabriel', role: 'Calm Twin', aura: 'Steady Resolve', img: 'https://i.postimg.cc/Z0tRZCpW/D56B732A-558A-49E2-81DA-E2BAD61AF235.png' },
+      { id: 'chidinma', name: 'Chidinma', role: 'Top Student', aura: 'Book Power', img: 'https://i.postimg.cc/6TJ3wynF/42F129FE-13DA-431B-BABB-9B0B2061241A.png' }
+    ];
 
-    function updateJoy(touch) {
-        let dx = touch.clientX - joyCenter.x;
-        let dy = touch.clientY - joyCenter.y;
-        const dist = Math.sqrt(dx*dx + dy*dy);
-        const maxR = 40;
-        if(dist > maxR) { dx = (dx/dist)*maxR; dy = (dy/dist)*maxR; }
-        
-        joyKnob.style.transform = `translate(${dx}px, ${dy}px)`;
-        input.moveX = dx / maxR;
-        input.moveY = dy / maxR;
+    const tones = {
+      info: 'linear-gradient(135deg, rgba(59,130,246,0.95), rgba(14,165,233,0.95))',
+      success: 'linear-gradient(135deg, rgba(16,185,129,0.95), rgba(5,150,105,0.95))',
+      warn: 'linear-gradient(135deg, rgba(245,158,11,0.95), rgba(217,119,6,0.95))'
+    };
+
+    function toast(msg, tone = 'info') {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.style.background = tones[tone] || tones.info;
+      el.style.opacity = '1';
+      el.style.transform = 'translateY(0)';
+      clearTimeout(el._timer);
+      el._timer = setTimeout(() => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(18px)';
+      }, 2500);
     }
 
-    // Action Button
-    actBtn.addEventListener('touchstart', (e) => { e.preventDefault(); input.action = true; });
-    actBtn.addEventListener('touchend', (e) => { e.preventDefault(); input.action = false; processAction(); });
-}
+    function hideAllScreens() {
+      const ids = ['introScreen','mainMenuScreen','tutorialGateScreen','creatorRevealScreen','avatarSelectionScreen'];
+      ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('hidden');
+      });
+    }
 
-// ==========================================
-// GAME LOGIC & UI
-// ==========================================
+    function showScreen(id) {
+      hideAllScreens();
+      const el = document.getElementById(id);
+      if (el) {
+        el.classList.remove('hidden');
+      }
+    }
 
-function startGame() {
-    initAudio(); // Required to unlock sound on mobile
-    gsap.to("#menu-screen", { duration: 0.5, opacity: 0, onComplete: () => {
-        document.getElementById('menu-screen').style.display = 'none';
-        state.currentScreen = 'gameplay';
-        document.getElementById('hud-top').classList.remove('hidden');
-        document.getElementById('mobile-controls').classList.remove('hidden');
-        updateUI();
-        updateInventoryGrid();
-
-        // Cinematic camera sweep to Michael
-        gsap.to(camera.position, {
-            duration: 2,
-            x: 0,
-            y: 15,
-            z: 20,
-            ease: "power3.out"
+    function bindPlannedButtons() {
+      document.querySelectorAll('[data-planned]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          toast(btn.getAttribute('data-planned'), 'warn');
         });
-    }});
-}
-
-function showToast(msg, type = "info") {
-    const toastContainer = document.getElementById('ui-overlay');
-    const toast = document.createElement('div');
-    toast.className = `absolute right-4 bottom-24 p-4 rounded-xl border font-bold pointer-events-auto shadow-lg z-50 text-xs
-        ${type === 'success' ? 'bg-purple-900/95 border-cyan-400 text-cyan-200 shadow-purple-500/20' : 
-          type === 'error' ? 'bg-red-900/95 border-red-500 text-red-200 shadow-red-500/20' : 
-          'bg-slate-900/95 border-purple-500 text-purple-200 shadow-purple-500/10'}`;
-    toast.innerText = msg;
-    toastContainer.appendChild(toast);
-    
-    // Elastic entrance bounce using GSAP
-    gsap.from(toast, { duration: 0.5, scale: 0.3, y: 50, ease: "elastic.out(1, 0.5)" });
-
-    setTimeout(() => { 
-        gsap.to(toast, { duration: 0.3, scale: 0, opacity: 0, onComplete: () => toast.remove() });
-    }, 2500);
-}
-
-function updateUI() {
-    document.getElementById('aura-bar').style.width = `${(state.aura / state.maxAura) * 100}%`;
-    document.getElementById('aura-val').innerText = `${state.aura}/${state.maxAura}`;
-    document.getElementById('stat-brain').innerText = `🧠 ${state.brainCells}`;
-    document.getElementById('stat-food').innerText = `🍕 ${state.foodTokens}`;
-
-    // Compute updated ranks based on Aura
-    const foundRankObj = [...RANKS].reverse().find(r => state.aura >= r.min);
-    const currentRank = foundRankObj ? foundRankObj.name : 'New Student';
-    state.rank = currentRank;
-    document.getElementById('player-rank').innerText = currentRank;
-
-    // Toggle styling configurations
-    const overlay = document.getElementById('ui-overlay');
-    if (state.focusMode) {
-        overlay.classList.add('focus-active');
-    } else {
-        overlay.classList.remove('focus-active');
-    }
-}
-
-const RANKS = [
-    { name: 'New Student', min: 0 },
-    { name: 'Explorer', min: 100 },
-    { name: 'Scholar', min: 250 },
-    { name: 'Aura Guardian', min: 500 }
-];
-
-function updateInventoryGrid() {
-    // Basic inventory UI updates if a grid is present in the HTML
-    const grid = document.getElementById('inventory-grid');
-    if(grid) {
-        grid.innerHTML = '';
-        state.inventory.forEach((item, idx) => {
-            const slot = document.createElement('div');
-            slot.className = "bg-purple-950/50 p-2 rounded border border-purple-800 text-center flex flex-col items-center justify-center relative";
-            slot.innerHTML = `
-                <div class="text-xl">${item.icon}</div>
-                <div class="text-[9px] font-bold mt-1 text-slate-300">${item.name}</div>
-                <span class="absolute top-1 right-1 bg-cyan-500 text-black font-black text-[8px] px-1 rounded-full">${item.qty}</span>
-            `;
-            grid.appendChild(slot);
-        });
-    }
-}
-
-function modifyStats(changes) {
-    let newAura = state.aura + (changes.aura || 0);
-    if (newAura > state.maxAura) newAura = state.maxAura;
-    state.aura = Math.max(0, newAura); // Keep aura from falling into negative values
-
-    state.brainCells = Math.max(0, state.brainCells + (changes.brainCells || 0));
-    state.foodTokens = Math.max(0, state.foodTokens + (changes.foodTokens || 0));
-
-    updateUI();
-
-    if (state.aura <= 0) {
-        state.currentScreen = 'gameover';
-        document.getElementById('gameover-screen').classList.remove('hidden');
-        document.getElementById('hud-top').classList.add('hidden');
-        playSound('damage');
-    }
-}
-
-function processAction() {
-    if (state.currentScreen === 'gameplay' && state.activeInteractable) {
-        playSound('boing');
-        state.currentScreen = 'dialogue';
-        document.getElementById('dialogue-screen').classList.remove('hidden');
-        
-        // Elastic entrance bounce for dialogue card using GSAP
-        gsap.from("#dialogue-box", { duration: 0.5, scale: 0.8, opacity: 0, y: 100, ease: "back.out(1.5)" });
-
-        const dName = document.getElementById('dialogue-name');
-        const dAvatar = document.getElementById('dialogue-avatar');
-        const dOptions = document.getElementById('dialogue-options');
-
-        dName.innerText = state.activeInteractable.name;
-        dAvatar.innerText = state.activeInteractable.icon || '🎒';
-        dOptions.innerHTML = '';
-
-        const textToType = state.activeInteractable.dialogue || state.activeInteractable.desc;
-        typeDialogText(textToType, 'dialogue-text', () => {
-            // Specialized dialog options load after type completion
-            if (state.activeInteractable.id === 'classroom' || state.activeInteractable.name === "Class Rep") {
-                const assignmentItem = state.inventory.find(item => item.name === 'Lost Assignment File');
-                if (assignmentItem && assignmentItem.qty > 0) {
-                    createOption(dOptions, "Submit physical Lost Assignment File", () => {
-                        assignmentItem.qty = 0;
-                        state.quests.find(q => q.id === 'homework').done = true;
-                        modifyStats({ aura: 40 });
-                        updateInventoryGrid();
-                        showToast("Omo Class Rep happy die! +40 Aura!", "success");
-                        exitDialogue();
-                    });
-                } else {
-                    createOption(dOptions, "Submit homework (Costs 2 Brain Cells)", () => {
-                        if (state.brainCells >= 2) {
-                            const reward = state.focusMode ? 40 : 20;
-                            modifyStats({ brainCells: -2, aura: reward });
-                            state.quests.find(q => q.id === 'homework').done = true;
-                            showToast("Sharp guy! Homework sorted. +" + reward + " Aura!", "success");
-                            exitDialogue();
-                        } else {
-                            showToast("You no do assignment! Zero brain cells 😭", "error");
-                        }
-                    });
-                }
-                createOption(dOptions, "Sneak away silently", () => {
-                    if (Math.random() > 0.4) {
-                        showToast("Smooth escape! 🥷", "success");
-                    } else {
-                        modifyStats({ aura: -15 });
-                        showToast("Isi Owu caught you loitering! -15 Aura.", "error");
-                    }
-                    exitDialogue();
-                });
-            } else if (state.activeInteractable.name === "Gossip NPC" || state.activeInteractable.id === 'gate') {
-                createOption(dOptions, "Listen to rumors (Costs 1 Brain Cell)", () => {
-                    if (state.brainCells >= 1) {
-                        modifyStats({ brainCells: -1, aura: 15 });
-                        showToast("Gossip sweet! Discovered secret shortcut! +15 Aura", "success");
-                    } else {
-                        showToast("Too exhausted to analyze gossips...", "error");
-                    }
-                    exitDialogue();
-                });
-            } else if (state.activeInteractable.name === "Food Lover" || state.activeInteractable.id === 'canteen') {
-                createOption(dOptions, "Buy Jollof Food (Costs 3 Brain Cells)", () => {
-                    if (state.brainCells >= 3) {
-                        modifyStats({ brainCells: -3, foodTokens: 1 });
-                        showToast("Got Jollof pack from Food Lover 🍕!", "success");
-                    } else {
-                        showToast("Not enough Brain Cells to trade with Food Lover!", "error");
-                    }
-                    exitDialogue();
-                });
-            } else if (state.activeInteractable.name === "Study Genius" || state.activeInteractable.id === 'library') {
-                createOption(dOptions, "Solve complex physics calculus (+3 Brain Cells, -5 Aura)", () => {
-                    modifyStats({ brainCells: 3, aura: -5 });
-                    showToast("Brain cells upgraded! 🧠 (+3)", "success");
-                    exitDialogue();
-                });
-            } else if (state.activeInteractable.id === 'rooftop') {
-                createOption(dOptions, "Meditate on high platform (+15 Aura)", () => {
-                    modifyStats({ aura: 15 });
-                    showToast("Inner peace achieved on rooftop!", "success");
-                    exitDialogue();
-                });
-            } else if (state.activeInteractable.id === 'underground') {
-                const shardItem = state.inventory.find(item => item.name === 'Aura Core Shard');
-                if (shardItem && shardItem.qty > 0) {
-                    createOption(dOptions, "Fit the glowing Core Shard into the machine", () => {
-                        shardItem.qty = 0;
-                        state.quests.find(q => q.id === 'stabilize').done = true;
-                        modifyStats({ aura: 50, maxAura: 50 });
-                        updateInventoryGrid();
-                        showToast("The Chamber Hummed. Aura Core fully Stabilized!", "success");
-                        exitDialogue();
-                    });
-                } else {
-                    createOption(dOptions, "Secure the Core fragment (Costs 3 Brain Cells)", () => {
-                        if (state.brainCells >= 3) {
-                            modifyStats({ brainCells: -3, aura: 30 });
-                            showToast("Aura Core stabilized partially! Core fragment secured.", "success");
-                        } else {
-                            showToast("Requires 3 Brain Cells to align the Core mechanics!", "error");
-                        }
-                        exitDialogue();
-                    });
-                }
-            } else if (state.activeInteractable.name === "Ifeoma") {
-                createOption(dOptions, "Compliment her white stockings (+15 Aura)", () => {
-                    modifyStats({ aura: 15 });
-                    showToast("Omo, Ifeoma thick die! She giggles: 'You look dope in that hoodie!'", "success");
-                    exitDialogue();
-                });
-            } else if (state.activeInteractable.name === "Ngozi") {
-                createOption(dOptions, "Compliment her white stockings (+10 Aura)", () => {
-                    modifyStats({ aura: 10 });
-                    showToast("Ngozi smiles! 'You get eye, Michael! See white stockings!'", "success");
-                    exitDialogue();
-                });
-            } else if (state.activeInteractable.name === "Chidi") {
-                createOption(dOptions, "Ask about her rebel hand tattoo (+2 Brain Cells)", () => {
-                    modifyStats({ brainCells: 2 });
-                    showToast("Chidi hand tattoo clean! She gives you hacker hacks.", "success");
-                    exitDialogue();
-                });
-            } else if (state.activeInteractable.name === "Favour") {
-                createOption(dOptions, "Admire her bad rose sleeve tattoo (+20 Aura)", () => {
-                    modifyStats({ aura: 20 });
-                    showToast("Favour curvy model smiles! 'My rose tattoo bad, right?'", "success");
-                    exitDialogue();
-                });
-            }
-            createOption(dOptions, "Keep walking", () => {
-                exitDialogue();
-            });
-        });
-    }
-}
-
-function createOption(container, text, callback) {
-    const btn = document.createElement('button');
-    btn.className = "w-full p-3 bg-purple-900/35 hover:bg-cyan-900/40 border border-purple-700/50 hover:border-cyan-400 text-left rounded-lg text-xs font-bold transition-all text-slate-200 cursor-pointer pointer-events-auto";
-    btn.innerText = text;
-    btn.onclick = callback;
-    container.appendChild(btn);
-}
-
-function exitDialogue() {
-    gsap.to("#dialogue-box", { 
-        duration: 0.3, 
-        scale: 0.8, 
-        opacity: 0, 
-        y: 100, 
-        onComplete: () => {
-            state.currentScreen = 'gameplay';
-            document.getElementById('dialogue-screen').classList.add('hidden');
-            playSound('interact');
-        }
-    });
-}
-
-function eatFood() {
-    if (state.foodTokens > 0) {
-        modifyStats({ foodTokens: -1, aura: 20 });
-        playSound('eat');
-        showToast("Omo, you chopped Jollof and recovered +20 Aura! 🔥", "success");
-    } else {
-        showToast("No Jollof Rice in your pocket!", "error");
-    }
-}
-
-// BOSS ENCOUNTER CONTROLLER
-function startBossFight(name, quote) {
-    state.currentScreen = 'boss';
-    state.boss = { hp: 100, maxHp: 100, name };
-    
-    document.getElementById('boss-screen').classList.remove('hidden');
-    document.getElementById('boss-name').innerText = name; // Element is static in HTML, just updating logic
-    document.getElementById('boss-quote').innerText = `"${quote}"`;
-    playSound('damage');
-    
-    // Elastic entrance pop on boss card
-    gsap.from("#boss-combat-card", { duration: 0.6, scale: 0.7, opacity: 0, rotation: -10, ease: "elastic.out(1, 0.4)" });
-    
-    updateBossUI();
-}
-
-function updateBossUI() {
-    if (!state.boss) return;
-    document.getElementById('boss-hp-bar').style.width = `${(state.boss.hp / state.boss.maxHp) * 100}%`;
-}
-
-function attackBoss(attackType) {
-    let damage = 0;
-    if (attackType === 'brain') {
-        if (state.brainCells < 2) {
-            showToast("No brain cells left to formulate logic!", "error");
-            return;
-        }
-        modifyStats({ brainCells: -2 });
-        damage = state.focusMode ? 40 : 20;
-    } else if (attackType === 'food') {
-        if (state.foodTokens < 1) {
-            showToast("No energy food left!", "error");
-            return;
-        }
-        modifyStats({ foodTokens: -1 });
-        damage = state.focusMode ? 50 : 25;
+      });
     }
 
-    state.boss.hp -= damage;
-    const retaliation = Math.floor(Math.random() * 12) + 8;
-    modifyStats({ aura: -retaliation });
-    playSound('damage');
+    function renderAvatarCards() {
+      const grid = document.getElementById('avatarGrid');
+      if (!grid) return;
 
-    // Red damage flash on canvas container using GSAP
-    gsap.fromTo("#game-canvas", { filter: "brightness(2) sepia(1) hue-rotate(320deg)" }, { duration: 0.4, filter: "none" });
+      grid.innerHTML = '';
+      avatarData.forEach((char) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'group text-left overflow-hidden rounded-[26px] border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] transition shadow-[0_16px_40px_rgba(0,0,0,0.25)]';
+        button.innerHTML = `
+          <div style="position:relative;">
+            <img src="${char.img}" alt="${char.name}" style="width:100%; height:230px; object-fit:cover; display:block;" />
+            <div style="position:absolute; inset:0; background:linear-gradient(180deg, transparent, rgba(5,10,18,0.72));"></div>
+          </div>
+          <div class="p-4">
+            <div class="flex items-center justify-between gap-2 mb-2">
+              <h3 class="text-xl font-black text-white">${char.name}</h3>
+              <span class="text-[10px] uppercase tracking-[0.18em] text-cyan-300 font-black">${char.role}</span>
+            </div>
+            <p class="text-xs text-slate-300">${char.aura}</p>
+          </div>
+        `;
 
-    if (state.boss.hp <= 0) {
-        state.boss.hp = 0;
-        updateBossUI();
-        state.quests.find(q => q.id === 'escape').done = true;
-        showToast("YOU DEFEATED THE STRICT SENTINEL! +50 Aura!", "success");
-        modifyStats({ aura: 50, maxAura: 25 });
-        
-        // Relocate boss
-        bossTeacher.mesh.position.set(0, 0, 10);
-        
-        gsap.to("#boss-combat-card", { 
-            duration: 0.4, 
-            scale: 0.5, 
-            opacity: 0, 
-            onComplete: () => {
-                document.getElementById('boss-screen').classList.add('hidden');
-                state.currentScreen = 'gameplay';
-                state.boss = null;
-            }
-        });
-    } else {
-        updateBossUI();
-        showToast(`Isi Owu attacks back! -${retaliation} Aura`, "error");
-    }
-}
-
-// Cinematic Dialogue Scroll Typewriter Engine
-function typeDialogText(fullText, elementId, onComplete) {
-    const el = document.getElementById(elementId);
-    el.innerText = '';
-    let currentIdx = 0;
-    if (dialogueTextTimer) clearInterval(dialogueTextTimer);
-
-    dialogueTextTimer = setInterval(() => {
-        if (currentIdx < fullText.length) {
-            el.innerText += fullText[currentIdx];
-            currentIdx++;
-            if (currentIdx % 2 === 0) playSound('typewriter');
-        } else {
-            clearInterval(dialogueTextTimer);
-            if (onComplete) onComplete();
-        }
-    }, 25);
-}
-let dialogueTextTimer = null;
-
-// ==========================================
-// PHYSICS & GRAPHICS RENDER LOOP
-// ==========================================
-let patrolDir = 1;
-let stepTimer = 0;
-
-function updatePhysics(delta) {
-    if (state.currentScreen !== 'gameplay') return;
-
-    const nightSpeedModifier = state.dayTime ? 1 : 1.25;
-    const speed = state.focusMode ? 15.5 * delta : 9 * delta;
-    let isMoving = false;
-
-    // Movement tracking via Joystick vectors
-    let tx = player.mesh.position.x + (input.moveX * speed);
-    let tz = player.mesh.position.z + (input.moveY * speed);
-
-    if (Math.abs(input.moveX) > 0.1 || Math.abs(input.moveY) > 0.1) {
-        player.mesh.rotation.y = Math.atan2(input.moveX, input.moveY);
-        isMoving = true;
-    }
-
-    // boundary limits
-    tx = Math.max(-23, Math.min(23, tx));
-    tz = Math.max(-28, Math.min(28, tz));
-
-    // Simple Collision Check
-    const pBox = new THREE.Box3().setFromCenterAndSize(new THREE.Vector3(tx, 0.9, tz), new THREE.Vector3(1.2, 1.8, 1.2));
-    let collision = false;
-    for(let box of staticColliders) {
-        if(pBox.intersectsBox(box)) { collision = true; break; }
-    }
-
-    if(!collision) {
-        player.mesh.position.x = tx;
-        player.mesh.position.z = tz;
-    }
-
-    // Vertical stair scale translations
-    if (player.mesh.position.x > 14 && player.mesh.position.z > 10 && player.mesh.position.z < 20) {
-        const ratio = (player.mesh.position.z - 10) / 10;
-        player.mesh.position.y = THREE.MathUtils.lerp(0, 5.2, ratio);
-    } 
-    else if (player.mesh.position.x > -4 && player.mesh.position.x < 4 && player.mesh.position.z < -10 && player.mesh.position.z > -22) {
-        const ratio = (-10 - player.mesh.position.z) / 12;
-        player.mesh.position.y = THREE.MathUtils.lerp(0, -4.5, ratio);
-    } else {
-        if (player.mesh.position.z > 14 && player.mesh.position.x > 12) {
-            player.mesh.position.y = 5.2;
-        } else if (player.mesh.position.z < -4 && player.mesh.position.x > -6 && player.mesh.position.x < 6) {
-            player.mesh.position.y = -4.5;
-        } else {
-            player.mesh.position.y = 0;
-        }
-    }
-
-    // Dynamic swing limb configurations
-    if (isMoving) {
-        const swing = Math.sin(clock.getElapsedTime() * (state.focusMode ? 16 : 10)) * 0.65;
-        player.joints.rArm.rotation.x = swing;
-        player.joints.lArm.rotation.x = -swing;
-        player.joints.rLeg.rotation.x = -swing;
-        player.joints.lLeg.rotation.x = swing;
-
-        stepTimer -= delta;
-        if (stepTimer <= 0) {
-            playSound('footstep');
-            stepTimer = state.focusMode ? 0.2 : 0.35;
-        }
-    } else {
-        player.joints.rArm.rotation.x = 0;
-        player.joints.lArm.rotation.x = 0;
-        player.joints.rLeg.rotation.x = 0;
-        player.joints.lLeg.rotation.x = 0;
-    }
-
-    // Camera follow (Tracking vertical displacement seamlessly with smooth lerping)
-    camera.position.x += (player.mesh.position.x - camera.position.x) * 0.08;
-    camera.position.z += (player.mesh.position.z + 18 - camera.position.z) * 0.08;
-    camera.position.y += (player.mesh.position.y + 10 - camera.position.y) * 0.08;
-    camera.lookAt(player.mesh.position);
-
-    // Active AI spotlight patrol sweep for Isi Owu
-    const patrolSpeed = (state.dayTime ? 3.5 : 5.0) * nightSpeedModifier;
-    bossTeacher.mesh.position.x += patrolDir * patrolSpeed * delta;
-    if (bossTeacher.mesh.position.x > 18) { patrolDir = -1; bossTeacher.mesh.rotation.y = -Math.PI/2; }
-    if (bossTeacher.mesh.position.x < -18) { patrolDir = 1; bossTeacher.mesh.rotation.y = Math.PI/2; }
-
-    const tSwing = Math.sin(clock.getElapsedTime() * 8.5) * 0.55;
-    bossTeacher.joints.rArm.rotation.x = tSwing;
-    bossTeacher.joints.lArm.rotation.x = -tSwing;
-    bossTeacher.joints.rLeg.rotation.x = -tSwing;
-    bossTeacher.joints.lLeg.rotation.x = tSwing;
-
-    // Trigger Combat Arena if spotted by Teacher
-    const distanceToTeacher = player.mesh.position.distanceTo(bossTeacher.mesh.position);
-    if (distanceToTeacher < 5.0 && Math.abs(player.mesh.position.y - bossTeacher.mesh.position.y) < 2) {
-        startBossFight("Isi Owu", "WHERE IS YOUR EXAM REGISTRATION PASS?! COME HERE!");
-        return;
-    }
-
-    // Hallway dangerous flags activation
-    if (player.mesh.position.z > 3 && player.mesh.position.z < 15 && player.mesh.position.y < 2) {
-        document.getElementById('hallway-warning').classList.remove('hidden');
-    } else {
-        document.getElementById('hallway-warning').classList.add('hidden');
-    }
-
-    // Evaluate proximity with physical pickups on the floor
-    pickupItems.forEach((item, idx) => {
-        item.mesh.rotation.y += 1.5 * delta;
-        const distToPickup = player.mesh.position.distanceTo(item.mesh.position);
-        
-        if (distToPickup < 1.6 && Math.abs(player.mesh.position.y - item.mesh.position.y) < 1.5) {
-            playSound('interact');
-            scene.remove(item.mesh);
-            pickupItems.splice(idx, 1);
-            
-            const targetInv = state.inventory.find(i => i.name === item.name);
-            if (targetInv) {
-                targetInv.qty++;
+        button.addEventListener('click', () => {
+          appState.selectedCharacter = char.id;
+          toast(`Selected ${char.name}.`, 'success');
+          setTimeout(() => {
+            if (appState.creatorUnlocked) {
+              startGame(char.id);
             } else {
-                state.inventory.push({ name: item.name, icon: item.icon, qty: 1, type: 'pickup' });
+              showScreen('creatorRevealScreen');
             }
-            showToast(`Found and stored: ${item.name} ${item.icon}!`, "success");
-            updateUI();
-            updateInventoryGrid();
-        }
-    });
+          }, 220);
+        });
 
-    // Check interaction range
-    let currentFocusInteractable = null;
-
-    zoneIndicators.forEach(zone => {
-        const distance = player.mesh.position.distanceTo(zone.mesh.position);
-        zone.mesh.rotation.y += 1.6 * delta;
-        
-        if (distance < 3.3 && Math.abs(player.mesh.position.y - zone.mesh.position.y) < 2) {
-            currentFocusInteractable = zone;
-        }
-    });
-
-    npcsList.forEach(npc => {
-        const distance = player.mesh.position.distanceTo(npc.mesh.position);
-        if (distance < 3.2 && Math.abs(player.mesh.position.y - npc.mesh.position.y) < 2) {
-            currentFocusInteractable = npc;
-        }
-    });
-
-    // Alert interactive popup overlays
-    const interactPopup = document.getElementById('interact-popup');
-    if (currentFocusInteractable) {
-        if (!state.activeInteractable) {
-            // GSAP elastic scale-up on active interact box
-            interactPopup.classList.remove('hidden');
-            gsap.from(interactPopup, { duration: 0.4, scale: 0.5, ease: "elastic.out(1, 0.4)" });
-        }
-        state.activeInteractable = currentFocusInteractable;
-        document.getElementById('interact-title').innerText = currentFocusInteractable.name;
-        document.getElementById('interact-icon').innerText = currentFocusInteractable.icon || "👤";
-    } else {
-        state.activeInteractable = null;
-        interactPopup.classList.add('hidden');
+        grid.appendChild(button);
+      });
     }
 
-    // Prevent minimap error if canvas isn't populated
-    const mmapCanvas = document.getElementById('minimap');
-    if(mmapCanvas && window.updateMinimap) {
-        updateMinimap();
+    function startIntroTyping() {
+      const textEl = document.getElementById('introText');
+      const message = appState.introText;
+      let i = 0;
+      textEl.textContent = '';
+      const tick = () => {
+        textEl.textContent = message.slice(0, i);
+        i++;
+        if (i <= message.length) {
+          setTimeout(tick, 28);
+        }
+      };
+      tick();
     }
-}
 
-function renderLoop() {
-    requestAnimationFrame(renderLoop);
-    updatePhysics(clock.getDelta());
-    renderer.render(scene, camera);
-}
+    function goToMainMenu() {
+      showScreen('mainMenuScreen');
+    }
 
-window.onload = () => { initEngine(); renderLoop(); };
-</script>
+    function goToTutorial() {
+      showScreen('tutorialGateScreen');
+    }
 
+    function completeTutorial() {
+      appState.tutorialDone = true;
+      showScreen('creatorRevealScreen');
+      appState.creatorUnlocked = true;
+    }
+
+    function showAvatarSelection() {
+      renderAvatarCards();
+      showScreen('avatarSelectionScreen');
+    }
+
+    function bindMenuFlow() {
+      document.getElementById('introScreen').addEventListener('click', () => {
+        goToMainMenu();
+      });
+
+      document.getElementById('mainPlayButton').addEventListener('click', () => {
+        if (appState.tutorialDone) {
+          showAvatarSelection();
+        } else {
+          goToTutorial();
+        }
+      });
+
+      document.getElementById('tutorialStartBtn').addEventListener('click', () => {
+        toast('Tutorial complete. Creator unlocked.', 'success');
+        completeTutorial();
+      });
+
+      document.getElementById('creatorContinueBtn').addEventListener('click', () => {
+        showAvatarSelection();
+      });
+
+      document.getElementById('backToMenuBtn').addEventListener('click', () => {
+        goToMainMenu();
+      });
+    }
+
+    function updateHud() {
+      const portrait = document.getElementById('hudPortrait');
+      const name = document.getElementById('hudName');
+      const level = document.getElementById('hudLevel');
+      const auraBar = document.getElementById('hudAuraBar');
+      const auraText = document.getElementById('hudAuraText');
+      const selected = avatarData.find(item => item.id === appState.selectedCharacter) || avatarData[0];
+
+      portrait.src = selected.img;
+      name.textContent = selected.name;
+      level.textContent = String(appState.level);
+      auraBar.style.width = `${Math.max(0, Math.min(100, appState.aura))}%`;
+      auraText.textContent = `${Math.max(0, Math.min(100, appState.aura))}%`;
+    }
+
+    function renderQuests() {
+      const questList = document.getElementById('questList');
+      const quests = [
+        'Walk the gate route',
+        'Talk to a student',
+        'Train your aura',
+        'Explore the campus'
+      ];
+      questList.innerHTML = quests.map((q, idx) => {
+        const done = idx === 0 ? 'done' : '';
+        return `<li class="${done ? 'text-emerald-300' : 'text-slate-200'}">${q}</li>`;
+      }).join('');
+    }
+
+    function setupAudio() {
+      const audio = new Audio('https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3');
+      audio.loop = true;
+      audio.volume = 0.25;
+      document.getElementById('muteButton').addEventListener('click', () => {
+        audio.muted = !audio.muted;
+        document.getElementById('muteButton').textContent = audio.muted ? 'Unmute' : 'Mute';
+      });
+      document.getElementById('trainAuraButton').addEventListener('click', () => {
+        appState.aura = Math.min(100, appState.aura + 12);
+        updateHud();
+        toast('Aura forged. You feel stronger.', 'success');
+      });
+      try {
+        audio.play().catch(() => {});
+      } catch (e) {}
+    }
+
+    let scene, camera, renderer, player, keys = {};
+    let moveX = 0, moveZ = 0;
+
+    function initThreeGame() {
+      if (appState.gameStarted) return;
+      appState.gameStarted = true;
+
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x7ec0ee);
+      scene.fog = new THREE.Fog(0x7ec0ee, 12, 90);
+
+      camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 200);
+      camera.position.set(0, 8, 14);
+
+      renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.getElementById('canvasContainer').appendChild(renderer.domElement);
+
+      const ambient = new THREE.AmbientLight(0xffffff, 1.2);
+      scene.add(ambient);
+
+      const dir = new THREE.DirectionalLight(0xffffff, 1.1);
+      dir.position.set(12, 22, 8);
+      scene.add(dir);
+
+      const ground = new THREE.Mesh(
+        new THREE.PlaneGeometry(120, 120),
+        new THREE.MeshStandardMaterial({ color: 0x3a8c46, roughness: 0.92, metalness: 0.08 })
+      );
+      ground.rotation.x = -Math.PI / 2;
+      ground.position.y = -0.01;
+      scene.add(ground);
+
+      const road = new THREE.Mesh(
+        new THREE.BoxGeometry(16, 0.2, 90),
+        new THREE.MeshStandardMaterial({ color: 0x3c3b41 })
+      );
+      road.position.set(0, 0.09, 0);
+      scene.add(road);
+
+      const gate = new THREE.Mesh(
+        new THREE.BoxGeometry(20, 8, 2),
+        new THREE.MeshStandardMaterial({ color: 0x7f1d1d, roughness: 0.9 })
+      );
+      gate.position.set(0, 4, -34);
+      scene.add(gate);
+
+      const buildingMaterial = new THREE.MeshStandardMaterial({ color: 0xb7b6c8, roughness: 0.9 });
+      const classBlock = new THREE.Mesh(new THREE.BoxGeometry(28, 12, 18), buildingMaterial);
+      classBlock.position.set(-34, 6, 20);
+      scene.add(classBlock);
+
+      const lib = new THREE.Mesh(new THREE.BoxGeometry(28, 10, 16), new THREE.MeshStandardMaterial({ color: 0x8b5cf6, roughness: 0.8 }));
+      lib.position.set(34, 5, 18);
+      scene.add(lib);
+
+      const treeMaterial = new THREE.MeshStandardMaterial({ color: 0x166534 });
+      const trunkMaterial = new THREE.MeshStandardMaterial({ color: 0x5b2d0c });
+      const treePositions = [
+        [-18, 0, -20], [18, 0, -20],
+        [-18, 0, 22], [18, 0, 22],
+        [-40, 0, 0], [40, 0, 0]
+      ];
+
+      treePositions.forEach(([x,z]) => {
+        const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.9, 3.2, 8), trunkMaterial);
+        trunk.position.set(x, 1.6, z);
+        scene.add(trunk);
+
+        const crown = new THREE.Mesh(new THREE.SphereGeometry(2.8, 12, 12), treeMaterial);
+        crown.position.set(x, 5.2, z);
+        scene.add(crown);
+      });
+
+      const playerGeo = new THREE.BoxGeometry(1.5, 2, 1.5);
+      const playerMat = new THREE.MeshStandardMaterial({ color: 0x22d3ee, emissive: 0x155e75 });
+      player = new THREE.Mesh(playerGeo, playerMat);
+      player.position.set(0, 1.2, 22);
+      scene.add(player);
+
+      const auraRing = new THREE.Mesh(
+        new THREE.RingGeometry(1.2, 1.8, 20),
+        new THREE.MeshBasicMaterial({ color: 0xa855f7, side: THREE.DoubleSide, transparent: true, opacity: 0.7 })
+      );
+      auraRing.rotation.x = -Math.PI / 2;
+      auraRing.position.y = 0.15;
+      player.add(auraRing);
+
+      window.addEventListener('keydown', (event) => {
+        keys[event.key.toLowerCase()] = true;
+      });
+      window.addEventListener('keyup', (event) => {
+        keys[event.key.toLowerCase()] = false;
+      });
+
+      const pad = document.getElementById('touchPad');
+      const padInner = document.getElementById('touchPadInner');
+      const jumpButton = document.getElementById('jumpButton');
+      const actionButton = document.getElementById('actionButton');
+
+      pad.style.display = 'block';
+      jumpButton.style.display = 'block';
+      actionButton.style.display = 'block';
+
+      let drag = false;
+      let centerX = 0;
+      let centerY = 0;
+      let touchId = null;
+
+      pad.addEventListener('touchstart', (e) => {
+        drag = true;
+        const t = e.touches[0];
+        touchId = t.identifier;
+        centerX = t.clientX;
+        centerY = t.clientY;
+      }, { passive: true });
+
+      pad.addEventListener('touchmove', (e) => {
+        if (!drag) return;
+        const touch = Array.from(e.touches).find(t => t.identifier === touchId);
+        if (!touch) return;
+        const dx = touch.clientX - centerX;
+        const dy = touch.clientY - centerY;
+        const max = 34;
+        const limitX = Math.max(-max, Math.min(max, dx));
+        const limitY = Math.max(-max, Math.min(max, dy));
+        padInner.style.transform = `translate(calc(-50% + ${limitX}px), calc(-50% + ${limitY}px))`;
+        moveX = limitX / max;
+        moveZ = limitY / max;
+      }, { passive: true });
+
+      const resetPad = () => {
+        drag = false;
+        touchId = null;
+        moveX = 0;
+        moveZ = 0;
+        padInner.style.transform = 'translate(-50%, -50%)';
+      };
+
+      pad.addEventListener('touchend', resetPad);
+      pad.addEventListener('touchcancel', resetPad);
+
+      jumpButton.addEventListener('click', () => {
+        player.position.y = 1.2 + 3.8;
+      });
+
+      actionButton.addEventListener('click', () => {
+        toast('School interaction ready. Next stage adds NPC dialog and quests.', 'info');
+      });
+
+      window.addEventListener('resize', () => {
+        if (!renderer || !camera) return;
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+
+      animateGame();
+    }
+
+    function animateGame() {
+      requestAnimationFrame(animateGame);
+      if (!scene || !camera || !player) return;
+
+      let dx = 0;
+      let dz = 0;
+
+      if (keys['w'] || keys['arrowup']) dz -= 1;
+      if (keys['s'] || keys['arrowdown']) dz += 1;
+      if (keys['a'] || keys['arrowleft']) dx -= 1;
+      if (keys['d'] || keys['arrowright']) dx += 1;
+
+      if (Math.abs(dx) > 0 || Math.abs(dz) > 0 || Math.abs(moveX) > 0 || Math.abs(moveZ) > 0) {
+        const fx = dx + moveX;
+        const fz = dz + moveZ;
+        const mag = Math.hypot(fx, fz) || 1;
+        player.position.x += (fx / mag) * 0.22;
+        player.position.z += (fz / mag) * 0.22;
+        player.rotation.y = Math.atan2(fx, fz);
+      }
+
+      player.position.x = Math.max(-52, Math.min(52, player.position.x));
+      player.position.z = Math.max(-46, Math.min(46, player.position.z));
+
+      const targetX = player.position.x + 9;
+      const targetZ = player.position.z + 14;
+      camera.position.x += (targetX - camera.position.x) * 0.08;
+      camera.position.z += (targetZ - camera.position.z) * 0.08;
+      camera.position.y = 9.5;
+      camera.lookAt(player.position.x, 1.2, player.position.z);
+
+      renderer.render(scene, camera);
+    }
+
+    function startGame(selectedId) {
+      const selected = avatarData.find(item => item.id === selectedId) || avatarData[0];
+      appState.selectedCharacter = selected.id;
+      document.getElementById('canvasContainer').style.display = 'block';
+      document.getElementById('gameHUD').style.display = 'block';
+      document.getElementById('touchPad').style.display = 'block';
+      document.getElementById('jumpButton').style.display = 'block';
+      document.getElementById('actionButton').style.display = 'block';
+      hideAllScreens();
+      updateHud();
+      renderQuests();
+      document.getElementById('storyFeed').textContent = `You are playing as ${selected.name}. The school is alive.`;
+      initThreeGame();
+      toast(`Starting ${selected.name}'s route.`, 'success');
+    }
+
+    function boot() {
+      bindPlannedButtons();
+      bindMenuFlow();
+      renderAvatarCards();
+      startIntroTyping();
+      setTimeout(() => {
+        showScreen('mainMenuScreen');
+      }, 1800);
+      setupAudio();
+      updateHud();
+      renderQuests();
+    }
+
+    document.addEventListener('DOMContentLoaded', boot);
+  </script>
 </body>
 </html>
