@@ -1,1195 +1,924 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Melting Point Chronicles</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <style>
-    :root {
-      --bg-1: #090b12;
-      --bg-2: #120d17;
-      --panel: rgba(18, 22, 32, 0.82);
-      --panel-soft: rgba(255,255,255,0.06);
-      --cyan: #22d3ee;
-      --purple: #a855f7;
-      --pink: #ec4899;
-      --gold: #fbbf24;
-      --green: #34d399;
-      --red: #f87171;
-      --text: #edf2ff;
-      --muted: #adb7d1;
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Melting Point Chronicles</title>
+    <meta
+      name="description"
+      content="Melting Point Chronicles — a Nigerian secondary school anime RPG. Build your aura, explore campus, and face the final boss."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700;800&family=Orbitron:wght@500;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #070b14;
+        --bg-2: #0d1220;
+        --bg-3: #131b2d;
+        --panel: rgba(15, 20, 31, 0.75);
+        --panel-soft: rgba(255, 255, 255, 0.04);
+        --border: rgba(255, 255, 255, 0.09);
+        --text: #edf2ff;
+        --text-dim: #9aa8c7;
+        --accent: #67e8f9;
+        --accent-2: #c084fc;
+        --gold: #fbbf24;
+        --hot: #ff7b54;
+        --scarlet: #ff4d6d;
+        --green: #34d399;
+        --shadow: rgba(0, 0, 0, 0.38);
+      }
 
-    * { box-sizing: border-box; }
+      * {
+        box-sizing: border-box;
+      }
 
-    html, body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
-      background: var(--bg-1);
-      color: var(--text);
-      font-family: 'Outfit', sans-serif;
-      overflow: hidden;
-      user-select: none;
-      -webkit-user-select: none;
-      -webkit-tap-highlight-color: transparent;
-    }
+      html {
+        scroll-behavior: smooth;
+      }
 
-    body {
-      background:
-        radial-gradient(circle at top, rgba(168,85,247,0.2), transparent 26%),
-        linear-gradient(180deg, var(--bg-2), var(--bg-1));
-    }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background:
+          radial-gradient(circle at top, rgba(168, 85, 247, 0.17), transparent 18%),
+          radial-gradient(circle at 80% 20%, rgba(34, 211, 238, 0.14), transparent 18%),
+          linear-gradient(180deg, #080d18 0%, #090e17 100%);
+        color: var(--text);
+        font-family: "Exo 2", sans-serif;
+      }
 
-    .title-font { font-family: 'Fredoka', sans-serif; }
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
 
-    .screen {
-      position: absolute;
-      inset: 0;
-      z-index: 30;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+      img {
+        max-width: 100%;
+        display: block;
+      }
 
-    .glass {
-      background: rgba(13, 17, 26, 0.78);
-      border: 1px solid rgba(255,255,255,0.08);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      box-shadow: 0 18px 52px rgba(0,0,0,0.45);
-    }
+      .page-shell {
+        width: min(1180px, calc(100% - 32px));
+        margin: 0 auto;
+      }
 
-    .panel-btn {
-      border: 1px solid rgba(255,255,255,0.08);
-      background: rgba(255,255,255,0.04);
-      color: white;
-      transition: 0.2s ease;
-    }
+      .nav-bar {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        background: rgba(9, 12, 19, 0.7);
+        backdrop-filter: blur(18px);
+        border-bottom: 1px solid var(--border);
+      }
 
-    .panel-btn:hover {
-      background: rgba(255,255,255,0.08);
-      transform: translateY(-1px);
-    }
+      .nav-inner {
+        width: min(1180px, calc(100% - 32px));
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+        min-height: 72px;
+      }
 
-    .primary-btn {
-      background: linear-gradient(135deg, var(--cyan), var(--purple));
-      border: none;
-      box-shadow: 0 0 24px rgba(34, 211, 238, 0.4);
-      transition: .18s ease;
-    }
+      .nav-logo {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        font-family: "Orbitron", sans-serif;
+        font-weight: 800;
+        font-size: 1rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
 
-    .primary-btn:hover {
-      transform: translateY(-1px) scale(1.01);
-    }
+      .logo-flame {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, rgba(251, 191, 36, 0.18), rgba(255, 123, 84, 0.2));
+        border: 1px solid rgba(251, 191, 36, 0.24);
+        box-shadow: 0 0 20px rgba(251, 191, 36, 0.18);
+      }
 
-    .action-btn {
-      background: linear-gradient(135deg, var(--purple), var(--pink));
-      border: none;
-      box-shadow: 0 0 18px rgba(168,85,247,0.35);
-    }
+      .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
 
-    .chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      border-radius: 999px;
-      padding: 7px 12px;
-      font-size: 10px;
-      letter-spacing: 0.25em;
-      text-transform: uppercase;
-      font-weight: 800;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.04);
-      color: var(--text);
-    }
+      .nav-link {
+        padding: 0.6rem 0.9rem;
+        border-radius: 999px;
+        color: var(--text-dim);
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        transition: 0.2s ease;
+      }
 
-    #canvasContainer {
-      position: absolute;
-      inset: 0;
-      z-index: 1;
-      display: none;
-    }
+      .nav-link:hover,
+      .nav-link.active {
+        color: var(--text);
+        background: rgba(255, 255, 255, 0.05);
+      }
 
-    #gameHUD {
-      position: absolute;
-      inset: 0;
-      z-index: 15;
-      pointer-events: none;
-      display: none;
-    }
+      .hamburger {
+        display: none;
+        background: transparent;
+        border: 1px solid var(--border);
+        color: var(--text);
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        cursor: pointer;
+      }
 
-    .hud-box {
-      pointer-events: auto;
-      background: rgba(10, 13, 20, 0.74);
-      border: 1px solid rgba(255,255,255,0.08);
-      backdrop-filter: blur(8px);
-    }
+      .hero {
+        padding: 52px 0 36px;
+      }
 
-    #questList li::before {
-      content: "•";
-      margin-right: 8px;
-      color: var(--cyan);
-    }
+      .hero-wrap {
+        display: grid;
+        grid-template-columns: 1.05fr 0.95fr;
+        align-items: center;
+        gap: 32px;
+      }
 
-    #touchPad {
-      position: absolute;
-      left: 16px;
-      bottom: 22px;
-      width: 138px;
-      height: 138px;
-      border-radius: 50%;
-      z-index: 25;
-      pointer-events: none;
-      display: none;
-    }
+      .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 0.55rem 0.9rem;
+        border-radius: 999px;
+        border: 1px solid rgba(103, 232, 249, 0.28);
+        background: rgba(103, 232, 249, 0.06);
+        color: var(--accent);
+        font-size: 0.7rem;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        font-weight: 700;
+      }
 
-    #touchPadInner {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      width: 62px;
-      height: 62px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.15);
-      border: 2px solid rgba(255,255,255,0.2);
-      box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
-    }
+      .hero-title {
+        margin: 18px 0 18px;
+        font-family: "Orbitron", sans-serif;
+        font-size: clamp(2.8rem, 6vw, 6rem);
+        line-height: 0.92;
+        letter-spacing: -0.04em;
+        font-weight: 900;
+      }
 
-    #jumpButton {
-      position: absolute;
-      right: 28px;
-      bottom: 42px;
-      width: 72px;
-      height: 72px;
-      border-radius: 50%;
-      z-index: 25;
-      display: none;
-      pointer-events: auto;
-      color: white;
-      background: linear-gradient(135deg, rgba(168,85,247,0.85), rgba(236,72,153,0.9));
-      border: 1px solid rgba(255,255,255,0.24);
-      box-shadow: 0 12px 30px rgba(168,85,247,0.32);
-    }
+      .hero-title .accent {
+        color: var(--accent);
+      }
 
-    #actionButton {
-      position: absolute;
-      right: 116px;
-      bottom: 42px;
-      width: 72px;
-      height: 72px;
-      border-radius: 50%;
-      z-index: 25;
-      display: none;
-      pointer-events: auto;
-      color: white;
-      background: linear-gradient(135deg, rgba(34,211,238,0.85), rgba(37,99,235,0.9));
-      border: 1px solid rgba(255,255,255,0.22);
-      box-shadow: 0 12px 30px rgba(34,211,238,0.25);
-    }
+      .hero-sub {
+        max-width: 640px;
+        margin: 0 0 18px;
+        color: var(--text-dim);
+        font-size: 1.08rem;
+        line-height: 1.7;
+      }
 
-    #toast {
-      position: fixed;
-      right: 20px;
-      bottom: 20px;
-      z-index: 1000;
-      padding: 12px 16px;
-      border-radius: 12px;
-      background: linear-gradient(135deg, rgba(34,211,238,0.95), rgba(168,85,247,0.9));
-      color: white;
-      font-size: 12px;
-      font-weight: 700;
-      box-shadow: 0 16px 30px rgba(0,0,0,0.28);
-      opacity: 0;
-      transform: translateY(18px);
-      transition: 0.25s ease;
-      pointer-events: none;
-    }
-  </style>
-</head>
-<body>
-  <div id="canvasContainer"></div>
+      .hero-pidgin {
+        margin: 0 0 24px;
+        color: #f5d0fe;
+        font-weight: 600;
+        font-size: 1.02rem;
+      }
 
-  <div id="introScreen" class="screen">
-    <video autoplay muted loop playsinline style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0.38; filter: saturate(1.15) contrast(1.08);">
-      <source src="https://cdn.pixabay.com/video/2020/05/25/40144-424843403_large.mp4" type="video/mp4" />
-    </video>
-    <div style="position:absolute; inset:0; background:linear-gradient(180deg, rgba(0,0,0,0.78), rgba(0,0,0,0.5), rgba(0,0,0,0.85));"></div>
+      .hero-btns {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+      }
 
-    <div style="position:relative; z-index:1; max-width:900px; text-align:center; padding: 24px;">
-      <div class="chip mb-5">V6.0 Alpha</div>
-      <h1 class="title-font text-5xl md:text-8xl font-black tracking-widest" style="line-height:0.9; background:linear-gradient(135deg,#f5d0fe,#67e8f9,#c084fc); -webkit-background-clip:text; background-clip:text; color:transparent; text-shadow:0 0 30px rgba(34,211,238,0.15);">
-        Melting Point
-      </h1>
-      <h2 class="title-font text-2xl md:text-5xl font-extrabold mt-3 tracking-[0.28em] text-cyan-300">
-        CHRONICLES
-      </h2>
-      <p id="introText" class="mt-6 text-lg md:text-2xl text-white/80 italic min-h-[60px]" style="font-family:'Fredoka',sans-serif;">Welcome to Melting Point School...</p>
-      <p class="mt-8 text-sm uppercase tracking-[0.35em] text-slate-300 animate-pulse">Tap to continue</p>
-    </div>
-  </div>
+      .btn-primary,
+      .btn-secondary {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 52px;
+        padding: 0.9rem 1.5rem;
+        border-radius: 16px;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        font-size: 0.72rem;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
 
-  <div id="mainMenuScreen" class="screen hidden">
-    <div style="position:absolute; inset:0; background:linear-gradient(180deg, rgba(6,8,15,0.75), rgba(8,10,16,0.9)), url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat; filter: saturate(1.05);"></div>
+      .btn-primary {
+        background: linear-gradient(135deg, var(--accent), var(--accent-2));
+        color: #040b12;
+        box-shadow: 0 0 28px rgba(103, 232, 249, 0.25);
+      }
 
-    <div style="position:relative; z-index:1; width:min(1100px, 92vw);">
-      <div class="text-center mb-10">
-        <div class="chip mb-6">School Life RPG</div>
-        <h1 class="title-font text-5xl md:text-7xl font-black tracking-tight leading-none">
-          Melting Point<br>
-          <span style="color:var(--cyan);">Chronicles</span>
-        </h1>
+      .btn-secondary {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--border);
+        color: var(--text);
+      }
+
+      .btn-primary:hover,
+      .btn-secondary:hover {
+        transform: translateY(-1px);
+      }
+
+      .hero-cover {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 1.05 / 1.15;
+        object-fit: cover;
+        border-radius: 28px;
+        border: 1px solid rgba(255, 255, 255, 0.09);
+        box-shadow: 0 25px 80px rgba(0, 0, 0, 0.55);
+      }
+
+      .hero-cover-wrap {
+        position: relative;
+      }
+
+      .hero-cover-wrap::before {
+        content: "";
+        position: absolute;
+        inset: 16px;
+        border-radius: 30px;
+        border: 1px solid rgba(103, 232, 249, 0.22);
+        pointer-events: none;
+      }
+
+      .stats-strip {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(120px, 1fr));
+        gap: 16px;
+        padding: 18px 16px;
+        margin: 12px 0 8px;
+        border: 1px solid var(--border);
+        border-radius: 22px;
+        background: rgba(255, 255, 255, 0.02);
+      }
+
+      .stat-item {
+        text-align: center;
+        padding: 10px 8px;
+      }
+
+      .stat-num {
+        font-family: "Orbitron", sans-serif;
+        font-size: clamp(1.6rem, 2vw, 2.3rem);
+        font-weight: 800;
+        margin-bottom: 6px;
+      }
+
+      .stat-label {
+        color: var(--text-dim);
+        font-size: 0.72rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+
+      .section {
+        padding: 86px 0 24px;
+      }
+
+      .section-head {
+        margin-bottom: 26px;
+      }
+
+      .section-kicker {
+        margin: 0 0 8px;
+        color: var(--accent);
+        font-size: 0.72rem;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        font-weight: 700;
+      }
+
+      .section-title {
+        margin: 0;
+        font-family: "Orbitron", sans-serif;
+        font-size: clamp(2rem, 3vw, 3rem);
+        line-height: 1.1;
+      }
+
+      .section-title .accent2 {
+        color: var(--accent-2);
+      }
+
+      .section-sub {
+        margin: 12px 0 0;
+        color: var(--text-dim);
+        font-size: 1rem;
+        line-height: 1.7;
+      }
+
+      .features-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(200px, 1fr));
+        gap: 18px;
+        margin-top: 28px;
+      }
+
+      .feature-card {
+        padding: 22px 18px 20px;
+        background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+        border: 1px solid var(--border);
+        border-radius: 22px;
+        box-shadow: 0 16px 28px rgba(0, 0, 0, 0.18);
+      }
+
+      .feature-icon {
+        width: 52px;
+        height: 52px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 16px;
+        background: linear-gradient(135deg, rgba(103, 232, 249, 0.16), rgba(192, 132, 252, 0.14));
+        border: 1px solid rgba(103, 232, 249, 0.18);
+        font-size: 1.5rem;
+        margin-bottom: 16px;
+      }
+
+      .feature-title {
+        margin: 0 0 8px;
+        font-size: 1.18rem;
+        font-weight: 800;
+      }
+
+      .feature-desc {
+        margin: 0;
+        color: var(--text-dim);
+        line-height: 1.7;
+      }
+
+      .creator-card {
+        margin-top: 30px;
+        display: grid;
+        grid-template-columns: 1.1fr 1.4fr;
+        gap: 24px;
+        padding: 18px;
+        border-radius: 28px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      }
+
+      .creator-photo {
+        width: 100%;
+        border-radius: 22px;
+        min-height: 400px;
+        object-fit: cover;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      .creator-content {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+
+      .creator-top {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        width: fit-content;
+        padding: 0.5rem 0.8rem;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--border);
+        color: var(--text-dim);
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        font-size: 0.68rem;
+        font-weight: 700;
+      }
+
+      .creator-name {
+        margin: 16px 0 6px;
+        font-size: clamp(2rem, 3vw, 3rem);
+        font-family: "Orbitron", sans-serif;
+        font-weight: 800;
+      }
+
+      .creator-text {
+        margin: 0;
+        color: var(--text-dim);
+        line-height: 1.8;
+        font-size: 1.02rem;
+      }
+
+      .aura-wrap {
+        margin-top: 28px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .aura-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.8rem 1rem;
+        border-radius: 999px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        font-size: 0.68rem;
+        border: 1px solid var(--border);
+      }
+
+      .aura-1 { background: rgba(103, 232, 249, 0.08); color: var(--accent); }
+      .aura-2 { background: rgba(192, 132, 252, 0.08); color: #e9d5ff; }
+      .aura-3 { background: rgba(52, 211, 153, 0.08); color: #bbf7d0; }
+      .aura-4 { background: rgba(251, 191, 36, 0.08); color: #fde68a; }
+      .aura-5 { background: rgba(255, 123, 84, 0.08); color: #fed7aa; }
+      .aura-6 { background: rgba(255, 77, 109, 0.1); color: #fecdd3; }
+
+      .chapters-list {
+        margin-top: 28px;
+        display: grid;
+        gap: 14px;
+      }
+
+      .chapter-item {
+        display: grid;
+        grid-template-columns: 84px 1fr;
+        gap: 16px;
+        padding: 18px 20px;
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.02);
+      }
+
+      .chapter-num {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 52px;
+        width: 52px;
+        border-radius: 16px;
+        background: linear-gradient(135deg, rgba(103, 232, 249, 0.08), rgba(192, 132, 252, 0.09));
+        border: 1px solid rgba(103, 232, 249, 0.2);
+        color: var(--accent);
+        font-family: "Orbitron", sans-serif;
+        font-weight: 700;
+      }
+
+      .chapter-title {
+        margin: 0 0 4px;
+        font-size: 1.2rem;
+        font-weight: 800;
+      }
+
+      .chapter-copy {
+        margin: 0;
+        color: var(--text-dim);
+        line-height: 1.65;
+      }
+
+      .chapter-locked {
+        opacity: 0.7;
+      }
+
+      .gallery-grid {
+        margin-top: 28px;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(220px, 1fr));
+        gap: 18px;
+      }
+
+      .gallery-card {
+        overflow: hidden;
+        border-radius: 24px;
+        background: rgba(255,255,255,0.02);
+        border: 1px solid var(--border);
+        transition: transform 0.2s ease;
+      }
+
+      .gallery-card:hover {
+        transform: translateY(-2px);
+      }
+
+      .gallery-card img {
+        width: 100%;
+        aspect-ratio: 3 / 4;
+        object-fit: cover;
+        object-position: center top;
+      }
+
+      .gallery-caption {
+        padding: 12px 14px 16px;
+        color: var(--text-dim);
+        font-weight: 600;
+      }
+
+      .cta-wrap {
+        margin-top: 32px;
+        padding: 34px 20px;
+        border-radius: 28px;
+        border: 1px solid var(--border);
+        background: linear-gradient(135deg, rgba(192, 132, 252, 0.08), rgba(103, 232, 249, 0.06));
+        text-align: center;
+      }
+
+      .cta-wrap h2 {
+        margin: 0 0 12px;
+        font-family: "Orbitron", sans-serif;
+        font-size: clamp(2rem, 3vw, 3rem);
+      }
+
+      .cta-copy {
+        margin: 0 0 22px;
+        color: var(--text-dim);
+      }
+
+      .site-footer {
+        padding: 30px 0 48px;
+        text-align: center;
+        color: var(--text-dim);
+      }
+
+      .footer-title {
+        margin: 0 0 6px;
+        font-weight: 700;
+      }
+
+      @media (max-width: 980px) {
+        .hero-wrap,
+        .creator-card {
+          grid-template-columns: 1fr;
+        }
+
+        .features-grid {
+          grid-template-columns: repeat(2, minmax(220px, 1fr));
+        }
+
+        .gallery-grid {
+          grid-template-columns: repeat(2, minmax(200px, 1fr));
+        }
+      }
+
+      @media (max-width: 720px) {
+        .nav-bar {
+          position: static;
+        }
+
+        .nav-links {
+          display: none;
+          position: absolute;
+          top: 72px;
+          left: 16px;
+          right: 16px;
+          flex-direction: column;
+          align-items: stretch;
+          background: rgba(9, 12, 19, 0.96);
+          border: 1px solid var(--border);
+          border-radius: 18px;
+          padding: 12px;
+        }
+
+        .nav-links.open {
+          display: flex;
+        }
+
+        .hamburger {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .stats-strip {
+          grid-template-columns: repeat(2, minmax(110px, 1fr));
+        }
+
+        .features-grid,
+        .gallery-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .hero {
+          padding-top: 28px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="nav-bar">
+      <div class="nav-inner">
+        <a class="nav-logo" href="#top" aria-label="Melting Point Chronicles home">
+          <span class="logo-flame">🔥</span>
+          <span>MPC</span>
+        </a>
+
+        <button class="hamburger" aria-label="Open menu" id="menuToggle">☰</button>
+
+        <nav class="nav-links" id="mainNav">
+          <a class="nav-link active" href="#top">🏠 Home</a>
+          <a class="nav-link" href="#features">🎮 Features</a>
+          <a class="nav-link" href="#chapters">📖 Story</a>
+          <a class="nav-link" href="#gallery">🖼️ Gallery</a>
+          <a class="nav-link" href="#creator">🎬 About</a>
+        </nav>
       </div>
+    </header>
 
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <button id="mainPlayButton" class="primary-btn col-span-2 md:col-span-4 text-white font-black uppercase tracking-[0.25em] text-sm py-5 rounded-2xl">Play Game</button>
-        <button class="panel-btn text-white font-bold uppercase tracking-[0.18em] text-xs py-4 rounded-2xl" data-planned="Character gallery is being expanded. This will be added in the next stage.">Characters</button>
-        <button class="panel-btn text-white font-bold uppercase tracking-[0.18em] text-xs py-4 rounded-2xl" data-planned="Lore encyclopedia is planned for a later stage.">Lore</button>
-        <button class="panel-btn text-white font-bold uppercase tracking-[0.18em] text-xs py-4 rounded-2xl" data-planned="Achievements are planned in the progression stage.">Achievements</button>
-        <button class="panel-btn text-white font-bold uppercase tracking-[0.18em] text-xs py-4 rounded-2xl" data-planned="News updates are planned after core gameplay is stable.">News</button>
-        <button class="panel-btn text-white font-bold uppercase tracking-[0.18em] text-xs py-4 rounded-2xl" data-planned="The music player is a future feature hook.">Music</button>
-        <button class="panel-btn text-white font-bold uppercase tracking-[0.18em] text-xs py-4 rounded-2xl" data-planned="Developer diary will be added after the build passes testing.">Diary</button>
-        <button class="panel-btn text-white font-bold uppercase tracking-[0.18em] text-xs py-4 rounded-2xl" data-planned="Fan art and memory gallery are planned.">Fan Art</button>
-        <button class="panel-btn text-white font-bold uppercase tracking-[0.18em] text-xs py-4 rounded-2xl" data-planned="Patch notes are added after the next content pass.">Patch Notes</button>
-        <button class="panel-btn text-white font-bold uppercase tracking-[0.18em] text-xs py-4 rounded-2xl" data-planned="Settings are planned once the game loop is stable.">Settings</button>
-        <button class="panel-btn text-white font-bold uppercase tracking-[0.18em] text-xs py-4 rounded-2xl" data-planned="Roadmap remains for later production milestones.">Roadmap</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="tutorialGateScreen" class="screen hidden">
-    <div style="position:absolute; inset:0; background:radial-gradient(circle at center, rgba(34,211,238,0.12), rgba(17,24,39,0.88) 54%, rgba(2,6,23,0.96));"></div>
-
-    <div class="glass relative z-10 w-[min(760px,92vw)] rounded-[28px] p-6 md:p-8">
-      <div class="chip mb-5">Beginner Trial</div>
-      <h2 class="title-font text-3xl md:text-5xl font-black text-white mb-4">Welcome, New Student</h2>
-      <p class="text-sm md:text-base text-slate-300 leading-relaxed mb-6">
-        Complete the school walkthrough, learn movement, interact with students, and power your aura before entering the full campus adventure.
-      </p>
-
-      <div class="grid grid-cols-2 gap-3 mb-6 text-left text-xs text-slate-200">
-        <div class="rounded-2xl border border-white/10 bg-white/5 p-3">
-          <div class="mb-1 font-black text-cyan-300">Move</div>
-          <div>WASD / joystick</div>
-        </div>
-        <div class="rounded-2xl border border-white/10 bg-white/5 p-3">
-          <div class="mb-1 font-black text-fuchsia-300">Action</div>
-          <div>Interact / talk</div>
-        </div>
-        <div class="rounded-2xl border border-white/10 bg-white/5 p-3">
-          <div class="mb-1 font-black text-amber-300">Aura</div>
-          <div>Train to build power</div>
-        </div>
-        <div class="rounded-2xl border border-white/10 bg-white/5 p-3">
-          <div class="mb-1 font-black text-emerald-300">Goal</div>
-          <div>Reach the gate</div>
-        </div>
-      </div>
-
-      <button id="tutorialStartBtn" class="primary-btn w-full py-4 rounded-2xl text-white font-black uppercase tracking-[0.2em] text-sm">
-        Begin Tutorial
-      </button>
-    </div>
-  </div>
-
-  <div id="creatorRevealScreen" class="screen hidden">
-    <div style="position:absolute; inset:0; background:radial-gradient(circle at center, rgba(236,72,153,0.18), rgba(15,15,22,0.94));"></div>
-
-    <div class="glass relative z-10 w-[min(640px,92vw)] rounded-[30px] p-6 md:p-8 text-center">
-      <div class="chip mb-5">Creator Unlock</div>
-      <img src="https://i.postimg.cc/FHmpp9YB/43373877-80E6-4595-8C49-D18AA27B650F.jpg" alt="Michael" class="mx-auto mb-5 rounded-full object-cover border-4 border-white/15" style="width:150px; height:150px;" />
-      <h3 class="title-font text-3xl md:text-4xl font-black text-white mb-3">Michael</h3>
-      <p class="text-sm md:text-base text-slate-200 leading-relaxed mb-7">
-        “This game was made by Michael, also a student like you. We literally went to the same school, bruv. I'm still developing it and trying my best. If you're not in the game yet, start existing sharp sharp so I can add you. Enjoy the vibe!”
-      </p>
-      <button id="creatorContinueBtn" class="primary-btn w-full py-4 rounded-2xl text-white font-black uppercase tracking-[0.18em] text-sm">
-        Continue to Character Select
-      </button>
-    </div>
-  </div>
-
-  <div id="avatarSelectionScreen" class="screen hidden" style="padding:32px; overflow:auto;">
-    <div class="relative z-10 w-full max-w-7xl">
-      <div class="flex items-center justify-between mb-7">
-        <div>
-          <div class="text-[10px] uppercase tracking-[0.3em] text-cyan-300 font-black mb-2">Choose</div>
-          <h2 class="title-font text-4xl md:text-5xl font-black text-white">Your Legend</h2>
-        </div>
-        <button id="backToMenuBtn" class="panel-btn px-4 py-2 rounded-full text-white text-xs uppercase tracking-[0.2em] font-bold">Back</button>
-      </div>
-
-      <div class="grid grid-cols-1 xl:grid-cols-[1.5fr_0.9fr] gap-6 items-start">
-        <div id="avatarGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
-
-        <aside id="characterDetailsCard" class="glass rounded-[28px] p-5 sticky top-4">
-          <div class="relative mb-4">
-            <img id="detailsPortrait" src="" alt="Selected character" class="w-full h-56 object-cover rounded-[22px] border border-white/10" />
-            <div class="absolute inset-0 rounded-[22px] bg-gradient-to-t from-slate-950/80 via-transparent to-transparent"></div>
+    <main class="page-shell" id="top">
+      <section class="hero">
+        <div class="hero-wrap">
+          <div>
+            <span class="hero-badge">🔥 Nigerian School RPG — PH Vibes Only</span>
+            <h1 class="hero-title">
+              MELTING POINT<br />
+              <span class="accent">CHRONICLES</span>
+            </h1>
+            <p class="hero-sub">
+              A story-driven anime school RPG set in a Nigerian secondary school in Port Harcourt.
+              Choose your character, build your aura, survive exams, and uncover the secrets of Melting Point College.
+            </p>
+            <p class="hero-pidgin">“I be Aura King — nobody fit stop me for this school!” 🔥</p>
+            <div class="hero-btns">
+              <a class="btn-primary" href="#play">🎮 Play Now</a>
+              <a class="btn-secondary" href="#creator">👤 Choose Character</a>
+            </div>
           </div>
 
-          <div class="flex items-center justify-between gap-3 mb-3">
+          <div class="hero-cover-wrap">
+            <img
+              class="hero-cover"
+              src="https://i.postimg.cc/d0J3BpQc/F0632B6A-A5D4-47E7-BAEA-0F3BA36C5DE6.png"
+              alt="Melting Point Chronicles team poster"
+            />
+          </div>
+        </div>
+      </section>
+
+      <section class="stats-strip" aria-label="Game stats">
+        <div class="stat-item">
+          <div class="stat-num">8</div>
+          <div class="stat-label">Playable Heroes</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">7</div>
+          <div class="stat-label">Story Chapters</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">14+</div>
+          <div class="stat-label">Locations</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">6</div>
+          <div class="stat-label">Aura Levels</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">6</div>
+          <div class="stat-label">Possible Endings</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">7+</div>
+          <div class="stat-label">Mini Games</div>
+        </div>
+      </section>
+
+      <section class="section" id="features">
+        <div class="section-head">
+          <p class="section-kicker">// What’s inside</p>
+          <h2 class="section-title">Game <span class="accent2">Features</span></h2>
+          <p class="section-sub">Everything wey make this game different from ordinary school game.</p>
+        </div>
+
+        <div class="features-grid">
+          <article class="feature-card">
+            <div class="feature-icon">🎮</div>
+            <h3 class="feature-title">Open World School RPG</h3>
+            <p class="feature-desc">Explore Melting Point College — classrooms, rooftop, hidden basement, and more.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">🔥</div>
+            <h3 class="feature-title">Aura System</h3>
+            <p class="feature-desc">Level up from Dormant to Aura King. Your aura changes how NPCs react to you.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">🇳🇬</div>
+            <h3 class="feature-title">Full Pidgin Vibes</h3>
+            <p class="feature-desc">Authentic Nigerian PH school dialogue. Isi Owu go shout, your crew go hype you.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">👤</div>
+            <h3 class="feature-title">8 Playable Characters</h3>
+            <p class="feature-desc">Michael, Ifeoma, Amara, Trevor, David, Mike, Gabriel and more with unique quests.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">📖</div>
+            <h3 class="feature-title">7 Story Chapters</h3>
+            <p class="feature-desc">From new student arrival to the epic WAEC Guardian battle against Isi Owu.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">⚽</div>
+            <h3 class="feature-title">Mini-Games</h3>
+            <p class="feature-desc">Football matches, coding challenges, exam survival, rooftop parkour and more.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">🎭</div>
+            <h3 class="feature-title">Multiple Endings</h3>
+            <p class="feature-desc">Top Student, Football Legend, Aura King, Chaos... your choices matter.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">📱</div>
+            <h3 class="feature-title">Mobile-First</h3>
+            <p class="feature-desc">Built for Android. Virtual joystick + action buttons. Play anywhere.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="creator">
+        <div class="section-head">
+          <p class="section-kicker">// Made with 🔥</p>
+          <h2 class="section-title">From the <span class="accent2">Creator</span></h2>
+        </div>
+
+        <div class="creator-card">
+          <img
+            class="creator-photo"
+            src="https://i.postimg.cc/FHmpp9YB/43373877-80E6-4595-8C49-D18AA27B650F.jpg"
+            alt="Michael"
+          />
+
+          <div class="creator-content">
+            <span class="creator-top">👨‍💻 Michael — Developer & Student</span>
+            <h3 class="creator-name">Michael</h3>
+            <p class="creator-text">
+              This game was made by <strong>Michael</strong> — also a student like you. We literally went to the same school bruv 😭.
+              So I made this game while still developing it and trying my best. This is my own idea, and if you’re not in my game yet,
+              start existing sharp sharp so I can add you. Check it out 🥴
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="play">
+        <div class="section-head">
+          <p class="section-kicker">// Progression System</p>
+          <h2 class="section-title">The <span class="accent2">Aura</span> System</h2>
+          <p class="section-sub">Your aura is your power. It grows as you complete quests, ace exams, and build reputation.</p>
+        </div>
+
+        <div class="aura-wrap">
+          <span class="aura-badge aura-1">① Dormant</span>
+          <span class="aura-badge aura-2">② Rising</span>
+          <span class="aura-badge aura-3">③ Focused</span>
+          <span class="aura-badge aura-4">④ Elite</span>
+          <span class="aura-badge aura-5">⑤ Legendary</span>
+          <span class="aura-badge aura-6">⑥ Aura King 👑</span>
+        </div>
+      </section>
+
+      <section class="section" id="chapters">
+        <div class="section-head">
+          <p class="section-kicker">// The Story</p>
+          <h2 class="section-title">Story <span class="accent2">Chapters</span></h2>
+          <p class="section-sub">Seven chapters of drama, friendship, exams, and aura battles.</p>
+        </div>
+
+        <div class="chapters-list">
+          <article class="chapter-item">
+            <span class="chapter-num">01</span>
             <div>
-              <div id="detailsRole" class="text-[10px] uppercase tracking-[0.2em] text-cyan-300 font-black">Role</div>
-              <h3 id="detailsName" class="text-2xl font-black text-white">Michael</h3>
+              <h3 class="chapter-title">The New Student</h3>
+              <p class="chapter-copy">Michael arrives at Melting Point. First day, first impressions, first aura awakening.</p>
             </div>
-            <div class="rounded-full border border-cyan-400/30 bg-cyan-500/10 px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-cyan-200 font-black">Level 1</div>
-          </div>
+          </article>
 
-          <p id="detailsQuote" class="text-sm text-slate-300 leading-relaxed mb-4">No one gets to be quiet forever.</p>
-
-          <div class="grid grid-cols-2 gap-3 mb-4">
-            <div class="rounded-2xl border border-white/10 bg-white/[0.04] p-3">
-              <div class="text-[10px] uppercase tracking-[0.18em] text-violet-300 font-black">Passive</div>
-              <div id="detailsPassive" class="text-sm font-semibold text-white mt-1">Aura Flow</div>
+          <article class="chapter-item">
+            <span class="chapter-num">02</span>
+            <div>
+              <h3 class="chapter-title">Suspicious Teacher</h3>
+              <p class="chapter-copy">Rumors about Isi Owu begin. Something is off about this school, and it ain’t normal.</p>
             </div>
-            <div class="rounded-2xl border border-white/10 bg-white/[0.04] p-3">
-              <div class="text-[10px] uppercase tracking-[0.18em] text-amber-300 font-black">Style</div>
-              <div id="detailsStyle" class="text-sm font-semibold text-white mt-1">Calm</div>
+          </article>
+
+          <article class="chapter-item">
+            <span class="chapter-num">03</span>
+            <div>
+              <h3 class="chapter-title">The First Exam</h3>
+              <p class="chapter-copy">Exam survival mode activated. Your choices affect your grades and your reputation.</p>
             </div>
-          </div>
+          </article>
 
-          <div class="mb-4">
-            <div class="text-[10px] uppercase tracking-[0.18em] text-pink-300 font-black mb-2">Personal Quest</div>
-            <p id="detailsQuest" class="text-sm text-slate-200 leading-relaxed"></p>
-          </div>
+          <article class="chapter-item chapter-locked">
+            <span class="chapter-num">04</span>
+            <div>
+              <h3 class="chapter-title">Sports Festival</h3>
+              <p class="chapter-copy">Football, races, and competition. David and Ifeoma shine with raw energy and discipline.</p>
+            </div>
+          </article>
 
-          <div class="mb-5">
-            <div class="text-[10px] uppercase tracking-[0.18em] text-emerald-300 font-black mb-2">Abilities</div>
-            <div id="detailsStats" class="space-y-3"></div>
-          </div>
+          <article class="chapter-item chapter-locked">
+            <span class="chapter-num">05</span>
+            <div>
+              <h3 class="chapter-title">School Secrets</h3>
+              <p class="chapter-copy">Amara reveals hidden truths. The secret basement is real, and the school is hiding something.</p>
+            </div>
+          </article>
 
-          <button id="confirmCharacterBtn" class="primary-btn w-full py-3 rounded-2xl text-white font-black uppercase tracking-[0.22em] text-xs">
-            Start Story
-          </button>
-        </aside>
-      </div>
-    </div>
-  </div>
+          <article class="chapter-item chapter-locked">
+            <span class="chapter-num">06</span>
+            <div>
+              <h3 class="chapter-title">The Aura Awakens</h3>
+              <p class="chapter-copy">Full aura unlock. The school will never be the same as the energy inside you erupts.</p>
+            </div>
+          </article>
 
-  <div id="gameHUD">
-    <div style="position:absolute; top:18px; left:18px; width:min(360px, calc(100vw - 36px));" class="hud-box rounded-2xl p-3">
-      <div class="flex items-center gap-3">
-        <img id="hudPortrait" src="https://i.postimg.cc/Prh2fKyL/47C569FA-49D9-4495-9FB0-225527702F92.png" alt="Character portrait" style="width:56px; height:56px; border-radius:14px; object-fit:cover; border:1px solid rgba(255,255,255,0.1);" />
-        <div class="flex-1 min-w-0">
-          <div class="flex items-center justify-between gap-3">
-            <div class="font-black uppercase tracking-[0.14em] text-sm text-white" id="hudName">Michael</div>
-            <div class="text-[10px] uppercase tracking-[0.12em] text-slate-300">Lvl <span id="hudLevel">1</span></div>
-          </div>
-          <div class="mt-2 h-2 rounded-full bg-slate-800 overflow-hidden">
-            <div id="hudAuraBar" class="h-full rounded-full bg-gradient-to-r from-cyan-400 to-violet-500" style="width:35%;"></div>
-          </div>
-          <div class="mt-2 flex items-center justify-between text-[10px] text-slate-300">
-            <span>Campus Aura</span>
-            <span id="hudAuraText">35%</span>
-          </div>
+          <article class="chapter-item chapter-locked">
+            <span class="chapter-num">07</span>
+            <div>
+              <h3 class="chapter-title">WAEC Trials</h3>
+              <p class="chapter-copy">The ultimate exam. Isi Owu’s true form: WAEC Guardian. The final test is here.</p>
+            </div>
+          </article>
         </div>
-      </div>
-    </div>
+      </section>
 
-    <div style="position:absolute; top:18px; right:18px; width:220px;" class="hud-box rounded-2xl p-3">
-      <div class="flex items-center justify-between">
-        <div class="font-black uppercase tracking-[0.14em] text-[10px] text-cyan-300">Weather</div>
-        <div id="weatherText" class="font-bold text-sm text-white">Sunny</div>
-      </div>
-      <div class="mt-3 flex gap-2">
-        <button id="muteButton" class="panel-btn flex-1 py-2 rounded-xl text-white font-black uppercase text-[10px] tracking-[0.2em]">Mute</button>
-        <button id="trainAuraButton" class="action-btn flex-1 py-2 rounded-xl text-white font-black uppercase text-[10px] tracking-[0.2em]">Aura</button>
-      </div>
-    </div>
-
-    <div style="position:absolute; left:18px; bottom:18px; width:290px;" class="hud-box rounded-2xl p-3">
-      <div class="font-black uppercase tracking-[0.18em] text-[10px] text-violet-300 mb-2">Active Quests</div>
-      <ul id="questList" class="text-xs text-slate-200 list-none m-0 p-0 space-y-2"></ul>
-    </div>
-
-    <div style="position:absolute; right:18px; bottom:18px; width:240px;" class="hud-box rounded-2xl p-3 text-right">
-      <div class="font-black uppercase tracking-[0.18em] text-[10px] text-pink-300 mb-2">School Feed</div>
-      <p id="storyFeed" class="text-xs text-slate-300 leading-relaxed">Welcome to the school grounds. Explore and make your story.</p>
-    </div>
-  </div>
-
-  <div id="touchPad">
-    <div id="touchPadInner"></div>
-  </div>
-  <button id="jumpButton">⤒</button>
-  <button id="actionButton">Act</button>
-
-  <div id="toast"></div>
-
-  <script>
-    const appState = {
-      introText: "Welcome to Melting Point School... no wahala yet, but the aura is waking up.",
-      tutorialDone: false,
-      creatorUnlocked: false,
-      selectedCharacter: 'michael',
-      gameStarted: false,
-      aura: 35,
-      level: 1,
-      weather: 'Sunny',
-      story: 'Welcome to the school grounds. Explore and make your story.',
-      quests: [
-        { id: 'gate', text: 'Walk the gate route', done: false },
-        { id: 'student', text: 'Talk to a student', done: false },
-        { id: 'aura', text: 'Train your aura', done: false },
-        { id: 'explore', text: 'Explore the campus', done: false }
-      ],
-      npcList: [],
-      nearestNpc: null,
-      stats: {
-        academics: 1,
-        sports: 1,
-        tech: 1,
-        leadership: 1,
-        reputation: 0,
-        money: 100,
-        health: 100,
-        stamina: 100
-      },
-      inventory: [
-        { id: 'book', name: 'School Book', icon: '📘', quantity: 1 },
-        { id: 'aura-core', name: 'Aura Core', icon: '💠', quantity: 0 },
-        { id: 'food', name: 'Snack', icon: '🍕', quantity: 2 }
-      ],
-      saveVersion: 1
-    };
-
-    const avatarData = [
-      {
-        id: 'michael',
-        name: 'Michael',
-        role: 'Main Protagonist',
-        passive: 'Aura Flow',
-        style: 'Calm',
-        quote: 'No one gets to be quiet forever.',
-        quest: 'Protect the school rumor before it turns into a civil war between students and prefects.',
-        img: 'https://i.postimg.cc/Prh2fKyL/47C569FA-49D9-4495-9FB0-225527702F92.png',
-        statBars: [
-          { label: 'Academics', value: 72 },
-          { label: 'Sports', value: 66 },
-          { label: 'Tech', value: 58 },
-          { label: 'Leadership', value: 80 }
-        ]
-      },
-      {
-        id: 'ifeoma',
-        name: 'Ifeoma',
-        role: 'Sports Queen',
-        passive: 'Blazing Sprint',
-        style: 'Aggressive',
-        quote: 'I do not run from pressure, I outrun it.',
-        quest: 'Win the inter-house sprint and uncover who has been sabotaging the team bus.',
-        img: 'https://i.postimg.cc/ZKZVYjHB/6411284C-EA81-4EB8-BB99-3535C7E8A4BB.png',
-        statBars: [
-          { label: 'Academics', value: 62 },
-          { label: 'Sports', value: 94 },
-          { label: 'Tech', value: 48 },
-          { label: 'Leadership', value: 76 }
-        ]
-      },
-      {
-        id: 'amara',
-        name: 'Amara',
-        role: 'Mystery Keeper',
-        passive: 'Silent Reading',
-        style: 'Analytical',
-        quote: 'Truth hides in the quiet places.',
-        quest: 'Follow the hidden messages in the library and expose a stolen exam paper ring.',
-        img: 'https://i.postimg.cc/PNsxhPYL/DC972A45-EC19-441B-B451-B7A18578242C.png',
-        statBars: [
-          { label: 'Academics', value: 90 },
-          { label: 'Sports', value: 42 },
-          { label: 'Tech', value: 78 },
-          { label: 'Leadership', value: 70 }
-        ]
-      },
-      {
-        id: 'trevor',
-        name: 'Trevor',
-        role: 'Tech Genius',
-        passive: 'Quick Analysis',
-        style: 'Smart',
-        quote: 'If it can be hacked, it can be fixed.',
-        quest: 'Decrypt the mystery gate code before the principal closes the science lab.',
-        img: 'https://i.postimg.cc/ZKZVYjHC/06BA4789-560E-41F6-A9AD-92DF3C9CA591.png',
-        statBars: [
-          { label: 'Academics', value: 88 },
-          { label: 'Sports', value: 52 },
-          { label: 'Tech', value: 96 },
-          { label: 'Leadership', value: 65 }
-        ]
-      },
-      {
-        id: 'david',
-        name: 'David',
-        role: 'Football Captain',
-        passive: 'Crew Spirit',
-        style: 'Bold',
-        quote: 'The team is the real victory.',
-        quest: 'Lead the school team to the inter-state cup without losing the squad's trust.',
-        img: 'https://i.postimg.cc/grFJdn8r/0A515472-047C-4206-9F56-54834EF6ED63.png',
-        statBars: [
-          { label: 'Academics', value: 56 },
-          { label: 'Sports', value: 92 },
-          { label: 'Tech', value: 44 },
-          { label: 'Leadership', value: 83 }
-        ]
-      },
-      {
-        id: 'mike',
-        name: 'Mike',
-        role: 'Mischievous Twin',
-        passive: 'Chaos Step',
-        style: 'Playful',
-        quote: 'I always say, if the system is broken, break it beautifully.',
-        quest: 'Outsmart the hall monitors and uncover the secret midnight basketball match.',
-        img: 'https://i.postimg.cc/LhKXRnLn/35D3D2CB-9CAC-45E9-AB8F-A6DC94DBBE30.png',
-        statBars: [
-          { label: 'Academics', value: 60 },
-          { label: 'Sports', value: 82 },
-          { label: 'Tech', value: 69 },
-          { label: 'Leadership', value: 58 }
-        ]
-      },
-      {
-        id: 'gabriel',
-        name: 'Gabriel',
-        role: 'Calm Twin',
-        passive: 'Steady Resolve',
-        style: 'Patient',
-        quote: 'A calm mind is always sharper than a loud one.',
-        quest: 'Keep the class together while the school election tension grows.',
-        img: 'https://i.postimg.cc/Z0tRZCpW/D56B732A-558A-49E2-81DA-E2BAD61AF235.png',
-        statBars: [
-          { label: 'Academics', value: 78 },
-          { label: 'Sports', value: 58 },
-          { label: 'Tech', value: 60 },
-          { label: 'Leadership', value: 85 }
-        ]
-      },
-      {
-        id: 'chidinma',
-        name: 'Chidinma',
-        role: 'Top Student',
-        passive: 'Book Burst',
-        style: 'Focused',
-        quote: 'Brains are always louder than rumors.',
-        quest: 'Protect the school prize list and stop a cheating ring from ruining a final exam.',
-        img: 'https://i.postimg.cc/6TJ3wynF/42F129FE-13DA-431B-BABB-9B0B2061241A.png',
-        statBars: [
-          { label: 'Academics', value: 98 },
-          { label: 'Sports', value: 48 },
-          { label: 'Tech', value: 72 },
-          { label: 'Leadership', value: 77 }
-        ]
-      }
-    ];
-
-    const tones = {
-      info: 'linear-gradient(135deg, rgba(59,130,246,0.95), rgba(14,165,233,0.95))',
-      success: 'linear-gradient(135deg, rgba(16,185,129,0.95), rgba(5,150,105,0.95))',
-      warn: 'linear-gradient(135deg, rgba(245,158,11,0.95), rgba(217,119,6,0.95))'
-    };
-
-    function toast(msg, tone = 'info') {
-      const el = document.getElementById('toast');
-      el.textContent = msg;
-      el.style.background = tones[tone] || tones.info;
-      el.style.opacity = '1';
-      el.style.transform = 'translateY(0)';
-      clearTimeout(el._timer);
-      el._timer = setTimeout(() => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(18px)';
-      }, 2500);
-    }
-
-    function hideAllScreens() {
-      const ids = ['introScreen','mainMenuScreen','tutorialGateScreen','creatorRevealScreen','avatarSelectionScreen'];
-      ids.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.classList.add('hidden');
-      });
-    }
-
-    function showScreen(id) {
-      hideAllScreens();
-      const el = document.getElementById(id);
-      if (el) {
-        el.classList.remove('hidden');
-      }
-    }
-
-    function bindPlannedButtons() {
-      document.querySelectorAll('[data-planned]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          toast(btn.getAttribute('data-planned'), 'warn');
-        });
-      });
-    }
-
-    function renderCharacterDetails() {
-      const character = avatarData.find(item => item.id === appState.selectedCharacter) || avatarData[0];
-      const detailsName = document.getElementById('detailsName');
-      const detailsRole = document.getElementById('detailsRole');
-      const detailsQuote = document.getElementById('detailsQuote');
-      const detailsPassive = document.getElementById('detailsPassive');
-      const detailsStyle = document.getElementById('detailsStyle');
-      const detailsQuest = document.getElementById('detailsQuest');
-      const detailsPortrait = document.getElementById('detailsPortrait');
-      const detailsStats = document.getElementById('detailsStats');
-
-      detailsName.textContent = character.name;
-      detailsRole.textContent = character.role;
-      detailsQuote.textContent = `“${character.quote}”`;
-      detailsPassive.textContent = character.passive;
-      detailsStyle.textContent = character.style;
-      detailsQuest.textContent = character.quest;
-      detailsPortrait.src = character.img;
-
-      detailsStats.innerHTML = character.statBars.map((stat) => `
-        <div>
-          <div class="flex items-center justify-between text-[10px] uppercase tracking-[0.18em] text-slate-300 mb-1">
-            <span>${stat.label}</span>
-            <span>${stat.value}%</span>
-          </div>
-          <div class="h-2 w-full rounded-full bg-slate-800 overflow-hidden">
-            <div class="h-full rounded-full bg-gradient-to-r from-cyan-400 via-violet-500 to-pink-500" style="width:${stat.value}%"></div>
-          </div>
+      <section class="section" id="gallery">
+        <div class="section-head">
+          <p class="section-kicker">// Character Art + Game Cover</p>
+          <h2 class="section-title">Character <span class="accent2">Gallery</span></h2>
+          <p class="section-sub">The full cast of Melting Point Chronicles — from Michael to Isi Owu.</p>
         </div>
-      `).join('');
-    }
 
-    function renderAvatarCards() {
-      const grid = document.getElementById('avatarGrid');
-      if (!grid) return;
+        <div class="gallery-grid">
+          <article class="gallery-card">
+            <img src="https://i.postimg.cc/d0J3BpQc/F0632B6A-A5D4-47E7-BAEA-0F3BA36C5DE6.png" alt="Game cover" />
+            <div class="gallery-caption">🎮 Game Cover — Everyone Together</div>
+          </article>
 
-      grid.innerHTML = '';
-      avatarData.forEach((char) => {
-        const card = document.createElement('button');
-        card.type = 'button';
-        const active = char.id === appState.selectedCharacter;
-        card.className = `group text-left overflow-hidden rounded-[26px] border transition shadow-[0_16px_40px_rgba(0,0,0,0.25)] ${active ? 'border-cyan-400/50 bg-cyan-500/10' : 'border-white/10 bg-white/[0.04] hover:bg-white/[0.08]'}`;
-        card.innerHTML = `
-          <div style="position:relative;">
-            <img src="${char.img}" alt="${char.name}" style="width:100%; height:220px; object-fit:cover; display:block;" />
-            <div style="position:absolute; inset:0; background:linear-gradient(180deg, transparent, rgba(5,10,18,0.72));"></div>
-          </div>
-          <div class="p-4">
-            <div class="flex items-center justify-between gap-2 mb-2">
-              <h3 class="text-xl font-black text-white">${char.name}</h3>
-              <span class="text-[10px] uppercase tracking-[0.18em] text-cyan-300 font-black">${char.role}</span>
-            </div>
-            <p class="text-xs text-slate-300">${char.passive}</p>
-          </div>
-        `;
+          <article class="gallery-card">
+            <img src="https://i.postimg.cc/bJ8tnR3m/845BD746-76E6-4F13-B77C-5C3EE2CFBBD5.png" alt="Michael" />
+            <div class="gallery-caption">Michael — Protagonist</div>
+          </article>
 
-        card.addEventListener('click', () => {
-          appState.selectedCharacter = char.id;
-          renderAvatarCards();
-          renderCharacterDetails();
-          toast(`${char.name} selected.`, 'success');
-        });
+          <article class="gallery-card">
+            <img src="https://i.postimg.cc/sXyhWJwn/C7B761B7-8326-4CF2-B7CA-6C2E82E9ADA0.png" alt="Ifeoma" />
+            <div class="gallery-caption">Ifeoma — Sports Queen</div>
+          </article>
 
-        grid.appendChild(card);
+          <article class="gallery-card">
+            <img src="https://i.postimg.cc/hjgdm0pM/B981C9E2-C0D4-4845-87DF-589A9A15A5AC.png" alt="Amara" />
+            <div class="gallery-caption">Amara — Mystery Girl</div>
+          </article>
+
+          <article class="gallery-card">
+            <img src="https://i.postimg.cc/B6sKFCMp/D60FC427-A35A-43B6-A90B-2DB5D2788983.png" alt="Trevor" />
+            <div class="gallery-caption">Trevor — Tech Genius</div>
+          </article>
+
+          <article class="gallery-card">
+            <img src="https://i.postimg.cc/6QBq0g6s/EFA2B168-07B3-48E2-8F3B-A4E48075DD8E.png" alt="David" />
+            <div class="gallery-caption">David — Football Captain</div>
+          </article>
+        </div>
+      </section>
+
+      <section class="cta-wrap">
+        <h2>Ready to Enter <span class="accent2">Melting Point</span>?</h2>
+        <p class="cta-copy">Choose your character and start your school adventure. We move! 🔥</p>
+        <div class="hero-btns" style="justify-content:center;">
+          <a class="btn-primary" href="#play">👤 Select Character</a>
+          <a class="btn-secondary" href="#gallery">🖼️ View Gallery</a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p class="footer-title">🔥 Melting Point Chronicles © 2025 — Made by Michael</p>
+      <p>Still developing… check am out 🥴</p>
+    </footer>
+
+    <script>
+      const menuToggle = document.getElementById('menuToggle');
+      const mainNav = document.getElementById('mainNav');
+
+      menuToggle?.addEventListener('click', () => {
+        mainNav.classList.toggle('open');
+        menuToggle.textContent = mainNav.classList.contains('open') ? '✕' : '☰';
       });
-    }
-
-    function startIntroTyping() {
-      const textEl = document.getElementById('introText');
-      const message = appState.introText;
-      let i = 0;
-      textEl.textContent = '';
-      const tick = () => {
-        textEl.textContent = message.slice(0, i);
-        i++;
-        if (i <= message.length) {
-          setTimeout(tick, 28);
-        }
-      };
-      tick();
-    }
-
-    function goToMainMenu() {
-      showScreen('mainMenuScreen');
-    }
-
-    function goToTutorial() {
-      showScreen('tutorialGateScreen');
-    }
-
-    function completeTutorial() {
-      appState.tutorialDone = true;
-      showScreen('creatorRevealScreen');
-      appState.creatorUnlocked = true;
-    }
-
-    function showAvatarSelection() {
-      appState.selectedCharacter = appState.selectedCharacter || 'michael';
-      renderAvatarCards();
-      renderCharacterDetails();
-      showScreen('avatarSelectionScreen');
-    }
-
-    function bindMenuFlow() {
-      document.getElementById('introScreen').addEventListener('click', () => {
-        goToMainMenu();
-      });
-
-      document.getElementById('mainPlayButton').addEventListener('click', () => {
-        if (appState.tutorialDone) {
-          showAvatarSelection();
-        } else {
-          goToTutorial();
-        }
-      });
-
-      document.getElementById('tutorialStartBtn').addEventListener('click', () => {
-        toast('Tutorial complete. Creator unlocked.', 'success');
-        completeTutorial();
-      });
-
-      document.getElementById('creatorContinueBtn').addEventListener('click', () => {
-        showAvatarSelection();
-      });
-
-      document.getElementById('backToMenuBtn').addEventListener('click', () => {
-        goToMainMenu();
-      });
-
-      document.getElementById('confirmCharacterBtn').addEventListener('click', () => {
-        const char = avatarData.find(item => item.id === appState.selectedCharacter) || avatarData[0];
-        startGame(char.id);
-      });
-    }
-
-    function updateHud() {
-      const portrait = document.getElementById('hudPortrait');
-      const name = document.getElementById('hudName');
-      const level = document.getElementById('hudLevel');
-      const auraBar = document.getElementById('hudAuraBar');
-      const auraText = document.getElementById('hudAuraText');
-      const selected = avatarData.find(item => item.id === appState.selectedCharacter) || avatarData[0];
-
-      portrait.src = selected.img;
-      name.textContent = selected.name;
-      level.textContent = String(appState.level);
-      auraBar.style.width = `${Math.max(0, Math.min(100, appState.aura))}%`;
-      auraText.textContent = `${Math.max(0, Math.min(100, appState.aura))}%`;
-    }
-
-    function renderQuests() {
-      const questList = document.getElementById('questList');
-      questList.innerHTML = appState.quests.map((quest) => {
-        const doneClass = quest.done ? 'text-emerald-300 line-through' : 'text-slate-200';
-        return `<li class="${doneClass}">${quest.text}</li>`;
-      }).join('');
-    }
-
-    function markQuestDone(id) {
-      const quest = appState.quests.find(item => item.id === id);
-      if (quest) quest.done = true;
-      renderQuests();
-    }
-
-    function saveGameState() {
-      const payload = {
-        version: appState.saveVersion,
-        selectedCharacter: appState.selectedCharacter,
-        tutorialDone: appState.tutorialDone,
-        creatorUnlocked: appState.creatorUnlocked,
-        aura: appState.aura,
-        level: appState.level,
-        weather: appState.weather,
-        stats: appState.stats,
-        inventory: appState.inventory,
-        quests: appState.quests
-      };
-      localStorage.setItem('melting-point-chronicles-save', JSON.stringify(payload));
-    }
-
-    function loadGameState() {
-      const raw = localStorage.getItem('melting-point-chronicles-save');
-      if (!raw) return false;
-      try {
-        const save = JSON.parse(raw);
-        if (!save || save.version !== appState.saveVersion) return false;
-        appState.selectedCharacter = save.selectedCharacter || appState.selectedCharacter;
-        appState.tutorialDone = !!save.tutorialDone;
-        appState.creatorUnlocked = !!save.creatorUnlocked;
-        appState.aura = save.aura || appState.aura;
-        appState.level = save.level || appState.level;
-        appState.weather = save.weather || appState.weather;
-        appState.stats = save.stats || appState.stats;
-        appState.inventory = save.inventory || appState.inventory;
-        appState.quests = save.quests || appState.quests;
-        return true;
-      } catch (e) {
-        return false;
-      }
-    }
-
-    function setupAudio() {
-      const audio = new Audio('https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3');
-      audio.loop = true;
-      audio.volume = 0.25;
-
-      document.getElementById('muteButton').addEventListener('click', () => {
-        audio.muted = !audio.muted;
-        document.getElementById('muteButton').textContent = audio.muted ? 'Unmute' : 'Mute';
-      });
-
-      document.getElementById('trainAuraButton').addEventListener('click', () => {
-        appState.aura = Math.min(100, appState.aura + 12);
-        appState.stats.reputation += 2;
-        markQuestDone('aura');
-        updateHud();
-        saveGameState();
-        appState.story = 'Your aura is rising. The campus feels alive.';
-        document.getElementById('storyFeed').textContent = appState.story;
-        toast('Aura forged. You feel stronger.', 'success');
-      });
-
-      try { audio.play().catch(() => {}); } catch (e) {}
-    }
-
-    let scene, camera, renderer, player, keys = {};
-    let moveX = 0, moveZ = 0;
-
-    function createNPC(name, color, x, z) {
-      const group = new THREE.Group();
-      const body = new THREE.Mesh(
-        new THREE.BoxGeometry(1.5, 2, 1.2),
-        new THREE.MeshStandardMaterial({ color })
-      );
-      body.position.y = 1.8;
-      group.add(body);
-
-      const head = new THREE.Mesh(
-        new THREE.BoxGeometry(1.1, 1.1, 1.1),
-        new THREE.MeshStandardMaterial({ color: 0xf2d0b7 })
-      );
-      head.position.y = 3.3;
-      group.add(head);
-
-      const aura = new THREE.Mesh(
-        new THREE.RingGeometry(1.3, 1.8, 24),
-        new THREE.MeshBasicMaterial({ color: 0x22d3ee, side: THREE.DoubleSide, transparent: true, opacity: 0.3 })
-      );
-      aura.rotation.x = -Math.PI / 2;
-      aura.position.y = 0.12;
-      group.add(aura);
-
-      group.position.set(x, 0, z);
-      scene.add(group);
-
-      return { name, mesh: group, color, done: false };
-    }
-
-    function spawnNPCs() {
-      const crowd = [
-        { name: 'Security Musa', color: 0x1d4ed8, x: -20, z: 34 },
-        { name: 'Ifeoma', color: 0xf97316, x: -10, z: -12 },
-        { name: 'Trevor', color: 0x22c55e, x: 18, z: 12 },
-        { name: 'Adaeze', color: 0xe879f9, x: 32, z: -10 }
-      ];
-
-      appState.npcList = crowd.map((npc) => createNPC(npc.name, npc.color, npc.x, npc.z));
-    }
-
-    function updateNearestNPC() {
-      if (!player || !appState.npcList.length) {
-        appState.nearestNpc = null;
-        return;
-      }
-
-      let nearest = null;
-      let nearestDistance = Infinity;
-
-      appState.npcList.forEach((npc) => {
-        const dx = player.position.x - npc.mesh.position.x;
-        const dz = player.position.z - npc.mesh.position.z;
-        const d = Math.hypot(dx, dz);
-
-        if (d < nearestDistance) {
-          nearestDistance = d;
-          nearest = npc;
-        }
-      });
-
-      appState.nearestNpc = nearestDistance < 4 ? nearest : null;
-      const actionButton = document.getElementById('actionButton');
-      if (actionButton) {
-        actionButton.textContent = appState.nearestNpc ? 'Talk' : 'Act';
-      }
-    }
-
-    function handleInteraction() {
-      const npc = appState.nearestNpc;
-
-      if (!npc) {
-        toast('No student nearby. Walk closer and try again.', 'info');
-        return;
-      }
-
-      const message = `You spoke with ${npc.name}. The school is getting more suspicious.`;
-      appState.story = message;
-      document.getElementById('storyFeed').textContent = message;
-      appState.stats.reputation += 1;
-      markQuestDone('student');
-      saveGameState();
-      toast(message, 'success');
-
-      if (npc.name === 'Security Musa') {
-        markQuestDone('gate');
-      }
-    }
-
-    function initThreeGame() {
-      if (appState.gameStarted) return;
-      appState.gameStarted = true;
-
-      scene = new THREE.Scene();
-      scene.background = new THREE.Color(0x7ec0ee);
-      scene.fog = new THREE.Fog(0x7ec0ee, 12, 90);
-
-      camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 200);
-      camera.position.set(0, 8, 14);
-
-      renderer = new THREE.WebGLRenderer({ antialias: true });
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      document.getElementById('canvasContainer').appendChild(renderer.domElement);
-
-      const ambient = new THREE.AmbientLight(0xffffff, 1.2);
-      scene.add(ambient);
-
-      const dir = new THREE.DirectionalLight(0xffffff, 1.1);
-      dir.position.set(12, 22, 8);
-      scene.add(dir);
-
-      const ground = new THREE.Mesh(
-        new THREE.PlaneGeometry(120, 120),
-        new THREE.MeshStandardMaterial({ color: 0x3a8c46, roughness: 0.92, metalness: 0.08 })
-      );
-      ground.rotation.x = -Math.PI / 2;
-      ground.position.y = -0.01;
-      scene.add(ground);
-
-      const road = new THREE.Mesh(
-        new THREE.BoxGeometry(16, 0.2, 90),
-        new THREE.MeshStandardMaterial({ color: 0x3c3b41 })
-      );
-      road.position.set(0, 0.09, 0);
-      scene.add(road);
-
-      const gate = new THREE.Mesh(
-        new THREE.BoxGeometry(20, 8, 2),
-        new THREE.MeshStandardMaterial({ color: 0x7f1d1d, roughness: 0.9 })
-      );
-      gate.position.set(0, 4, -34);
-      scene.add(gate);
-
-      const buildingMaterial = new THREE.MeshStandardMaterial({ color: 0xb7b6c8, roughness: 0.9 });
-      const classBlock = new THREE.Mesh(new THREE.BoxGeometry(28, 12, 18), buildingMaterial);
-      classBlock.position.set(-34, 6, 20);
-      scene.add(classBlock);
-
-      const lib = new THREE.Mesh(new THREE.BoxGeometry(28, 10, 16), new THREE.MeshStandardMaterial({ color: 0x8b5cf6, roughness: 0.8 }));
-      lib.position.set(34, 5, 18);
-      scene.add(lib);
-
-      const treeMaterial = new THREE.MeshStandardMaterial({ color: 0x166534 });
-      const trunkMaterial = new THREE.MeshStandardMaterial({ color: 0x5b2d0c });
-      const treePositions = [
-        [-18, 0, -20], [18, 0, -20],
-        [-18, 0, 22], [18, 0, 22],
-        [-40, 0, 0], [40, 0, 0]
-      ];
-
-      treePositions.forEach(([x,z]) => {
-        const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.9, 3.2, 8), trunkMaterial);
-        trunk.position.set(x, 1.6, z);
-        scene.add(trunk);
-
-        const crown = new THREE.Mesh(new THREE.SphereGeometry(2.8, 12, 12), treeMaterial);
-        crown.position.set(x, 5.2, z);
-        scene.add(crown);
-      });
-
-      const playerGeo = new THREE.BoxGeometry(1.5, 2, 1.5);
-      const playerMat = new THREE.MeshStandardMaterial({ color: 0x22d3ee, emissive: 0x155e75 });
-      player = new THREE.Mesh(playerGeo, playerMat);
-      player.position.set(0, 1.2, 22);
-      scene.add(player);
-
-      const auraRing = new THREE.Mesh(
-        new THREE.RingGeometry(1.2, 1.8, 20),
-        new THREE.MeshBasicMaterial({ color: 0xa855f7, side: THREE.DoubleSide, transparent: true, opacity: 0.7 })
-      );
-      auraRing.rotation.x = -Math.PI / 2;
-      auraRing.position.y = 0.15;
-      player.add(auraRing);
-
-      spawnNPCs();
-
-      window.addEventListener('keydown', (event) => {
-        keys[event.key.toLowerCase()] = true;
-      });
-      window.addEventListener('keyup', (event) => {
-        keys[event.key.toLowerCase()] = false;
-      });
-
-      const pad = document.getElementById('touchPad');
-      const padInner = document.getElementById('touchPadInner');
-      const jumpButton = document.getElementById('jumpButton');
-      const actionButton = document.getElementById('actionButton');
-
-      pad.style.display = 'block';
-      jumpButton.style.display = 'block';
-      actionButton.style.display = 'block';
-
-      actionButton.addEventListener('click', handleInteraction);
-
-      let drag = false;
-      let centerX = 0;
-      let centerY = 0;
-      let touchId = null;
-
-      pad.addEventListener('touchstart', (e) => {
-        drag = true;
-        const t = e.touches[0];
-        touchId = t.identifier;
-        centerX = t.clientX;
-        centerY = t.clientY;
-      }, { passive: true });
-
-      pad.addEventListener('touchmove', (e) => {
-        if (!drag) return;
-        const touch = Array.from(e.touches).find(t => t.identifier === touchId);
-        if (!touch) return;
-        const dx = touch.clientX - centerX;
-        const dy = touch.clientY - centerY;
-        const max = 34;
-        const limitX = Math.max(-max, Math.min(max, dx));
-        const limitY = Math.max(-max, Math.min(max, dy));
-        padInner.style.transform = `translate(calc(-50% + ${limitX}px), calc(-50% + ${limitY}px))`;
-        moveX = limitX / max;
-        moveZ = limitY / max;
-      }, { passive: true });
-
-      const resetPad = () => {
-        drag = false;
-        touchId = null;
-        moveX = 0;
-        moveZ = 0;
-        padInner.style.transform = 'translate(-50%, -50%)';
-      };
-
-      pad.addEventListener('touchend', resetPad);
-      pad.addEventListener('touchcancel', resetPad);
-
-      jumpButton.addEventListener('click', () => {
-        player.position.y = 1.2 + 3.8;
-      });
-
-      window.addEventListener('resize', () => {
-        if (!renderer || !camera) return;
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-      });
-
-      animateGame();
-    }
-
-    function animateGame() {
-      requestAnimationFrame(animateGame);
-      if (!scene || !camera || !player) return;
-
-      let dx = 0;
-      let dz = 0;
-
-      if (keys['w'] || keys['arrowup']) dz -= 1;
-      if (keys['s'] || keys['arrowdown']) dz += 1;
-      if (keys['a'] || keys['arrowleft']) dx -= 1;
-      if (keys['d'] || keys['arrowright']) dx += 1;
-
-      if (Math.abs(dx) > 0 || Math.abs(dz) > 0 || Math.abs(moveX) > 0 || Math.abs(moveZ) > 0) {
-        const fx = dx + moveX;
-        const fz = dz + moveZ;
-        const mag = Math.hypot(fx, fz) || 1;
-        player.position.x += (fx / mag) * 0.22;
-        player.position.z += (fz / mag) * 0.22;
-        player.rotation.y = Math.atan2(fx, fz);
-      }
-
-      player.position.x = Math.max(-52, Math.min(52, player.position.x));
-      player.position.z = Math.max(-46, Math.min(46, player.position.z));
-
-      const targetX = player.position.x + 9;
-      const targetZ = player.position.z + 14;
-      camera.position.x += (targetX - camera.position.x) * 0.08;
-      camera.position.z += (targetZ - camera.position.z) * 0.08;
-      camera.position.y = 9.5;
-      camera.lookAt(player.position.x, 1.2, player.position.z);
-
-      if (player.position.z < -20) {
-        markQuestDone('gate');
-      }
-
-      if (player.position.x > 20 || player.position.x < -20 || player.position.z > 20 || player.position.z < -20) {
-        markQuestDone('explore');
-      }
-
-      updateNearestNPC();
-      renderer.render(scene, camera);
-    }
-
-    function startGame(selectedId) {
-      const selected = avatarData.find(item => item.id === selectedId) || avatarData[0];
-      appState.selectedCharacter = selected.id;
-      document.getElementById('canvasContainer').style.display = 'block';
-      document.getElementById('gameHUD').style.display = 'block';
-      document.getElementById('touchPad').style.display = 'block';
-      document.getElementById('jumpButton').style.display = 'block';
-      document.getElementById('actionButton').style.display = 'block';
-      hideAllScreens();
-      updateHud();
-      renderQuests();
-      document.getElementById('storyFeed').textContent = `You are playing as ${selected.name}. The school is alive.`;
-      initThreeGame();
-      saveGameState();
-      toast(`Starting ${selected.name}'s route.`, 'success');
-    }
-
-    function boot() {
-      const existing = loadGameState();
-      if (existing) {
-        appState.tutorialDone = true;
-        appState.creatorUnlocked = true;
-      }
-
-      bindPlannedButtons();
-      bindMenuFlow();
-      renderAvatarCards();
-      renderCharacterDetails();
-      startIntroTyping();
-      setTimeout(() => {
-        showScreen('mainMenuScreen');
-      }, 1800);
-      setupAudio();
-      updateHud();
-      renderQuests();
-    }
-
-    document.addEventListener('DOMContentLoaded', boot);
-  </script>
-</body>
+    </script>
+  </body>
 </html>
