@@ -6,20 +6,21 @@
     <title>Melting Point Chronicles</title>
     <meta
       name="description"
-      content="Melting Point Chronicles — a Nigerian secondary school anime RPG. Build your aura, explore campus, and face the final boss."
+      content="Melting Point Chronicles — an anime-inspired Nigerian school RPG with aura battles, lore, character choices, and a 3D exploration field."
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700;800&family=Orbitron:wght@500;700;800;900&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700;800;900&family=Orbitron:wght@500;700;800;900&display=swap"
       rel="stylesheet"
     />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
       :root {
         --bg: #070b14;
         --bg-2: #0d1220;
         --bg-3: #131b2d;
-        --panel: rgba(15, 20, 31, 0.75);
+        --panel: rgba(15, 20, 31, 0.72);
         --panel-soft: rgba(255, 255, 255, 0.04);
         --border: rgba(255, 255, 255, 0.09);
         --text: #edf2ff;
@@ -282,12 +283,14 @@
         text-transform: uppercase;
         font-size: 0.72rem;
         transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+        cursor: pointer;
       }
 
       .btn-primary {
         background: linear-gradient(135deg, var(--accent), var(--accent-2));
         color: #09131d;
         box-shadow: 0 0 30px rgba(103, 232, 249, 0.24);
+        border: none;
       }
 
       .btn-primary::after,
@@ -366,65 +369,6 @@
         font-size: 0.72rem;
         letter-spacing: 0.1em;
         text-transform: uppercase;
-      }
-
-      .quick-links-section {
-        padding-top: 28px;
-      }
-
-      .quick-links {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(220px, 1fr));
-        gap: 16px;
-        margin-top: 22px;
-      }
-
-      .quick-link-card {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 16px;
-        padding: 18px 18px;
-        border-radius: 22px;
-        background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015));
-        border: 1px solid var(--border);
-        box-shadow: 0 18px 30px rgba(0, 0, 0, 0.12);
-        transition: transform 0.2s ease, border-color 0.2s ease;
-      }
-
-      .quick-link-card:hover {
-        transform: translateY(-2px);
-        border-color: rgba(103, 232, 249, 0.28);
-      }
-
-      .quick-link-kicker {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        margin-bottom: 6px;
-        color: var(--accent);
-        font-size: 0.68rem;
-        letter-spacing: 0.15em;
-        text-transform: uppercase;
-        font-weight: 700;
-      }
-
-      .quick-link-title {
-        font-weight: 800;
-        font-size: 1.04rem;
-      }
-
-      .quick-link-arrow {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 42px;
-        height: 42px;
-        border-radius: 14px;
-        background: linear-gradient(135deg, rgba(103, 232, 249, 0.14), rgba(192, 132, 252, 0.14));
-        border: 1px solid rgba(103, 232, 249, 0.18);
-        color: var(--text);
-        font-size: 1.2rem;
       }
 
       .section {
@@ -637,6 +581,32 @@
         opacity: 0.72;
       }
 
+      .gallery-tools {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 24px;
+      }
+
+      .filter-button {
+        border: 1px solid var(--border);
+        background: rgba(255,255,255,0.03);
+        color: var(--text-dim);
+        padding: 0.72rem 1rem;
+        border-radius: 999px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        font-size: 0.68rem;
+        cursor: pointer;
+      }
+
+      .filter-button.active {
+        background: linear-gradient(135deg, rgba(103,232,249,0.12), rgba(192,132,252,0.12));
+        color: #f3e8ff;
+        border-color: rgba(103, 232, 249, 0.28);
+      }
+
       .gallery-grid {
         margin-top: 28px;
         display: grid;
@@ -704,6 +674,296 @@
         font-weight: 700;
       }
 
+      .play-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(6, 9, 16, 0.86);
+        z-index: 120;
+        display: none;
+      }
+
+      .play-overlay.active {
+        display: block;
+      }
+
+      #gameCanvasWrap {
+        position: absolute;
+        inset: 0;
+      }
+
+      .game-ui {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        z-index: 10;
+      }
+
+      .hud-top,
+      .hud-bottom {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+        padding: 20px 20px 0 20px;
+      }
+
+      .hud-bottom {
+        align-items: flex-end;
+        padding-top: 0;
+        padding-bottom: 18px;
+      }
+
+      .profile-panel,
+      .quest-panel,
+      .action-panel {
+        pointer-events: auto;
+        background: rgba(12, 14, 22, 0.8);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+      }
+
+      .profile-panel {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        min-width: min(350px, 82vw);
+      }
+
+      .profile-panel img {
+        width: 52px;
+        height: 52px;
+        border-radius: 14px;
+        object-fit: cover;
+        border: 1px solid rgba(255,255,255,0.14);
+      }
+
+      .profile-panel h3 {
+        margin: 0;
+        font-weight: 900;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+      }
+
+      .profile-panel small {
+        display: block;
+        margin-top: 2px;
+        color: var(--text-dim);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        font-weight: 700;
+      }
+
+      .bar {
+        width: 100%;
+        height: 8px;
+        margin-top: 8px;
+        background: rgba(255,255,255,0.08);
+        border-radius: 999px;
+        overflow: hidden;
+      }
+
+      .bar-fill {
+        height: 100%;
+        width: 40%;
+        border-radius: 999px;
+      }
+
+      .bar-fill.aura { background: linear-gradient(90deg, #a855f7, #ec4899); }
+      .bar-fill.xp { background: linear-gradient(90deg, #22c55e, #34d399); }
+
+      .quest-panel {
+        padding: 14px 16px;
+        min-width: 260px;
+      }
+
+      .quest-panel h4 {
+        margin: 0 0 8px;
+        font-size: 0.68rem;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--gold);
+      }
+
+      .quest-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: grid;
+        gap: 8px;
+      }
+
+      .quest-list li {
+        font-size: 0.74rem;
+        color: #e5ebff;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .quest-list li.done {
+        color: #9ae6b4;
+        text-decoration: line-through;
+      }
+
+      .action-panel {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+      }
+
+      #interactBtn,
+      .mini-btn {
+        pointer-events: auto;
+        border: none;
+        border-radius: 12px;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        cursor: pointer;
+      }
+
+      #interactBtn {
+        background: linear-gradient(135deg, #22c55e, #10b981);
+        color: #04130f;
+        padding: 0.9rem 1rem;
+        box-shadow: 0 0 20px rgba(34,197,94,0.26);
+      }
+
+      .mini-btn {
+        background: rgba(255,255,255,0.07);
+        color: var(--text);
+        padding: 0.8rem 1rem;
+      }
+
+      .touch-left,
+      .touch-right {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 50vw;
+        z-index: 30;
+      }
+
+      .touch-left { left: 0; }
+      .touch-right { right: 0; }
+
+      #joyBase {
+        display: none;
+        position: absolute;
+        bottom: 32px;
+        left: 32px;
+        width: 120px;
+        height: 120px;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.2);
+        border-radius: 50%;
+        z-index: 50;
+      }
+
+      #joyStick {
+        position: absolute;
+        width: 42px;
+        height: 42px;
+        background: linear-gradient(135deg, #a855f7, #ec4899);
+        border-radius: 50%;
+        left: 39px;
+        top: 39px;
+        box-shadow: 0 0 18px rgba(168,85,247,0.45);
+      }
+
+      .dialogue-box {
+        position: absolute;
+        left: 50%;
+        bottom: 22px;
+        transform: translateX(-50%);
+        width: min(720px, calc(100% - 22px));
+        background: rgba(11, 14, 22, 0.8);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 18px 16px 16px;
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        display: none;
+        z-index: 60;
+      }
+
+      .dialogue-box.active { display: block; }
+
+      .dialogue-top {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .dialogue-top img {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 14px;
+        border: 1px solid rgba(255,255,255,0.15);
+      }
+
+      .dialogue-box h4 {
+        margin: 0;
+        color: #a5f3fc;
+        font-size: 0.8rem;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+
+      .dialogue-box p {
+        margin: 12px 0 0;
+        color: #e6ecff;
+        line-height: 1.7;
+      }
+
+      .dialogue-actions {
+        margin-top: 14px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+      }
+
+      .dialogue-btn {
+        border: none;
+        border-radius: 12px;
+        padding: 0.72rem 1rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        cursor: pointer;
+      }
+
+      .dialogue-btn.primary {
+        background: linear-gradient(135deg, #8b5cf6, #ec4899);
+        color: white;
+      }
+
+      .dialogue-btn.secondary {
+        background: rgba(255,255,255,0.06);
+        color: var(--text);
+      }
+
+      .close-game-btn {
+        position: absolute;
+        right: 18px;
+        top: 18px;
+        border: 1px solid var(--border);
+        background: rgba(255,255,255,0.04);
+        color: var(--text);
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        font-weight: 800;
+        z-index: 70;
+        cursor: pointer;
+      }
+
       @media (max-width: 980px) {
         .hero-wrap,
         .creator-card {
@@ -714,8 +974,7 @@
           grid-template-columns: repeat(2, minmax(220px, 1fr));
         }
 
-        .gallery-grid,
-        .quick-links {
+        .gallery-grid {
           grid-template-columns: repeat(2, minmax(200px, 1fr));
         }
       }
@@ -750,18 +1009,32 @@
         }
 
         .stats-strip,
-        .quick-links {
-          grid-template-columns: repeat(2, minmax(110px, 1fr));
-        }
-
-        .features-grid,
         .gallery-grid,
-        .quick-links {
+        .features-grid {
           grid-template-columns: 1fr;
         }
 
         .hero {
           padding-top: 28px;
+        }
+
+        .hud-top,
+        .hud-bottom {
+          display: block;
+        }
+
+        .quest-panel {
+          margin-top: 12px;
+        }
+
+        .profile-panel {
+          min-width: 0;
+          width: 100%;
+        }
+
+        .touch-left,
+        .touch-right {
+          width: 50%;
         }
       }
     </style>
@@ -779,10 +1052,10 @@
         <nav class="nav-links" id="mainNav">
           <a class="nav-link active" href="#top">🏠 Home</a>
           <a class="nav-link" href="#features">🎮 Features</a>
-          <a class="nav-link" href="#quick-links">🔗 Sites</a>
           <a class="nav-link" href="#chapters">📖 Story</a>
           <a class="nav-link" href="#gallery">🖼️ Gallery</a>
           <a class="nav-link" href="#creator">🎬 About</a>
+          <a class="nav-link" href="#play">▶ Play</a>
         </nav>
       </div>
     </header>
@@ -792,21 +1065,18 @@
         <div class="hero-wrap">
           <div>
             <span class="hero-badge">🔥 Nigerian School RPG — PH Vibes Only</span>
-            <h1 class="hero-title">
-              MELTING POINT<br />
-              <span class="accent">CHRONICLES</span>
-            </h1>
+            <h1 class="hero-title">MELTING POINT<br /><span class="accent">CHRONICLES</span></h1>
             <div class="hero-meta">
               <span class="loading-pill"><span class="dot"></span> Opening school portal</span>
             </div>
             <p class="hero-sub">
-              A story-driven anime school RPG set in a Nigerian secondary school in Port Harcourt.
-              Choose your character, build your aura, survive exams, and uncover the secrets of Melting Point College.
+              A story-driven anime school RPG set in a Nigerian secondary school in Port Harcourt. Choose your character,
+              build your aura, survive exams, and uncover the secrets of Melting Point College.
             </p>
             <p class="hero-pidgin">“I be Aura King — nobody fit stop me for this school!” 🔥</p>
             <div class="hero-btns">
-              <a class="btn-primary" href="#play">🎮 Enter App</a>
-              <a class="btn-secondary" href="#creator">👤 Choose Character</a>
+              <button class="btn-primary" id="startPlayBtn">🎮 Enter App</button>
+              <a class="btn-secondary" href="#gallery">👤 Choose Character</a>
             </div>
           </div>
 
@@ -839,37 +1109,11 @@
         </div>
         <div class="stat-item">
           <div class="stat-num">6</div>
-          <div class="stat-label">Possible Endings</div>
+          <div class="stat-label">Endings</div>
         </div>
         <div class="stat-item">
           <div class="stat-num">7+</div>
           <div class="stat-label">Mini Games</div>
-        </div>
-      </section>
-
-      <section class="section quick-links-section" id="quick-links">
-        <div class="section-head">
-          <p class="section-kicker">// Quick Access</p>
-          <h2 class="section-title">Live <span class="accent2">Sites</span></h2>
-          <p class="section-sub">Open the active builds instantly and keep track of your deployments.</p>
-        </div>
-
-        <div class="quick-links">
-          <a class="quick-link-card" href="https://melting-point-chronicles.netlify.app" target="_blank" rel="noreferrer">
-            <div>
-              <div class="quick-link-kicker">Primary</div>
-              <div class="quick-link-title">Melting Point Chronicles</div>
-            </div>
-            <span class="quick-link-arrow">↗</span>
-          </a>
-
-          <a class="quick-link-card" href="https://thriving-jalebi-3c1253.netlify.app" target="_blank" rel="noreferrer">
-            <div>
-              <div class="quick-link-kicker">Backup</div>
-              <div class="quick-link-title">Thriving Jalebi</div>
-            </div>
-            <span class="quick-link-arrow">↗</span>
-          </a>
         </div>
       </section>
 
@@ -931,31 +1175,6 @@
         </div>
       </section>
 
-      <section class="section" id="creator">
-        <div class="section-head">
-          <p class="section-kicker">// Made with 🔥</p>
-          <h2 class="section-title">From the <span class="accent2">Creator</span></h2>
-        </div>
-
-        <div class="creator-card">
-          <img
-            class="creator-photo"
-            src="https://i.postimg.cc/FHmpp9YB/43373877-80E6-4595-8C49-D18AA27B650F.jpg"
-            alt="Michael"
-          />
-
-          <div class="creator-content">
-            <span class="creator-top">👨‍💻 Michael — Developer & Student</span>
-            <h3 class="creator-name">Michael</h3>
-            <p class="creator-text">
-              This game was made by <strong>Michael</strong> — also a student like you. We literally went to the same school bruv 😭.
-              So I made this game while still developing it and trying my best. This is my own idea, and if you’re not in my game yet,
-              start existing sharp sharp so I can add you. Check it out 🥴
-            </p>
-          </div>
-        </div>
-      </section>
-
       <section class="section" id="play">
         <div class="section-head">
           <p class="section-kicker">// Progression System</p>
@@ -1001,15 +1220,15 @@
             <span class="chapter-num">03</span>
             <div>
               <h3 class="chapter-title">The First Exam</h3>
-              <p class="chapter-copy">Exam survival mode activated. Your choices affect your grades and your reputation.</p>
+              <p class="chapter-copy">Exam Survival Mode activated. Choices affect grades, reputation, and future quests.</p>
             </div>
           </article>
 
-          <article class="chapter-item chapter-locked">
+          <article class="chapter-item">
             <span class="chapter-num">04</span>
             <div>
               <h3 class="chapter-title">Sports Festival</h3>
-              <p class="chapter-copy">Football, races, and competition. David and Ifeoma shine with raw energy and discipline.</p>
+              <p class="chapter-copy">Football, races, and competition. David and Ifeoma shine under pressure.</p>
             </div>
           </article>
 
@@ -1017,7 +1236,7 @@
             <span class="chapter-num">05</span>
             <div>
               <h3 class="chapter-title">School Secrets</h3>
-              <p class="chapter-copy">Amara reveals hidden truths. The secret basement is real, and the school is hiding something.</p>
+              <p class="chapter-copy">Amara reveals hidden truths. The secret basement is real, and the aura is waking.</p>
             </div>
           </article>
 
@@ -1025,7 +1244,7 @@
             <span class="chapter-num">06</span>
             <div>
               <h3 class="chapter-title">The Aura Awakens</h3>
-              <p class="chapter-copy">Full aura unlock. The school will never be the same as the energy inside you erupts.</p>
+              <p class="chapter-copy">Full aura unlock. The school will never be the same, and the strongest students rise.</p>
             </div>
           </article>
 
@@ -1033,7 +1252,7 @@
             <span class="chapter-num">07</span>
             <div>
               <h3 class="chapter-title">WAEC Trials</h3>
-              <p class="chapter-copy">The ultimate exam. Isi Owu’s true form: WAEC Guardian. The final test is here.</p>
+              <p class="chapter-copy">The ultimate exam. Isi Owu’s true form: the WAEC Guardian. Your ending depends on your journey.</p>
             </div>
           </article>
         </div>
@@ -1041,78 +1260,768 @@
 
       <section class="section" id="gallery">
         <div class="section-head">
-          <p class="section-kicker">// Character Art + Game Cover</p>
-          <h2 class="section-title">Character <span class="accent2">Gallery</span></h2>
-          <p class="section-sub">The full cast of Melting Point Chronicles — from Michael to Isi Owu.</p>
+          <p class="section-kicker">// Character Database</p>
+          <h2 class="section-title">School <span class="accent2">Roster</span></h2>
+          <p class="section-sub">Every student and staff member has a role in the story.</p>
         </div>
 
-        <div class="gallery-grid">
-          <article class="gallery-card">
-            <img src="https://i.postimg.cc/d0J3BpQc/F0632B6A-A5D4-47E7-BAEA-0F3BA36C5DE6.png" alt="Game cover" />
-            <div class="gallery-caption">🎮 Game Cover — Everyone Together</div>
-          </article>
+        <div class="gallery-tools" id="filterBar">
+          <button class="filter-button active" data-filter="all">All</button>
+          <button class="filter-button" data-filter="playable">Playable</button>
+          <button class="filter-button" data-filter="student">Students</button>
+          <button class="filter-button" data-filter="staff">Staff</button>
+        </div>
 
-          <article class="gallery-card">
-            <img src="https://i.postimg.cc/bJ8tnR3m/845BD746-76E6-4F13-B77C-5C3EE2CFBBD5.png" alt="Michael" />
-            <div class="gallery-caption">Michael — Protagonist</div>
-          </article>
+        <div class="gallery-grid" id="galleryGrid"></div>
+      </section>
 
-          <article class="gallery-card">
-            <img src="https://i.postimg.cc/sXyhWJwn/C7B761B7-8326-4CF2-B7CA-6C2E82E9ADA0.png" alt="Ifeoma" />
-            <div class="gallery-caption">Ifeoma — Sports Queen</div>
-          </article>
+      <section class="section" id="creator">
+        <div class="section-head">
+          <p class="section-kicker">// Made with 🔥</p>
+          <h2 class="section-title">From the <span class="accent2">Creator</span></h2>
+        </div>
 
-          <article class="gallery-card">
-            <img src="https://i.postimg.cc/hjgdm0pM/B981C9E2-C0D4-4845-87DF-589A9A15A5AC.png" alt="Amara" />
-            <div class="gallery-caption">Amara — Mystery Girl</div>
-          </article>
+        <div class="creator-card">
+          <img
+            class="creator-photo"
+            src="https://i.postimg.cc/FHmpp9YB/43373877-80E6-4595-8C49-D18AA27B650F.jpg"
+            alt="Michael"
+          />
 
-          <article class="gallery-card">
-            <img src="https://i.postimg.cc/B6sKFCMp/D60FC427-A35A-43B6-A90B-2DB5D2788983.png" alt="Trevor" />
-            <div class="gallery-caption">Trevor — Tech Genius</div>
-          </article>
-
-          <article class="gallery-card">
-            <img src="https://i.postimg.cc/6QBq0g6s/EFA2B168-07B3-48E2-8F3B-A4E48075DD8E.png" alt="David" />
-            <div class="gallery-caption">David — Football Captain</div>
-          </article>
+          <div class="creator-content">
+            <span class="creator-top">👨‍💻 Michael — Developer & Student</span>
+            <h3 class="creator-name">Michael</h3>
+            <p class="creator-text">
+              This game was made by <strong>Michael</strong> — also a student like you. We literally went to the same school bruv 😭.
+              So I made this game while still developing it and trying my best. This is my own idea, and if you’re not in my game yet,
+              start existing sharp sharp so I can add you. Check it out 🥴
+            </p>
+          </div>
         </div>
       </section>
 
-      <section class="cta-wrap">
-        <h2>Ready to Enter <span class="accent2">Melting Point</span>?</h2>
+      <div class="cta-wrap">
+        <h2>Ready to Enter Melting <span class="accent2">Point?</span></h2>
         <p class="cta-copy">Choose your character and start your school adventure. We move! 🔥</p>
-        <div class="hero-btns" style="justify-content:center;">
-          <a class="btn-primary" href="#play">👤 Select Character</a>
-          <a class="btn-secondary" href="#gallery">🖼️ View Gallery</a>
-        </div>
-      </section>
+        <button class="btn-primary" id="ctaPlayBtn">Select Character</button>
+      </div>
     </main>
 
     <footer class="site-footer">
-      <p class="footer-title">🔥 Melting Point Chronicles © 2025 — Made by Michael</p>
-      <p>Still developing… check am out 🥴</p>
+      <p class="footer-title">🔥 Melting Point Chronicles © 2026 — Made by Michael</p>
+      <div>Still developing… check am out 😎</div>
     </footer>
 
+    <div class="play-overlay" id="playOverlay">
+      <button class="close-game-btn" id="closeGameBtn">✕</button>
+      <div id="gameCanvasWrap"></div>
+
+      <div class="touch-left" aria-label="Joystick area"></div>
+      <div class="touch-right" aria-label="Camera area"></div>
+      <div id="joyBase"><div id="joyStick"></div></div>
+
+      <div class="game-ui">
+        <div class="hud-top">
+          <div class="profile-panel">
+            <img id="hudPortrait" src="" alt="Character portrait" />
+            <div style="flex: 1">
+              <h3 id="hudName">MICHAEL</h3>
+              <small>Level <span id="hudLevel">1</span> • Aura Tier <span id="auraTier">Dormant</span></small>
+              <div class="bar"><div id="xpBar" class="bar-fill xp" style="width: 24%;"></div></div>
+              <div class="bar" style="margin-top: 8px;"><div id="auraBar" class="bar-fill aura" style="width: 12%;"></div></div>
+            </div>
+          </div>
+
+          <div class="quest-panel">
+            <h4>Active Quests</h4>
+            <ul class="quest-list" id="questList"></ul>
+          </div>
+        </div>
+
+        <div class="hud-bottom">
+          <div></div>
+          <div class="action-panel">
+            <button id="interactBtn" style="display:none;">Interact</button>
+            <button class="mini-btn" id="trainAuraBtn">Aura Walk</button>
+            <button class="mini-btn" id="jumpBtn">Jump</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="dialogue-box" id="dialogueBox">
+        <div class="dialogue-top">
+          <img id="dlgPortrait" src="" alt="NPC portrait" />
+          <div>
+            <h4 id="dlgSpeaker">NPC</h4>
+            <div id="dlgRelation" style="font-size:0.68rem;color:var(--text-dim);letter-spacing:0.08em;text-transform:uppercase;font-weight:700;">Stranger</div>
+          </div>
+        </div>
+        <p id="dlgText">"A story begins here..."</p>
+        <div class="dialogue-actions">
+          <button class="dialogue-btn primary" id="acceptDialogueBtn">Respond</button>
+          <button class="dialogue-btn secondary" id="closeDialogueBtn">Leave</button>
+        </div>
+      </div>
+    </div>
+
     <script>
+      const CHARACTERS = [
+        { id: 'michael', name: 'Michael', role: 'Main Protagonist', type: 'playable', img: 'https://i.postimg.cc/Prh2fKyL/47C569FA-49D9-4495-9FB0-225527702F92.png', bio: 'Main protagonist and creator. Balances coding games and surviving Port Harcourt school life.' },
+        { id: 'ifeoma', name: 'Ifeoma', role: 'Sports Queen', type: 'playable', img: 'https://i.postimg.cc/ZKZVYjHB/6411284C-EA81-4EB8-BB99-3535C7E8A4BB.png', bio: 'Fastest runner on the track. Fierce competitor and loyal friend.' },
+        { id: 'amara', name: 'Amara', role: 'Mystery Keeper', type: 'playable', img: 'https://i.postimg.cc/PNsxhPYL/DC972A45-EC19-441B-B451-B7A18578242C.png', bio: 'Knows the school hidden truths. Key to unlocking the basement and deeper lore.' },
+        { id: 'trevor', name: 'Trevor', role: 'Tech Genius', type: 'playable', img: 'https://i.postimg.cc/K8fgdXXH/D0BB3681-0659-4AD1-9180-1618686971C6.png', bio: 'Master coder and hacker of school systems. Always ready with a gadget.' },
+        { id: 'chidinma', name: 'Chidinma', role: 'Top Student', type: 'playable', img: 'https://i.postimg.cc/6TJ3wynF/42F129FE-13DA-431B-BABB-9B0B2061241A.png', bio: 'Brilliant student and drama club star. Can turn any situation into a performance.' },
+        { id: 'mike', name: 'Mike', role: 'Mischievous Twin', type: 'playable', img: 'https://i.postimg.cc/LhKXRnLn/35D3D2CB-9CAC-45E9-AB8F-A6DC94DBBE30.png', bio: 'Makes everyone laugh even when the school is on fire. Surprisingly good at reading people.' },
+        { id: 'gabriel', name: 'Gabriel', role: 'Calm Twin', type: 'playable', img: 'https://i.postimg.cc/Z0tRZCpW/D56B732A-558A-49E2-81DA-E2BAD61AF235.png', bio: 'Artistic soul with strong aura potential. Sees patterns others miss.' },
+        { id: 'david', name: 'David', role: 'Football Captain', type: 'playable', img: 'https://i.postimg.cc/grFJdn8r/0A515472-047C-4206-9F56-54834EF6ED63.png', bio: 'The pride of Melting Point football team. Calm under pressure and extremely competitive.' },
+        { id: 'precious', name: 'Precious', role: 'Student', type: 'student', img: 'https://i.postimg.cc/c18fqYNL/2DF0D902-FA03-4268-B7B7-8BFDE3D61B64.png', bio: 'Always smiling, always helping. The social glue of SS2.' },
+        { id: 'adaeze', name: 'Adaeze', role: 'School Gossip', type: 'student', img: 'https://i.postimg.cc/1Rgr92DS/3B548F00-D912-468D-B590-B082848F76A5.png', bio: 'Top of the class in literature. Soft-spoken but fierce when defending her friends.' },
+        { id: 'emeka', name: 'Emeka', role: 'Class Clown', type: 'student', img: 'https://i.postimg.cc/kG8Sxry8/5688CEF2-31FF-4FA4-9DE7-BE560EB043EF.png', bio: 'The guy who always has snacks. Loyal friend and excellent lookout.' },
+        { id: 'kelechi', name: 'Kelechi', role: 'Sleeping Student', type: 'student', img: 'https://i.postimg.cc/vT9nWRvn/92263068-3D2D-4D7F-B522-6BF5AF427292.png', bio: 'Quiet tech helper. Often found with Trevor in the computer lab.' },
+        { id: 'sophia', name: 'Sophia', role: 'Transfer Girl', type: 'student', img: 'https://i.postimg.cc/VvMtjyFD/18D4E584-8507-4DCF-923E-6D9B87FA0504.png', bio: 'Quiet observer with sharp eyes. Knows more school secrets than she lets on.' },
+        { id: 'samuel', name: 'Samuel', role: 'Transfer Student', type: 'student', img: 'https://i.postimg.cc/T1mbr8cr/ADC5E527-4718-4259-A7D5-F906FF2C203F.png', bio: 'Serious, reliable, always has his notes ready. The group’s moral compass.' },
+        { id: 'victor', name: 'Victor', role: 'Rival Student', type: 'student', img: 'https://i.postimg.cc/CMfbyDVK/FA4122BD-D86F-4CD2-A034-C655829235C1.png', bio: 'Ambitious and competitive. Wants the Aura King title almost as much as Michael.' },
+        { id: 'isi', name: 'Isi Owu', role: 'Final Boss Teacher', type: 'staff', img: 'https://i.postimg.cc/GhwGb2c5/6FC0FF7D-2FA8-4239-A102-6CD0F2F45C32.png', bio: 'The feared teacher. Once brilliant, now corrupted by the school’s aura. Becomes the WAEC Guardian in the final chapter.' },
+        { id: 'principal', name: 'Principal Okafor', role: 'Principal', type: 'staff', img: 'https://i.postimg.cc/GhwGb2cq/198B1549-D034-4398-AD5A-34CF3EF1D250.png', bio: 'The ultimate authority. Rarely leaves his office. Some say he knows the truth about the basement.' },
+        { id: 'coach', name: 'Coach Martins', role: 'Sports Coach', type: 'staff', img: 'https://i.postimg.cc/v865R9dr/11ABC614-6A5B-4074-A2E2-5497F8F85CE2.png', bio: 'Strict but fair. Believes sports build character as much as books.' },
+        { id: 'nurse', name: 'Nurse Grace', role: 'School Nurse', type: 'staff', img: 'https://i.postimg.cc/NGrRhTwH/7A41BD68-14CC-4EF8-843B-66A567E2EF37.png', bio: 'Heals bodies and sometimes egos. Knows every student’s medical history.' },
+        { id: 'mama', name: 'Mama Chisom', role: 'Canteen Mama', type: 'staff', img: 'https://i.postimg.cc/yYm9xHxH/9AD96DEE-6ECB-4D99-8409-B031FB4FDEE5.png', bio: 'The real boss of the school. Her jollof can fix any bad day.' },
+        { id: 'musa', name: 'Security Musa', role: 'Gate Security', type: 'staff', img: 'https://i.postimg.cc/kXQ8GmG4/F8C1AD1A-B54D-4EDD-8984-8E4E200C90A1.png', bio: 'Never sleeps. Has caught every student who tried to sneak out... almost.' }
+      ];
+
+      const galleryGrid = document.getElementById('galleryGrid');
+      const filterButtons = document.querySelectorAll('.filter-button');
+      const startPlayBtn = document.getElementById('startPlayBtn');
+      const ctaPlayBtn = document.getElementById('ctaPlayBtn');
+      const playOverlay = document.getElementById('playOverlay');
+      const closeGameBtn = document.getElementById('closeGameBtn');
       const menuToggle = document.getElementById('menuToggle');
       const mainNav = document.getElementById('mainNav');
 
-      menuToggle?.addEventListener('click', () => {
-        mainNav.classList.toggle('open');
-        menuToggle.textContent = mainNav.classList.contains('open') ? '✕' : '☰';
+      function renderGallery(filter = 'all') {
+        const items = CHARACTERS.filter((char) => {
+          if (filter === 'all') return true;
+          if (filter === 'playable') return char.type === 'playable';
+          if (filter === 'student') return char.type === 'student';
+          if (filter === 'staff') return char.type === 'staff';
+          return true;
+        });
+
+        galleryGrid.innerHTML = items.map((char) => `
+          <article class="gallery-card" aria-label="${char.name} details">
+            <img src="${char.img}" alt="${char.name}" />
+            <div class="gallery-caption">
+              <div style="font-size:1rem;font-weight:900;color:#edf2ff;">${char.name}</div>
+              <div style="margin-top:4px;font-size:0.7rem;letter-spacing:0.08em;text-transform:uppercase;color:#a5f3fc;">${char.role}</div>
+            </div>
+          </article>
+        `).join('');
+      }
+
+      renderGallery();
+
+      filterButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+          filterButtons.forEach((btn) => btn.classList.toggle('active', btn === button));
+          renderGallery(button.dataset.filter);
+        });
       });
 
-      const continueToApp = () => {
-        const target = document.getElementById('play');
-        if (!target) return;
-        setTimeout(() => {
-          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          window.location.hash = '#play';
-        }, 1200);
+      menuToggle.addEventListener('click', () => {
+        mainNav.classList.toggle('open');
+      });
+
+      startPlayBtn.addEventListener('click', () => { openGame('michael'); });
+      ctaPlayBtn.addEventListener('click', () => { openGame('michael'); });
+      closeGameBtn.addEventListener('click', closeGame);
+
+      function openGame(characterId) {
+        playOverlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        if (!GAME.initialized) {
+          initializeGame();
+        }
+        if (characterId) {
+          STATE.role = characterId;
+          const found = CHARACTERS.find((c) => c.id === characterId) || CHARACTERS[0];
+          document.getElementById('hudName').textContent = found.name.toUpperCase();
+          document.getElementById('hudPortrait').src = found.img;
+          document.getElementById('auraTier').textContent = STATE.auraTier;
+          updateHUD();
+        }
+      }
+
+      function closeGame() {
+        playOverlay.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+
+      const STATE = {
+        role: 'michael',
+        level: 1,
+        xp: 18,
+        aura: 12,
+        rep: 0,
+        questIndex: 0,
+        auraTier: 'Dormant',
+        relationships: {},
+        interactingNpc: null,
+        gameStarted: false
       };
 
-      window.addEventListener('load', continueToApp);
+      const GAME = {
+        scene: null,
+        camera: null,
+        renderer: null,
+        clock: null,
+        initialized: false,
+        player: null,
+        npcs: [],
+        colliders: [],
+        animationFrameId: null,
+        input: {
+          keys: {},
+          joyX: 0,
+          joyZ: 0,
+          camYaw: 0,
+          isJumping: false,
+          jumpVel: 0,
+          pointerDown: false,
+          lastPointerX: 0
+        }
+      };
+
+      const QUESTS = [
+        { id: 'musa', text: 'Talk to Security Musa at the gate', done: false },
+        { id: 'coach', text: 'Meet Coach Martins on the field', done: false },
+        { id: 'trevor', text: 'Check in with Trevor in the lab', done: false }
+      ];
+
+      function updateHUD() {
+        const hudLevel = document.getElementById('hudLevel');
+        const auraTier = document.getElementById('auraTier');
+        const auraBar = document.getElementById('auraBar');
+        const xpBar = document.getElementById('xpBar');
+        const questList = document.getElementById('questList');
+
+        hudLevel.textContent = String(STATE.level);
+        auraTier.textContent = STATE.auraTier;
+        auraBar.style.width = `${Math.min(100, STATE.aura)}%`;
+        xpBar.style.width = `${Math.min(100, STATE.xp)}%`;
+
+        questList.innerHTML = QUESTS.map((q) => `
+          <li class="${q.done ? 'done' : ''}"><span>◼</span> ${q.text}</li>
+        `).join('');
+      }
+
+      function initializeGame() {
+        const wrap = document.getElementById('gameCanvasWrap');
+        GAME.scene = new THREE.Scene();
+        GAME.scene.background = new THREE.Color(0x0d1120);
+        GAME.scene.fog = new THREE.FogExp2(0x0d1120, 0.003);
+
+        GAME.camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 1200);
+        GAME.renderer = new THREE.WebGLRenderer({ antialias: true });
+        GAME.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        GAME.renderer.setSize(window.innerWidth, window.innerHeight);
+        wrap.appendChild(GAME.renderer.domElement);
+
+        GAME.clock = new THREE.Clock();
+
+        const ambient = new THREE.AmbientLight(0xffffff, 0.8);
+        GAME.scene.add(ambient);
+
+        const sun = new THREE.DirectionalLight(0xe9d5ff, 1.1);
+        sun.position.set(80, 130, 50);
+        GAME.scene.add(sun);
+
+        buildMap();
+        createPlayer();
+        spawnNpcs();
+        bindControls();
+        updateHUD();
+        GAME.initialized = true;
+        GAME.animationFrameId = requestAnimationFrame(gameLoop);
+      }
+
+      function buildMap() {
+        const ground = new THREE.Mesh(
+          new THREE.PlaneGeometry(1000, 1000),
+          new THREE.MeshLambertMaterial({ color: 0x111821 })
+        );
+        ground.rotation.x = -Math.PI / 2;
+        ground.receiveShadow = true;
+        GAME.scene.add(ground);
+
+        const addBlock = (x, y, z, w, h, d, color, collides = true) => {
+          const mesh = new THREE.Mesh(
+            new THREE.BoxGeometry(w, h, d),
+            new THREE.MeshLambertMaterial({ color })
+          );
+          mesh.position.set(x, y, z);
+          mesh.castShadow = true;
+          mesh.receiveShadow = true;
+          GAME.scene.add(mesh);
+          if (collides) {
+            GAME.colliders.push({ x, z, w: w / 2 + 2, d: d / 2 + 2 });
+          }
+        };
+
+        addBlock(0, 6, 180, 120, 12, 5, 0x222225, true);
+        addBlock(-70, 15, 0, 42, 30, 90, 0x2d2b38, true);
+        addBlock(70, 12, 20, 42, 24, 42, 0x1e1b4b, true);
+        addBlock(-70, 10, -60, 36, 20, 36, 0x3b0764, true);
+        addBlock(120, 8, 80, 32, 16, 28, 0x7c2d12, true);
+
+        addBlock(70, 0.5, -80, 80, 1, 100, 0x0a513c, false);
+        addBlock(70, 5, -128, 40, 10, 2, 0xf8fafc, true);
+        addBlock(70, 5, -32, 40, 10, 2, 0xf8fafc, true);
+
+        for (let i = 0; i < 40; i++) {
+          const angle = (i / 40) * Math.PI * 2;
+          const radius = 320 + Math.random() * 100;
+          addBlock(Math.cos(angle) * radius, 24 + Math.random() * 24, Math.sin(angle) * radius, 25 + Math.random() * 18, 50 + Math.random() * 50, 25 + Math.random() * 18, 0x0b0b12, false);
+        }
+      }
+
+      function createFace(skinColor) {
+        const canvas = document.createElement('canvas');
+        canvas.width = 128;
+        canvas.height = 128;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = skinColor;
+        ctx.fillRect(0, 0, 128, 128);
+        ctx.fillStyle = '#111';
+        ctx.fillRect(30, 45, 12, 20);
+        ctx.fillRect(86, 45, 12, 20);
+        ctx.strokeStyle = '#111';
+        ctx.lineWidth = 6;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.arc(64, 75, 20, 0.2, Math.PI - 0.2);
+        ctx.stroke();
+        return new THREE.CanvasTexture(canvas);
+      }
+
+      function createRollingLoudTexture() {
+        const canvas = document.createElement('canvas');
+        canvas.width = 128;
+        canvas.height = 128;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#111111';
+        ctx.fillRect(0, 0, 128, 128);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 20px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('ROLLING', 64, 50);
+        ctx.fillText('LOUD', 64, 80);
+        return new THREE.CanvasTexture(canvas);
+      }
+
+      function createPlayer() {
+        const group = new THREE.Group();
+        const skin = '#b45309';
+        const outfit = STATE.role === 'ifeoma' ? 0xe53935 : 0x111111;
+
+        const faceTex = createFace(skin);
+        const headMats = Array(6).fill(new THREE.MeshLambertMaterial({ color: skin }));
+        headMats[4] = new THREE.MeshLambertMaterial({ map: faceTex });
+
+        const head = new THREE.Mesh(new THREE.BoxGeometry(2.2, 2.2, 2.2), headMats);
+        head.position.y = 8.5;
+        group.add(head);
+
+        const hair = new THREE.Mesh(new THREE.BoxGeometry(2.4, 1.2, 2.4), new THREE.MeshLambertMaterial({ color: 0x050505 }));
+        hair.position.y = 9.8;
+        head.add(hair);
+
+        const torsoMats = Array(6).fill(new THREE.MeshLambertMaterial({ color: outfit }));
+        if (STATE.role === 'michael') {
+          torsoMats[5] = new THREE.MeshLambertMaterial({ map: createRollingLoudTexture() });
+        }
+
+        const torso = new THREE.Mesh(new THREE.BoxGeometry(3.2, 4, 1.6), torsoMats);
+        torso.position.y = 5.0;
+        group.add(torso);
+
+        const armL = new THREE.Mesh(new THREE.BoxGeometry(1.2, 4, 1.2), new THREE.MeshLambertMaterial({ color: outfit }));
+        armL.position.set(-2.2, 5.0, 0);
+        group.add(armL);
+
+        const armR = new THREE.Mesh(new THREE.BoxGeometry(1.2, 4, 1.2), new THREE.MeshLambertMaterial({ color: outfit }));
+        armR.position.set(2.2, 5.0, 0);
+        group.add(armR);
+
+        const legMat = new THREE.MeshLambertMaterial({ color: outfit });
+        const legL = new THREE.Group();
+        legL.position.set(-0.85, 3.0, 0);
+        const upperL = new THREE.Mesh(new THREE.BoxGeometry(1.4, 2.0, 1.4), legMat);
+        upperL.position.y = -1.0;
+        const lowerL = new THREE.Mesh(new THREE.BoxGeometry(1.3, 2.0, 1.3), legMat);
+        lowerL.position.y = -3.0;
+        legL.add(upperL, lowerL);
+        group.add(legL);
+
+        const legR = new THREE.Group();
+        legR.position.set(0.85, 3.0, 0);
+        const upperR = new THREE.Mesh(new THREE.BoxGeometry(1.4, 2.0, 1.4), legMat);
+        upperR.position.y = -1.0;
+        const lowerR = new THREE.Mesh(new THREE.BoxGeometry(1.3, 2.0, 1.3), legMat);
+        lowerR.position.y = -3.0;
+        legR.add(upperR, lowerR);
+        group.add(legR);
+
+        const auraRing = new THREE.Mesh(
+          new THREE.RingGeometry(2.2, 3.2, 24),
+          new THREE.MeshBasicMaterial({ color: 0xa855f7, side: THREE.DoubleSide, transparent: true, opacity: 0 })
+        );
+        auraRing.rotation.x = Math.PI / 2;
+        auraRing.position.y = 0.1;
+        group.add(auraRing);
+
+        group.position.set(0, 0, 140);
+        GAME.scene.add(group);
+
+        GAME.player = {
+          group,
+          pieces: { head, torso, armL, armR, legL, legR, lowerL, lowerR, auraRing }
+        };
+      }
+
+      function spawnNpcs() {
+        const spawnData = [
+          { id: 'musa', x: 0, z: 165, skin: '#2b1506', outfit: 0x1a237e, text: 'O boy, show me your ID card!' },
+          { id: 'coach', x: 70, z: -80, skin: '#451a03', outfit: 0x22c55e, text: 'Give me 50 frog jumps! You think say football na joke?' },
+          { id: 'trevor', x: -65, z: -45, skin: '#cda482', outfit: 0x43a047, text: 'Guy! V0.6 mechanics running smoothly!' },
+          { id: 'ifeoma', x: -60, z: 25, skin: '#5c2b0c', outfit: 0xe53935, text: 'Michael! Wetin dey happen? Make we race!' },
+          { id: 'isi', x: -40, z: -100, skin: '#5c2b0c', outfit: 0x212121, text: 'MICHAEL! WHERE YOUR ASSIGNMENT?!' }
+        ];
+
+        spawnData.forEach((npcInfo) => {
+          const meta = CHARACTERS.find((c) => c.id === npcInfo.id);
+          if (!meta) return;
+
+          const group = new THREE.Group();
+          const faceTex = createFace(npcInfo.skin);
+          const headMats = Array(6).fill(new THREE.MeshLambertMaterial({ color: npcInfo.skin }));
+          headMats[4] = new THREE.MeshLambertMaterial({ map: faceTex });
+          const head = new THREE.Mesh(new THREE.BoxGeometry(2.2, 2.2, 2.2), headMats);
+          head.position.y = 8.5;
+          group.add(head);
+
+          const torso = new THREE.Mesh(new THREE.BoxGeometry(3.2, 4, 1.6), new THREE.MeshLambertMaterial({ color: npcInfo.outfit }));
+          torso.position.y = 5.0;
+          group.add(torso);
+
+          const legL = new THREE.Mesh(new THREE.BoxGeometry(1.4, 4, 1.4), new THREE.MeshLambertMaterial({ color: npcInfo.outfit }));
+          legL.position.set(-0.85, 2.0, 0);
+          group.add(legL);
+
+          const legR = new THREE.Mesh(new THREE.BoxGeometry(1.4, 4, 1.4), new THREE.MeshLambertMaterial({ color: npcInfo.outfit }));
+          legR.position.set(0.85, 2.0, 0);
+          group.add(legR);
+
+          group.position.set(npcInfo.x, 0, npcInfo.z);
+          GAME.scene.add(group);
+
+          GAME.npcs.push({
+            id: npcInfo.id,
+            name: meta.name,
+            img: meta.img,
+            mesh: group,
+            dialogs: [npcInfo.text],
+            dialogIndex: 0
+          });
+        });
+      }
+
+      function bindControls() {
+        document.addEventListener('keydown', (event) => {
+          GAME.input.keys[event.key.toLowerCase()] = true;
+        });
+
+        document.addEventListener('keyup', (event) => {
+          GAME.input.keys[event.key.toLowerCase()] = false;
+        });
+
+        document.getElementById('jumpBtn').addEventListener('click', () => {
+          if (!GAME.input.isJumping) {
+            GAME.input.isJumping = true;
+            GAME.input.jumpVel = 0.8;
+          }
+        });
+
+        document.getElementById('trainAuraBtn').addEventListener('click', () => {
+          STATE.aura = Math.min(100, STATE.aura + 18);
+          STATE.auraTier = getAuraLevel(STATE.aura);
+          updateHUD();
+          if (GAME.player) {
+            GAME.player.pieces.auraRing.material.opacity = 0.9;
+            GAME.player.pieces.auraRing.scale.set(1.2, 1.2, 1.2);
+          }
+        });
+
+        const touchLeft = document.querySelector('.touch-left');
+        const touchRight = document.querySelector('.touch-right');
+        const joyBase = document.getElementById('joyBase');
+        const joyStick = document.getElementById('joyStick');
+
+        let joyCenter = { x: 0, y: 0 };
+        let touchId = null;
+        let rightTouchId = null;
+
+        touchLeft.addEventListener('touchstart', (event) => {
+          const touch = event.changedTouches[0];
+          touchId = touch.identifier;
+          joyCenter = { x: touch.clientX, y: touch.clientY };
+          joyBase.style.display = 'block';
+          joyBase.style.left = `${touch.clientX - 60}px`;
+          joyBase.style.top = `${touch.clientY - 60}px`;
+          joyStick.style.transform = 'translate(0px, 0px)';
+        }, { passive: true });
+
+        touchLeft.addEventListener('touchmove', (event) => {
+          for (const touch of event.changedTouches) {
+            if (touch.identifier !== touchId) continue;
+            let dx = touch.clientX - joyCenter.x;
+            let dy = touch.clientY - joyCenter.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist > 35) {
+              dx = (dx / dist) * 35;
+              dy = (dy / dist) * 35;
+            }
+            joyStick.style.transform = `translate(${dx}px, ${dy}px)`;
+            GAME.input.joyX = dx / 35;
+            GAME.input.joyZ = dy / 35;
+          }
+        }, { passive: true });
+
+        const endJoy = (event) => {
+          for (const touch of event.changedTouches) {
+            if (touch.identifier !== touchId) continue;
+            joyBase.style.display = 'none';
+            joyStick.style.transform = 'translate(0px, 0px)';
+            GAME.input.joyX = 0;
+            GAME.input.joyZ = 0;
+            touchId = null;
+          }
+        };
+
+        touchLeft.addEventListener('touchend', endJoy, { passive: true });
+        touchLeft.addEventListener('touchcancel', endJoy, { passive: true });
+
+        touchRight.addEventListener('touchstart', (event) => {
+          const touch = event.changedTouches[0];
+          rightTouchId = touch.identifier;
+          GAME.input.pointerDown = true;
+          GAME.input.lastPointerX = touch.clientX;
+        }, { passive: true });
+
+        touchRight.addEventListener('touchmove', (event) => {
+          for (const touch of event.changedTouches) {
+            if (touch.identifier !== rightTouchId) continue;
+            const dx = touch.clientX - GAME.input.lastPointerX;
+            GAME.input.camYaw -= dx * 0.006;
+            GAME.input.lastPointerX = touch.clientX;
+          }
+        }, { passive: true });
+
+        touchRight.addEventListener('touchend', () => {
+          GAME.input.pointerDown = false;
+          rightTouchId = null;
+        }, { passive: true });
+
+        touchRight.addEventListener('pointerdown', (event) => {
+          GAME.input.pointerDown = true;
+          GAME.input.lastPointerX = event.clientX;
+        });
+
+        touchRight.addEventListener('pointermove', (event) => {
+          if (!GAME.input.pointerDown) return;
+          const dx = event.clientX - GAME.input.lastPointerX;
+          GAME.input.camYaw -= dx * 0.006;
+          GAME.input.lastPointerX = event.clientX;
+        });
+
+        touchRight.addEventListener('pointerup', () => {
+          GAME.input.pointerDown = false;
+        });
+
+        window.addEventListener('mousemove', (event) => {
+          if (!GAME.input.pointerDown) return;
+          const dx = event.clientX - GAME.input.lastPointerX;
+          GAME.input.camYaw -= dx * 0.006;
+          GAME.input.lastPointerX = event.clientX;
+        });
+      }
+
+      function checkpointCollision(nextX, nextZ) {
+        for (const b of GAME.colliders) {
+          const withinX = Math.abs(nextX - b.x) < b.w;
+          const withinZ = Math.abs(nextZ - b.z) < b.d;
+          if (withinX && withinZ) return true;
+        }
+        return false;
+      }
+
+      function getAuraLevel(value) {
+        if (value >= 90) return 'Aura King';
+        if (value >= 75) return 'Legendary';
+        if (value >= 60) return 'Elite';
+        if (value >= 45) return 'Focused';
+        if (value >= 25) return 'Rising';
+        return 'Dormant';
+      }
+
+      function gameLoop() {
+        const delta = GAME.clock.getDelta();
+        const elapsed = GAME.clock.elapsedTime;
+
+        if (!GAME.player || !GAME.renderer || !GAME.scene) {
+          requestAnimationFrame(gameLoop);
+          return;
+        }
+
+        const inputX = GAME.input.joyX;
+        const inputZ = GAME.input.joyZ;
+        let moveX = inputX;
+        let moveZ = inputZ;
+
+        if (GAME.input.keys['w'] || GAME.input.keys['arrowup']) moveZ -= 1;
+        if (GAME.input.keys['s'] || GAME.input.keys['arrowdown']) moveZ += 1;
+        if (GAME.input.keys['a'] || GAME.input.keys['arrowleft']) moveX -= 1;
+        if (GAME.input.keys['d'] || GAME.input.keys['arrowright']) moveX += 1;
+
+        const len = Math.hypot(moveX, moveZ);
+        if (len > 0.0001) {
+          const nx = moveX / len;
+          const nz = moveZ / len;
+          const worldX = nx * Math.cos(GAME.input.camYaw) + nz * Math.sin(GAME.input.camYaw);
+          const worldZ = -nx * Math.sin(GAME.input.camYaw) + nz * Math.cos(GAME.input.camYaw);
+
+          const player = GAME.player.group;
+          const nextX = player.position.x + worldX * 0.9;
+          const nextZ = player.position.z + worldZ * 0.9;
+
+          if (!checkpointCollision(nextX, player.position.z)) {
+            player.position.x = nextX;
+          }
+          if (!checkpointCollision(player.position.x, nextZ)) {
+            player.position.z = nextZ;
+          }
+
+          player.rotation.y = Math.atan2(worldX, worldZ);
+          const swing = Math.sin(elapsed * 12) * 0.7;
+          GAME.player.pieces.legL.rotation.x = swing;
+          GAME.player.pieces.legR.rotation.x = -swing;
+          GAME.player.pieces.lowerL.rotation.x = Math.sin(elapsed * 12 + Math.PI / 4) * 0.8;
+          GAME.player.pieces.lowerR.rotation.x = Math.sin(elapsed * 12 + Math.PI + Math.PI / 4) * 0.8;
+          GAME.player.pieces.armL.rotation.x = -swing;
+          GAME.player.pieces.armR.rotation.x = swing;
+        } else {
+          GAME.player.pieces.legL.rotation.x = 0;
+          GAME.player.pieces.legR.rotation.x = 0;
+          GAME.player.pieces.lowerL.rotation.x = 0;
+          GAME.player.pieces.lowerR.rotation.x = 0;
+          GAME.player.pieces.armL.rotation.x = 0;
+          GAME.player.pieces.armR.rotation.x = 0;
+        }
+
+        if (GAME.input.isJumping) {
+          GAME.player.group.position.y += GAME.input.jumpVel;
+          GAME.input.jumpVel -= 0.05;
+          if (GAME.player.group.position.y <= 0) {
+            GAME.player.group.position.y = 0;
+            GAME.input.isJumping = false;
+            GAME.input.jumpVel = 0;
+          }
+        }
+
+        if (GAME.player.pieces.auraRing.material.opacity > 0.01) {
+          GAME.player.pieces.auraRing.scale.x += delta * 3.2;
+          GAME.player.pieces.auraRing.scale.y += delta * 3.2;
+          GAME.player.pieces.auraRing.material.opacity -= delta * 1.5;
+        }
+
+        GAME.camera.position.x = GAME.player.group.position.x + Math.sin(GAME.input.camYaw) * 26;
+        GAME.camera.position.z = GAME.player.group.position.z + Math.cos(GAME.input.camYaw) * 26;
+        GAME.camera.position.y = GAME.player.group.position.y + 16;
+        GAME.camera.lookAt(GAME.player.group.position.x, GAME.player.group.position.y + 5, GAME.player.group.position.z);
+
+        trackProximity();
+        GAME.renderer.render(GAME.scene, GAME.camera);
+        requestAnimationFrame(gameLoop);
+      }
+
+      function trackProximity() {
+        const interactBtn = document.getElementById('interactBtn');
+        let closest = null;
+        let closestDistance = Infinity;
+
+        for (const npc of GAME.npcs) {
+          const dist = GAME.player.group.position.distanceTo(npc.mesh.position);
+          if (dist < closestDistance) {
+            closestDistance = dist;
+            closest = npc;
+          }
+        }
+
+        if (closest && closestDistance < 22) {
+          STATE.interactingNpc = closest;
+          interactBtn.style.display = 'inline-flex';
+        } else {
+          STATE.interactingNpc = null;
+          interactBtn.style.display = 'none';
+        }
+      }
+
+      document.getElementById('interactBtn').addEventListener('click', () => {
+        if (!STATE.interactingNpc) return;
+        const npc = STATE.interactingNpc;
+        const box = document.getElementById('dialogueBox');
+        const dlgPortrait = document.getElementById('dlgPortrait');
+        const dlgSpeaker = document.getElementById('dlgSpeaker');
+        const dlgText = document.getElementById('dlgText');
+        const dlgRelation = document.getElementById('dlgRelation');
+
+        dlgPortrait.src = npc.img;
+        dlgSpeaker.textContent = npc.name;
+        dlgText.textContent = `"${npc.dialogs[npc.dialogIndex % npc.dialogs.length]}"`;
+        npc.dialogIndex += 1;
+
+        const value = STATE.relationships[npc.id] || 0;
+        dlgRelation.textContent = value < 20 ? 'Stranger' : value < 40 ? 'Classmate' : value < 70 ? 'Friend' : 'Legend';
+        box.classList.add('active');
+      });
+
+      document.getElementById('acceptDialogueBtn').addEventListener('click', () => {
+        const npc = STATE.interactingNpc;
+        if (!npc) return;
+        STATE.relationships[npc.id] = (STATE.relationships[npc.id] || 0) + 10;
+        STATE.rep += 10;
+        STATE.xp = Math.min(100, STATE.xp + 15);
+        STATE.aura = Math.min(100, STATE.aura + 5);
+        STATE.auraTier = getAuraLevel(STATE.aura);
+        if (STATE.xp >= 100) {
+          STATE.level += 1;
+          STATE.xp = 0;
+        }
+        updateHUD();
+        document.getElementById('dialogueBox').classList.remove('active');
+      });
+
+      document.getElementById('closeDialogueBtn').addEventListener('click', () => {
+        document.getElementById('dialogueBox').classList.remove('active');
+      });
+
+      window.addEventListener('resize', () => {
+        if (!GAME.renderer || !GAME.camera) return;
+        GAME.camera.aspect = window.innerWidth / window.innerHeight;
+        GAME.camera.updateProjectionMatrix();
+        GAME.renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+
+      updateHUD();
     </script>
   </body>
 </html>
