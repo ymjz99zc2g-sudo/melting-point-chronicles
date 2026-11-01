@@ -1,4 +1,4 @@
-import { createFileRoute, Link, Scripts, createRootRoute, useRouterState } from '@tanstack/react-router'
+import { HeadContent, Link, Scripts, createRootRoute, useRouterState } from '@tanstack/react-router'
 import { useState } from 'react'
 import '../styles.css'
 
