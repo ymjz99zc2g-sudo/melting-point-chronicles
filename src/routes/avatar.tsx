@@ -125,6 +125,7 @@ export default function AvatarPage() {
         ))}
       </div>
 
+      {/* SELECTED PANEL */}
       <div className="selected-panel">
         <img src={char.img} alt={char.name} />
         <div className="selected-info">
@@ -142,10 +143,34 @@ export default function AvatarPage() {
             {char.quests.map(q => <span key={q} className="tag">📋 {q}</span>)}
           </div>
           <div style={{marginTop:'1.5rem'}}>
-            <Link to="/game" className="btn-primary" style={{fontSize:'0.88rem', padding:'0.75rem 1.5rem'}}>
+            <Link
+              to="/game"
+              className="btn-primary"
+              style={{fontSize:'0.88rem', padding:'0.75rem 1.5rem'}}
+            >
               🎮 Play as {char.name}
             </Link>
           </div>
+        </div>
+      </div>
+
+      {/* NPC SECTION */}
+      <div className="divider" />
+      <h2 className="section-title mb-2">Main <span className="accent2">Villain</span></h2>
+      <p className="section-sub mb-3">The feared antagonist — Isi Owu awaits</p>
+      <div className="card" style={{maxWidth: '400px', margin:'0 auto'}}>
+        <img
+          src="https://i.postimg.cc/hGKvr6Dk/9212B908-242F-42A7-A0BD-6B005BE6DF5D.png"
+          alt="Isi Owu"
+          className="card-img"
+        />
+        <div className="card-body">
+          <div className="card-name">Isi Owu</div>
+          <div className="card-role" style={{color:'var(--scarlet)'}}>Main Antagonist — Final Boss</div>
+          <div className="card-desc">
+            The most feared teacher in Melting Point College. Extremely strict, demands complete discipline. Has THREE boss phases: Teacher Mode → Exam Mode → WAEC Guardian Form.
+          </div>
+          <div className="card-quote">"MICHAEL! WHERE YOUR ASSIGNMENT?! WAEC Guardian form — ACTIVATE!"</div>
         </div>
       </div>
     </div>

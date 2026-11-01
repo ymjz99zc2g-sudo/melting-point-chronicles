@@ -13,6 +13,7 @@ export default function HowToPlayPage() {
       <h1 className="section-title">📖 How to <span className="accent">Play</span></h1>
       <p className="section-sub">Everything you need to know about Melting Point Chronicles</p>
 
+      {/* CONTROLS VISUAL */}
       <div className="controls-visual">
         <h2 style={{fontFamily:'Orbitron,sans-serif', fontSize:'0.95rem', marginBottom:'1.5rem', color:'var(--accent)'}}>
           CONTROLS — MOBILE + KEYBOARD
@@ -62,6 +63,7 @@ export default function HowToPlayPage() {
         </div>
       </div>
 
+      {/* GUIDE CARDS */}
       <div className="guide-grid">
         <div className="guide-card">
           <div className="guide-icon">🔥</div>
@@ -103,6 +105,88 @@ export default function HowToPlayPage() {
             <li>Isi Owu: Boss fights — avoid him! 😅</li>
           </ul>
         </div>
+
+        <div className="guide-card">
+          <div className="guide-icon">📊</div>
+          <div className="guide-title">SKILL SYSTEM</div>
+          <ul className="guide-list">
+            <li><strong style={{color:'var(--accent)'}}>Academics</strong> — Improves exam performance</li>
+            <li><strong style={{color:'var(--accent)'}}>Sports</strong> — Wins athletic events</li>
+            <li><strong style={{color:'var(--accent)'}}>Technology</strong> — Unlocks computer missions</li>
+            <li><strong style={{color:'var(--accent)'}}>Leadership</strong> — Improves NPC influence</li>
+            <li>Skills level up through related activities</li>
+            <li>Different characters start with different skill biases</li>
+          </ul>
+        </div>
+
+        <div className="guide-card">
+          <div className="guide-icon">🗺️</div>
+          <div className="guide-title">EXPLORATION</div>
+          <ul className="guide-list">
+            <li>Start at School Gate (spawn point)</li>
+            <li>Mini-map shows your position (top-right)</li>
+            <li>Location name shows bottom-left of screen</li>
+            <li>Some areas unlock as you progress</li>
+            <li>Secret Basement — late-game area 🔒</li>
+            <li>Rooftop — story scenes + secrets</li>
+          </ul>
+        </div>
+
+        <div className="guide-card">
+          <div className="guide-icon">⚔️</div>
+          <div className="guide-title">BOSS BATTLE — ISI OWU</div>
+          <ul className="guide-list">
+            <li>Phase 1: Teacher Mode — Pop quizzes + detentions</li>
+            <li>Phase 2: Exam Mode — Assignment Storm</li>
+            <li>Phase 3: WAEC Guardian Form (FINAL)</li>
+            <li>Abilities: Report Card Barrage, Aura Drain</li>
+            <li>Need high Academics skill to resist</li>
+            <li>Your ending depends on how you defeat him</li>
+          </ul>
+        </div>
+      </div>
+
+      {/* MINI GAMES */}
+      <div className="divider" />
+      <h2 className="section-title mb-2">🎲 <span className="accent2">Mini-Games</span></h2>
+      <p className="section-sub mb-3">Available throughout your school adventure</p>
+      <div style={{display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(200px,1fr))', gap:'0.75rem'}}>
+        {[
+          {icon:'📝', name:'Exam Survival', desc:'Answer questions before time runs out'},
+          {icon:'⚽', name:'Football Match', desc:'Score goals to beat rival schools'},
+          {icon:'💻', name:'Coding Challenge', desc:'Solve Trevor\'s programming puzzles'},
+          {icon:'🍽️', name:'Cafeteria Rush', desc:'Grab food before it runs out'},
+          {icon:'🏃', name:'Rooftop Parkour', desc:'Race across the school rooftop'},
+          {icon:'📚', name:'Notebook Hunt', desc:'Find missing notes before exam'},
+          {icon:'🧠', name:'Quiz Battles', desc:'PvP quiz against other students'},
+        ].map(mg => (
+          <div key={mg.name} style={{background:'var(--bg-card)', borderRadius:'12px', border:'1px solid var(--border)', padding:'0.75rem'}}>
+            <div style={{fontSize:'1.5rem', marginBottom:'0.4rem'}}>{mg.icon}</div>
+            <div style={{fontWeight:700, fontSize:'0.82rem', marginBottom:'0.25rem'}}>{mg.name}</div>
+            <div style={{color:'var(--text-dim)', fontSize:'0.75rem'}}>{mg.desc}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* ENDINGS */}
+      <div className="divider" />
+      <h2 className="section-title mb-2">🏆 <span className="accent">Possible Endings</span></h2>
+      <p className="section-sub mb-3">Your choices throughout the game determine which ending you get</p>
+      <div style={{display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(220px,1fr))', gap:'0.75rem'}}>
+        {[
+          {icon:'📚', name:'Top Student Ending', req:'High Academics + Reputation'},
+          {icon:'⚽', name:'Football Legend Ending', req:'High Sports + David quest complete'},
+          {icon:'💻', name:'Computer Genius Ending', req:'High Technology + Trevor quest complete'},
+          {icon:'🦸', name:'School Hero Ending', req:'High Leadership + all main quests done'},
+          {icon:'👑', name:'Aura King Ending', req:'Max Aura Level + defeat Isi Owu at full power'},
+          {icon:'💥', name:'Chaos Ending', req:'Low reputation + cause maximum mayhem'},
+        ].map(e => (
+          <div key={e.name} style={{background:'var(--bg-card)', borderRadius:'12px', border:'1px solid var(--border)', padding:'1rem'}}>
+            <div style={{fontSize:'1.5rem', marginBottom:'0.4rem'}}>{e.icon}</div>
+            <div style={{fontWeight:700, fontSize:'0.82rem', marginBottom:'0.25rem', color:'var(--accent)'}}>{e.name}</div>
+            <div style={{color:'var(--text-dim)', fontSize:'0.75rem'}}>Requires: {e.req}</div>
+          </div>
+        ))}
       </div>
     </div>
   )
