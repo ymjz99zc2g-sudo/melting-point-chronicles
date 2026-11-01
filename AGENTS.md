@@ -177,4 +177,3 @@ This starter uses "Application Name" as a placeholder throughout the UI and meta
 - `src/routes/__root.tsx` — the `title` field in the `head()` configuration
 
 Search for all occurrences of "Application Name" in the `src/` directory and replace with the user's application name.
-

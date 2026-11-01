@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 
 export const Route = createFileRoute('/avatar')({
@@ -125,7 +125,6 @@ export default function AvatarPage() {
         ))}
       </div>
 
-      {/* SELECTED PANEL */}
       <div className="selected-panel">
         <img src={char.img} alt={char.name} />
         <div className="selected-info">
@@ -154,7 +153,6 @@ export default function AvatarPage() {
         </div>
       </div>
 
-      {/* NPC SECTION */}
       <div className="divider" />
       <h2 className="section-title mb-2">Main <span className="accent2">Villain</span></h2>
       <p className="section-sub mb-3">The feared antagonist — Isi Owu awaits</p>

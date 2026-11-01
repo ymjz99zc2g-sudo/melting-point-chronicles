@@ -13,7 +13,6 @@ export default function HowToPlayPage() {
       <h1 className="section-title">📖 How to <span className="accent">Play</span></h1>
       <p className="section-sub">Everything you need to know about Melting Point Chronicles</p>
 
-      {/* CONTROLS VISUAL */}
       <div className="controls-visual">
         <h2 style={{fontFamily:'Orbitron,sans-serif', fontSize:'0.95rem', marginBottom:'1.5rem', color:'var(--accent)'}}>
           CONTROLS — MOBILE + KEYBOARD
@@ -63,7 +62,6 @@ export default function HowToPlayPage() {
         </div>
       </div>
 
-      {/* GUIDE CARDS */}
       <div className="guide-grid">
         <div className="guide-card">
           <div className="guide-icon">🔥</div>
@@ -146,7 +144,6 @@ export default function HowToPlayPage() {
         </div>
       </div>
 
-      {/* MINI GAMES */}
       <div className="divider" />
       <h2 className="section-title mb-2">🎲 <span className="accent2">Mini-Games</span></h2>
       <p className="section-sub mb-3">Available throughout your school adventure</p>
@@ -168,7 +165,6 @@ export default function HowToPlayPage() {
         ))}
       </div>
 
-      {/* ENDINGS */}
       <div className="divider" />
       <h2 className="section-title mb-2">🏆 <span className="accent">Possible Endings</span></h2>
       <p className="section-sub mb-3">Your choices throughout the game determine which ending you get</p>

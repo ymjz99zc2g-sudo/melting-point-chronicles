@@ -15,7 +15,6 @@ export default function RoadmapPage() {
         Melting Point Chronicles is still in development. Here's where we're headed — Michael is building this thing for real!
       </p>
 
-      {/* PLATFORMS */}
       <div className="roadmap-grid">
         {[
           { icon: '🌐', name: 'Web Prototype', status: 'live', label: '✅ Live Now' },
@@ -33,7 +32,6 @@ export default function RoadmapPage() {
 
       <div className="divider" />
 
-      {/* TIMELINE */}
       <h2 className="section-title mb-3">Development <span className="accent">Timeline</span></h2>
       <div className="roadmap-timeline">
         <div className="timeline-item">
@@ -104,7 +102,6 @@ export default function RoadmapPage() {
 
       <div className="divider" />
 
-      {/* FEATURE WISHLIST */}
       <h2 className="section-title mb-3">🎮 Upcoming <span className="accent2">Features</span></h2>
       <div style={{display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(240px,1fr))', gap:'1rem'}}>
         {[
@@ -125,7 +122,6 @@ export default function RoadmapPage() {
         ))}
       </div>
 
-      {/* CTA */}
       <div style={{marginTop:'3rem', background:'linear-gradient(135deg, rgba(155,89,182,0.1), rgba(255,107,53,0.05))', borderRadius:'20px', border:'1px solid var(--border)', padding:'2.5rem', textAlign:'center'}}>
         <div style={{fontSize:'3rem', marginBottom:'1rem'}}>🥴</div>
         <h2 style={{fontFamily:'Orbitron,sans-serif', fontSize:'1.1rem', marginBottom:'0.75rem', color:'var(--accent)'}}>

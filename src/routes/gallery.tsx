@@ -84,21 +84,6 @@ export default function GalleryPage() {
         ))}
       </div>
 
-      {/* CREATOR LOCKED SECTION */}
-      <div style={{marginTop:'3rem', background:'var(--bg-card)', borderRadius:'16px', border:'1px solid var(--border)', padding:'1.5rem', textAlign:'center'}}>
-        <div style={{fontSize:'3rem', marginBottom:'0.75rem'}}>🔒</div>
-        <h2 style={{fontFamily:'Orbitron,sans-serif', fontSize:'1rem', marginBottom:'0.5rem', color:'var(--accent)'}}>
-          Michael's Real Photo — Locked
-        </h2>
-        <p style={{color:'var(--text-dim)', fontSize:'0.85rem', maxWidth:'400px', margin:'0 auto 1rem'}}>
-          Beat the beginner tutorial level in the game to unlock Michael's actual real photo. He looks like the character — trust me 🥴
-        </p>
-        <a href="/game" className="btn-primary" style={{fontSize:'0.82rem', padding:'0.6rem 1.5rem', display:'inline-flex'}}>
-          🎮 Play to Unlock
-        </a>
-      </div>
-
-      {/* LIGHTBOX */}
       {lightbox && (
         <div className="lightbox" onClick={() => setLightbox(null)}>
           <img src={lightbox} alt="Character preview" />

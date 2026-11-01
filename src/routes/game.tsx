@@ -1,22 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useEffect, useRef, useState } from 'react'
 
 export const Route = createFileRoute('/game')({
   component: GamePage,
 })
-
-type GameHud = {
-  x: number
-  y: number
-  aura: number
-  maxAura: number
-  hp: number
-  maxHp: number
-  auraLevel: number
-  xp: number
-  sprinting: boolean
-  location: string
-}
 
 const TILE = 32
 const SPEED = 2.5
@@ -26,7 +12,6 @@ const MAP_H = 22
 
 const MAP: number[][] = [
   [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
   [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
   [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
   [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],

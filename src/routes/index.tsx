@@ -21,7 +21,6 @@ export default function LandingPage() {
 
   return (
     <div>
-      {/* HERO */}
       <section className="hero">
         <span className="hero-badge">🔥 Nigerian School RPG — PH Vibes Only</span>
         <img
@@ -43,7 +42,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* STATS */}
       <div className="stats-strip">
         {[
           { num: '8', label: 'Playable Characters' },
@@ -60,7 +58,6 @@ export default function LandingPage() {
         ))}
       </div>
 
-      {/* FEATURES */}
       <section className="section">
         <p className="section-sub accent mb-1">// What's inside</p>
         <h2 className="section-title">Game <span className="accent2">Features</span></h2>
@@ -76,7 +73,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* CREATOR SECTION */}
       <section className="creator-section">
         <div className="section" style={{paddingTop: 0, paddingBottom: 0}}>
           <p className="section-sub accent mb-1">// Made with 🔥</p>
@@ -118,7 +114,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* AURA LEVELS */}
       <section className="section">
         <p className="section-sub accent mb-1">// Progression System</p>
         <h2 className="section-title">The <span className="accent2">Aura</span> System</h2>
@@ -142,7 +137,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* STORY CHAPTERS */}
       <section className="section" style={{paddingTop: 0}}>
         <p className="section-sub accent mb-1">// The Story</p>
         <h2 className="section-title">Story <span className="accent">Chapters</span></h2>
@@ -169,7 +163,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* CTA */}
       <section className="section text-center" style={{paddingTop: 0}}>
         <div style={{background: 'linear-gradient(135deg, rgba(155,89,182,0.15), rgba(255,107,53,0.1))', borderRadius: '20px', border: '1px solid var(--border)', padding: '3rem 1.5rem'}}>
           <h2 className="section-title mb-2">Ready to Enter <span className="accent">Melting Point</span>?</h2>
