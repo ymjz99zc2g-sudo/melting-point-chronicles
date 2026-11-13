@@ -36,8 +36,16 @@ function Nav() {
         <span className="logo-flame">🔥</span>
         <span>MPC</span>
       </Link>
-      <button className="hamburger" onClick={() => setOpen(o => !o)} aria-label="menu">
-        {open ? '✕' : '☰'}
+      <button
+        className={`hamburger ${open ? 'is-open' : ''}`}
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        aria-label={open ? 'Close menu' : 'Open menu'}
+        aria-expanded={open}
+      >
+        <span />
+        <span />
+        <span />
       </button>
       <div className={`nav-links ${open ? 'open' : ''}`}>
         {navLinks.map(l => (
